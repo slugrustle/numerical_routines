@@ -39,28 +39,52 @@
  ********                  int8_t and uint8_t functions                  ********
  ********************************************************************************/
 
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0.
+ * divisor must not be -1 when dividend is -127 (-2^7).
+ */
 int8_t divround_i8(const int8_t dividend, const int8_t divisor);
+
+/* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint8_t divround_u8(const uint8_t dividend, const uint8_t divisor);
 
 /********************************************************************************
  ********                 int16_t and uint16_t functions                 ********
  ********************************************************************************/
 
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0.
+ * divisor must not be -1 when dividend is -32768 (-2^15).
+ */
 int16_t divround_i16(const int16_t dividend, const int16_t divisor);
+
+/* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint16_t divround_u16(const uint16_t dividend, const uint16_t divisor);
 
 /********************************************************************************
  ********                 int32_t and uint32_t functions                 ********
  ********************************************************************************/
 
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0.
+ * divisor must not be -1 when dividend is -2147483648 (-2^31).
+ */
 int32_t divround_i32(const int32_t dividend, const int32_t divisor);
+
+/* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint32_t divround_u32(const uint32_t dividend, const uint32_t divisor);
 
 /********************************************************************************
  ********                 int64_t and uint64_t functions                 ********
  ********************************************************************************/
 
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0.
+ * divisor must not be -1 when dividend is -9223372036854775808 (-2^63).
+ */
 int64_t divround_i64(const int64_t dividend, const int64_t divisor);
+
+/* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint64_t divround_u64(const uint64_t dividend, const uint64_t divisor);
 
 #endif /* #ifndef DIVROUND_H_ */

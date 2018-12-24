@@ -47,7 +47,10 @@ template <typename type> type divround(const type dividend, const type divisor) 
  ********           int8_t and uint8_t template specializations          ********
  ********************************************************************************/
 
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
+/** 
+ * Returns ROUND(dividend / divisor). divisor must never be 0. 
+ * divisor must not be -1 when dividend is -127 (-2^7).
+ */
 template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor) {
   int8_t quotient = dividend / divisor;
   int8_t remainder = dividend - (quotient * divisor);
@@ -89,7 +92,10 @@ template <> uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divi
  ********          int16_t and uint16_t template specializations         ********
  ********************************************************************************/
 
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0.
+ * divisor must not be -1 when dividend is -32768 (-2^15).
+ */
 template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divisor) {
   int16_t quotient = dividend / divisor;
   int16_t remainder = dividend - (quotient * divisor);
@@ -131,7 +137,10 @@ template <> uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t 
  ********          int32_t and uint32_t template specializations         ********
  ********************************************************************************/
 
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0. 
+ * divisor must not be -1 when dividend is -2147483648 (-2^31).
+ */
 template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divisor) {
   int32_t quotient = dividend / divisor;
   int32_t remainder = dividend - (quotient * divisor);
@@ -173,7 +182,10 @@ template <> uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t 
  ********          int64_t and uint64_t template specializations         ********
  ********************************************************************************/
 
- /* Returns ROUND(dividend / divisor). divisor must not be 0. */
+/**
+ * Returns ROUND(dividend / divisor). divisor must never be 0. 
+ * divisor must not be -1 when dividend is -9223372036854775808 (-2^63).
+ */
 template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divisor) {
   int64_t quotient = dividend / divisor;
   int64_t remainder = dividend - (quotient * divisor);
