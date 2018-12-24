@@ -13,9 +13,10 @@
  * types. shift may range from 1 to two less than the word length of type for
  * signed types.
  *
- * The correct operation of shiftround on negative signed inputs requires the
- * compiler to encode right shifts on signed types as arithmetic right shifts
- * rather than logical right shifts. Verify that your implementation does this.
+ * Correct operation for negative signed inputs requires two things:
+ * 1. The representation of signed integers must be 2's complement.
+ * 2. The compiler must encode right shifts on signed types as arithmetic
+ *    right shifts rather than logical right shifts.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -49,17 +50,17 @@ template <typename type> type shiftround(const type num, const int8_t shift) {
 /* Returns ROUND(num / 2^shift). shift must be on the range [1,6]. */
 template <> int8_t shiftround<int8_t>(const int8_t num, const int8_t shift) {
   uint8_t mask = masks_8bit[shift - 1];
-  uint8_t half_remainder = 1u << (shift - 1);
+  uint8_t half_remainder = static_cast<uint8_t>(1) << (shift - 1);
   if ((num & mask) >= half_remainder) {
-    if ((num & (0x80u | mask)) == (0x80u | half_remainder)) return num >> shift;
-    return (num >> shift) + 1;
+    if ((num & (static_cast<uint8_t>(0x80) | mask)) == (static_cast<uint8_t>(0x80) | half_remainder)) return num >> shift;
+    return (num >> shift) + static_cast<int8_t>(1);
   }
   return num >> shift;
 }
 
 /* Returns ROUND(num / 2^shift). shift must be on the range [1,7]. */
 template <> uint8_t shiftround<uint8_t>(const uint8_t num, const int8_t shift) {
-  if ((num & masks_8bit[shift - 1]) >= (static_cast<uint8_t>(1u) << (shift - 1))) return (num >> shift) + 1u;
+  if ((num & masks_8bit[shift - 1]) >= (static_cast<uint8_t>(1) << (shift - 1))) return (num >> shift) + static_cast<uint8_t>(1);
   return num >> shift;
 }
 
@@ -70,17 +71,17 @@ template <> uint8_t shiftround<uint8_t>(const uint8_t num, const int8_t shift) {
 /* Returns ROUND(num / 2^shift). shift must be on the range [1,14]. */
 template <> int16_t shiftround<int16_t>(const int16_t num, const int8_t shift) {
   uint16_t mask = masks_16bit[shift - 1];
-  uint16_t half_remainder = 1u << (shift - 1);
+  uint16_t half_remainder = static_cast<uint16_t>(1) << (shift - 1);
   if ((num & mask) >= half_remainder) {
-    if ((num & (0x8000u | mask)) == (0x8000u | half_remainder)) return num >> shift;
-    return (num >> shift) + 1;
+    if ((num & (static_cast<uint16_t>(0x8000) | mask)) == (static_cast<uint16_t>(0x8000) | half_remainder)) return num >> shift;
+    return (num >> shift) + static_cast<int16_t>(1);
   }
   return num >> shift;
 }
 
 /* Returns ROUND(num / 2^shift). shift must be on the range [1,15]. */
 template <> uint16_t shiftround<uint16_t>(const uint16_t num, const int8_t shift) {
-  if ((num & masks_16bit[shift - 1]) >= (static_cast<uint16_t>(1u) << (shift - 1))) return (num >> shift) + 1u;
+  if ((num & masks_16bit[shift - 1]) >= (static_cast<uint16_t>(1) << (shift - 1))) return (num >> shift) + static_cast<uint16_t>(1);
   return num >> shift;
 }
 

@@ -14,9 +14,10 @@
  * for unsigned types. Y ranges from 1 to two less than the word length of
  * the integer type for signed types.
  *
- * The correct operation of shiftround on negative signed inputs requires the
- * compiler to encode right shifts on signed types as arithmetic right shifts
- * rather than logical right shifts. Verify that your implementation does this.
+ * Correct operation for negative signed inputs requires two things:
+ * 1. The representation of signed integers must be 2's complement.
+ * 2. The compiler must encode right shifts on signed types as arithmetic
+ *    right shifts rather than logical right shifts.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -35,37 +36,37 @@
 
 /* Returns ROUND(num / 2^1) */
 int8_t shiftround_i8_1(const int8_t num) {
-  if ((num & 0x81u) == 0x01) return (num >> 1) + 1;
+  if ((num & ((uint8_t)0x81)) == ((int8_t)0x01)) return (num >> 1) + ((int8_t)1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 int8_t shiftround_i8_2(const int8_t num) {
-  if (((num & 0x03) >= 0x02) & ((num & 0x83u) != 0x82u)) return (num >> 2) + 1;
+  if (((num & ((int8_t)0x03)) >= ((int8_t)0x02)) & ((num & ((uint8_t)0x83)) != ((uint8_t)0x82))) return (num >> 2) + ((int8_t)1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 int8_t shiftround_i8_3(const int8_t num) {
-  if (((num & 0x07) >= 0x04) & ((num & 0x87u) != 0x84u)) return (num >> 3) + 1;
+  if (((num & ((int8_t)0x07)) >= ((int8_t)0x04)) & ((num & ((uint8_t)0x87)) != ((uint8_t)0x84))) return (num >> 3) + ((int8_t)1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 int8_t shiftround_i8_4(const int8_t num) {
-  if (((num & 0x0F) >= 0x08) & ((num & 0x8Fu) != 0x88u)) return (num >> 4) + 1;
+  if (((num & ((int8_t)0x0F)) >= ((int8_t)0x08)) & ((num & ((uint8_t)0x8F)) != ((uint8_t)0x88))) return (num >> 4) + ((int8_t)1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 int8_t shiftround_i8_5(const int8_t num) {
-  if (((num & 0x1F) >= 0x10) & ((num & 0x9Fu) != 0x90u)) return (num >> 5) + 1;
+  if (((num & ((int8_t)0x1F)) >= ((int8_t)0x10)) & ((num & ((uint8_t)0x9F)) != ((uint8_t)0x90))) return (num >> 5) + ((int8_t)1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 int8_t shiftround_i8_6(const int8_t num) {
-  if (((num & 0x3F) >= 0x20) & ((num & 0xBFu) != 0xA0u)) return (num >> 6) + 1;
+  if (((num & ((int8_t)0x3F)) >= ((int8_t)0x20)) & ((num & ((uint8_t)0xBF)) != ((uint8_t)0xA0))) return (num >> 6) + ((int8_t)1);
   return num >> 6;
 }
 
@@ -75,85 +76,85 @@ int8_t shiftround_i8_6(const int8_t num) {
 
 /* Returns ROUND(num / 2^1) */
 int16_t shiftround_i16_1(const int16_t num) {
-  if ((num & 0x8001u) == 0x0001) return (num >> 1) + 1;
+  if ((num & ((uint16_t)0x8001)) == ((int16_t)0x0001)) return (num >> 1) + ((int16_t)1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 int16_t shiftround_i16_2(const int16_t num) {
-  if (((num & 0x0003) >= 0x0002) & ((num & 0x8003u) != 0x8002u)) return (num >> 2) + 1;
+  if (((num & ((int16_t)0x0003)) >= ((int16_t)0x0002)) & ((num & ((uint16_t)0x8003)) != ((uint16_t)0x8002))) return (num >> 2) + ((int16_t)1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 int16_t shiftround_i16_3(const int16_t num) {
-  if (((num & 0x0007) >= 0x0004) & ((num & 0x8007u) != 0x8004u)) return (num >> 3) + 1;
+  if (((num & ((int16_t)0x0007)) >= ((int16_t)0x0004)) & ((num & ((uint16_t)0x8007)) != ((uint16_t)0x8004))) return (num >> 3) + ((int16_t)1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 int16_t shiftround_i16_4(const int16_t num) {
-  if (((num & 0x000F) >= 0x0008) & ((num & 0x800Fu) != 0x8008u)) return (num >> 4) + 1;
+  if (((num & ((int16_t)0x000F)) >= ((int16_t)0x0008)) & ((num & ((uint16_t)0x800F)) != ((uint16_t)0x8008))) return (num >> 4) + ((int16_t)1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 int16_t shiftround_i16_5(const int16_t num) {
-  if (((num & 0x001F) >= 0x0010) & ((num & 0x801Fu) != 0x8010u)) return (num >> 5) + 1;
+  if (((num & ((int16_t)0x001F)) >= ((int16_t)0x0010)) & ((num & ((uint16_t)0x801F)) != ((uint16_t)0x8010))) return (num >> 5) + ((int16_t)1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 int16_t shiftround_i16_6(const int16_t num) {
-  if (((num & 0x003F) >= 0x0020) & ((num & 0x803Fu) != 0x8020u)) return (num >> 6) + 1;
+  if (((num & ((int16_t)0x003F)) >= ((int16_t)0x0020)) & ((num & ((uint16_t)0x803F)) != ((uint16_t)0x8020))) return (num >> 6) + ((int16_t)1);
   return num >> 6;
 }
 
 /* Returns ROUND(num / 2^7) */
 int16_t shiftround_i16_7(const int16_t num) {
-  if (((num & 0x007F) >= 0x0040) & ((num & 0x807Fu) != 0x8040u)) return (num >> 7) + 1;
+  if (((num & ((int16_t)0x007F)) >= ((int16_t)0x0040)) & ((num & ((uint16_t)0x807F)) != ((uint16_t)0x8040))) return (num >> 7) + ((int16_t)1);
   return num >> 7;
 }
 
 /* Returns ROUND(num / 2^8) */
 int16_t shiftround_i16_8(const int16_t num) {
-  if (((num & 0x00FF) >= 0x0080) & ((num & 0x80FFu) != 0x8080u)) return (num >> 8) + 1;
+  if (((num & ((int16_t)0x00FF)) >= ((int16_t)0x0080)) & ((num & ((uint16_t)0x80FF)) != ((uint16_t)0x8080))) return (num >> 8) + ((int16_t)1);
   return num >> 8;
 }
 
 /* Returns ROUND(num / 2^9) */
 int16_t shiftround_i16_9(const int16_t num) {
-  if (((num & 0x01FF) >= 0x0100) & ((num & 0x81FFu) != 0x8100u)) return (num >> 9) + 1;
+  if (((num & ((int16_t)0x01FF)) >= ((int16_t)0x0100)) & ((num & ((uint16_t)0x81FF)) != ((uint16_t)0x8100))) return (num >> 9) + ((int16_t)1);
   return num >> 9;
 }
 
 /* Returns ROUND(num / 2^10) */
 int16_t shiftround_i16_10(const int16_t num) {
-  if (((num & 0x03FF) >= 0x0200) & ((num & 0x83FFu) != 0x8200u)) return (num >> 10) + 1;
+  if (((num & ((int16_t)0x03FF)) >= ((int16_t)0x0200)) & ((num & ((uint16_t)0x83FF)) != ((uint16_t)0x8200))) return (num >> 10) + ((int16_t)1);
   return num >> 10;
 }
 
 /* Returns ROUND(num / 2^11) */
 int16_t shiftround_i16_11(const int16_t num) {
-  if (((num & 0x07FF) >= 0x0400) & ((num & 0x87FFu) != 0x8400u)) return (num >> 11) + 1;
+  if (((num & ((int16_t)0x07FF)) >= ((int16_t)0x0400)) & ((num & ((uint16_t)0x87FF)) != ((uint16_t)0x8400))) return (num >> 11) + ((int16_t)1);
   return num >> 11;
 }
 
 /* Returns ROUND(num / 2^12) */
 int16_t shiftround_i16_12(const int16_t num) {
-  if (((num & 0x0FFF) >= 0x0800) & ((num & 0x8FFFu) != 0x8800u)) return (num >> 12) + 1;
+  if (((num & ((int16_t)0x0FFF)) >= ((int16_t)0x0800)) & ((num & ((uint16_t)0x8FFF)) != ((uint16_t)0x8800))) return (num >> 12) + ((int16_t)1);
   return num >> 12;
 }
 
 /* Returns ROUND(num / 2^13) */
 int16_t shiftround_i16_13(const int16_t num) {
-  if (((num & 0x1FFF) >= 0x1000) & ((num & 0x9FFFu) != 0x9000u)) return (num >> 13) + 1;
+  if (((num & ((int16_t)0x1FFF)) >= ((int16_t)0x1000)) & ((num & ((uint16_t)0x9FFF)) != ((uint16_t)0x9000))) return (num >> 13) + ((int16_t)1);
   return num >> 13;
 }
 
 /* Returns ROUND(num / 2^14) */
 int16_t shiftround_i16_14(const int16_t num) {
-  if (((num & 0x3FFF) >= 0x2000) & ((num & 0xBFFFu) != 0xA000u)) return (num >> 14) + 1;
+  if (((num & ((int16_t)0x3FFF)) >= ((int16_t)0x2000)) & ((num & ((uint16_t)0xBFFF)) != ((uint16_t)0xA000))) return (num >> 14) + ((int16_t)1);
   return num >> 14;
 }
 
@@ -723,43 +724,43 @@ int64_t shiftround_i64_62(const int64_t num) {
 
 /* Returns ROUND(num / 2^1) */
 uint8_t shiftround_u8_1(const uint8_t num) {
-  if (num & 0x01u) return (num >> 1) + 1u;
+  if (num & ((uint8_t)0x01)) return (num >> 1) + ((uint8_t)1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 uint8_t shiftround_u8_2(const uint8_t num) {
-  if ((num & 0x03u) >= 0x02u) return (num >> 2) + 1u;
+  if ((num & ((uint8_t)0x03)) >= ((uint8_t)0x02)) return (num >> 2) + ((uint8_t)1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 uint8_t shiftround_u8_3(const uint8_t num) {
-  if ((num & 0x07u) >= 0x04u) return (num >> 3) + 1u;
+  if ((num & ((uint8_t)0x07)) >= ((uint8_t)0x04)) return (num >> 3) + ((uint8_t)1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 uint8_t shiftround_u8_4(const uint8_t num) {
-  if ((num & 0x0Fu) >= 0x08u) return (num >> 4) + 1u;
+  if ((num & ((uint8_t)0x0F)) >= ((uint8_t)0x08)) return (num >> 4) + ((uint8_t)1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 uint8_t shiftround_u8_5(const uint8_t num) {
-  if ((num & 0x1Fu) >= 0x10u) return (num >> 5) + 1u;
+  if ((num & ((uint8_t)0x1F)) >= ((uint8_t)0x10)) return (num >> 5) + ((uint8_t)1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 uint8_t shiftround_u8_6(const uint8_t num) {
-  if ((num & 0x3Fu) >= 0x20u) return (num >> 6) + 1u;
+  if ((num & ((uint8_t)0x3F)) >= ((uint8_t)0x20)) return (num >> 6) + ((uint8_t)1);
   return num >> 6;
 }
 
 /* Returns ROUND(num / 2^7) */
 uint8_t shiftround_u8_7(const uint8_t num) {
-  if ((num & 0x7Fu) >= 0x40u) return (num >> 7) + 1u;
+  if ((num & ((uint8_t)0x7F)) >= ((uint8_t)0x40)) return (num >> 7) + ((uint8_t)1);
   return num >> 7;
 }
 
@@ -769,91 +770,91 @@ uint8_t shiftround_u8_7(const uint8_t num) {
 
 /* Returns ROUND(num / 2^1) */
 uint16_t shiftround_u16_1(const uint16_t num) {
-  if (num & 0x0001u) return (num >> 1) + 1u;
+  if (num & ((uint16_t)0x0001)) return (num >> 1) + ((uint16_t)1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 uint16_t shiftround_u16_2(const uint16_t num) {
-  if ((num & 0x0003u) >= 0x0002u) return (num >> 2) + 1u;
+  if ((num & ((uint16_t)0x0003)) >= ((uint16_t)0x0002)) return (num >> 2) + ((uint16_t)1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 uint16_t shiftround_u16_3(const uint16_t num) {
-  if ((num & 0x0007u) >= 0x0004u) return (num >> 3) + 1u;
+  if ((num & ((uint16_t)0x0007)) >= ((uint16_t)0x0004)) return (num >> 3) + ((uint16_t)1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 uint16_t shiftround_u16_4(const uint16_t num) {
-  if ((num & 0x000Fu) >= 0x0008u) return (num >> 4) + 1u;
+  if ((num & ((uint16_t)0x000F)) >= ((uint16_t)0x0008)) return (num >> 4) + ((uint16_t)1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 uint16_t shiftround_u16_5(const uint16_t num) {
-  if ((num & 0x001Fu) >= 0x0010u) return (num >> 5) + 1u;
+  if ((num & ((uint16_t)0x001F)) >= ((uint16_t)0x0010)) return (num >> 5) + ((uint16_t)1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 uint16_t shiftround_u16_6(const uint16_t num) {
-  if ((num & 0x003Fu) >= 0x0020u) return (num >> 6) + 1u;
+  if ((num & ((uint16_t)0x003F)) >= ((uint16_t)0x0020)) return (num >> 6) + ((uint16_t)1);
   return num >> 6;
 }
 
 /* Returns ROUND(num / 2^7) */
 uint16_t shiftround_u16_7(const uint16_t num) {
-  if ((num & 0x007Fu) >= 0x0040u) return (num >> 7) + 1u;
+  if ((num & ((uint16_t)0x007F)) >= ((uint16_t)0x0040)) return (num >> 7) + ((uint16_t)1);
   return num >> 7;
 }
 
 /* Returns ROUND(num / 2^8) */
 uint16_t shiftround_u16_8(const uint16_t num) {
-  if ((num & 0x00FFu) >= 0x0080u) return (num >> 8) + 1u;
+  if ((num & ((uint16_t)0x00FF)) >= ((uint16_t)0x0080)) return (num >> 8) + ((uint16_t)1);
   return num >> 8;
 }
 
 /* Returns ROUND(num / 2^9) */
 uint16_t shiftround_u16_9(const uint16_t num) {
-  if ((num & 0x01FFu) >= 0x0100u) return (num >> 9) + 1u;
+  if ((num & ((uint16_t)0x01FF)) >= ((uint16_t)0x0100)) return (num >> 9) + ((uint16_t)1);
   return num >> 9;
 }
 
 /* Returns ROUND(num / 2^10) */
 uint16_t shiftround_u16_10(const uint16_t num) {
-  if ((num & 0x03FFu) >= 0x0200u) return (num >> 10) + 1u;
+  if ((num & ((uint16_t)0x03FF)) >= ((uint16_t)0x0200)) return (num >> 10) + ((uint16_t)1);
   return num >> 10;
 }
 
 /* Returns ROUND(num / 2^11) */
 uint16_t shiftround_u16_11(const uint16_t num) {
-  if ((num & 0x07FFu) >= 0x0400u) return (num >> 11) + 1u;
+  if ((num & ((uint16_t)0x07FF)) >= ((uint16_t)0x0400)) return (num >> 11) + ((uint16_t)1);
   return num >> 11;
 }
 
 /* Returns ROUND(num / 2^12) */
 uint16_t shiftround_u16_12(const uint16_t num) {
-  if ((num & 0x0FFFu) >= 0x0800u) return (num >> 12) + 1u;
+  if ((num & ((uint16_t)0x0FFF)) >= ((uint16_t)0x0800)) return (num >> 12) + ((uint16_t)1);
   return num >> 12;
 }
 
 /* Returns ROUND(num / 2^13) */
 uint16_t shiftround_u16_13(const uint16_t num) {
-  if ((num & 0x1FFFu) >= 0x1000u) return (num >> 13) + 1u;
+  if ((num & ((uint16_t)0x1FFF)) >= ((uint16_t)0x1000)) return (num >> 13) + ((uint16_t)1);
   return num >> 13;
 }
 
 /* Returns ROUND(num / 2^14) */
 uint16_t shiftround_u16_14(const uint16_t num) {
-  if ((num & 0x3FFFu) >= 0x2000u) return (num >> 14) + 1u;
+  if ((num & ((uint16_t)0x3FFF)) >= ((uint16_t)0x2000)) return (num >> 14) + ((uint16_t)1);
   return num >> 14;
 }
 
 /* Returns ROUND(num / 2^15) */
 uint16_t shiftround_u16_15(const uint16_t num) {
-  if ((num & 0x7FFFu) >= 0x4000u) return (num >> 15) + 1u;
+  if ((num & ((uint16_t)0x7FFF)) >= ((uint16_t)0x4000)) return (num >> 15) + ((uint16_t)1);
   return num >> 15;
 }
 

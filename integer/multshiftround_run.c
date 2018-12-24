@@ -14,10 +14,10 @@
  * type for unsigned types. shift ranges from 1 to two less than the word
  * length of the integer type for signed types.
  *
- * The correct operation of multshiftround on negative signed inputs requires
- * the compiler to encode right shifts on signed types as arithmetic right
- * shifts rather than logical right shifts. Verify that your implementation
- * does this.
+ * Correct operation for negative signed inputs requires two things:
+ * 1. The representation of signed integers must be 2's complement.
+ * 2. The compiler must encode right shifts on signed types as arithmetic
+ *    right shifts rather than logical right shifts.
  *
  * Conceptually, multshiftround allows one to multiply the argument num by a
  * rational number with a base-2 denominator of the form mul / 2^shift. This
@@ -42,11 +42,11 @@
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,6]. */
 int8_t multshiftround_i8(const int8_t num, const int8_t mul, const int8_t shift) {
   uint8_t mask = masks_8bit[shift - 1];
-  uint8_t half_remainder = 1u << (shift - 1);
+  uint8_t half_remainder = ((uint8_t)1) << (shift - 1);
   int8_t prod = num * mul;
   if ((prod & mask) >= half_remainder) {
-    if ((prod & (0x80u | mask)) == (0x80u | half_remainder)) return prod >> shift;
-    return (prod >> shift) + 1;
+    if ((prod & (((uint8_t)0x80) | mask)) == (((uint8_t)0x80) | half_remainder)) return prod >> shift;
+    return (prod >> shift) + ((int8_t)1);
   }
   return prod >> shift;
 }
@@ -54,7 +54,7 @@ int8_t multshiftround_i8(const int8_t num, const int8_t mul, const int8_t shift)
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,7]. */
 uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const int8_t shift) {
   uint8_t prod = num * mul;
-  if ((prod & masks_8bit[shift - 1]) >= ((uint8_t)1u << (shift - 1))) return (prod >> shift) + 1u;
+  if ((prod & masks_8bit[shift - 1]) >= (((uint8_t)1) << (shift - 1))) return (prod >> shift) + ((uint8_t)1);
   return prod >> shift;
 }
 
@@ -65,11 +65,11 @@ uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const int8_t shi
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,14]. */
 int16_t multshiftround_i16(const int16_t num, const int16_t mul, const int8_t shift) {
   uint16_t mask = masks_16bit[shift - 1];
-  uint16_t half_remainder = 1u << (shift - 1);
+  uint16_t half_remainder = ((uint16_t)1) << (shift - 1);
   int16_t prod = num * mul;
   if ((prod & mask) >= half_remainder) {
-    if ((prod & (0x8000u | mask)) == (0x8000u | half_remainder)) return prod >> shift;
-    return (prod >> shift) + 1;
+    if ((prod & (((uint16_t)0x8000) | mask)) == (((uint16_t)0x8000) | half_remainder)) return prod >> shift;
+    return (prod >> shift) + ((int16_t)1);
   }
   return prod >> shift;
 }
@@ -77,7 +77,7 @@ int16_t multshiftround_i16(const int16_t num, const int16_t mul, const int8_t sh
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,15]. */
 uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const int8_t shift) {
   uint16_t prod = num * mul;
-  if ((prod & masks_16bit[shift - 1]) >= ((uint16_t)1u << (shift - 1))) return (prod >> shift) + 1u;
+  if ((prod & masks_16bit[shift - 1]) >= (((uint16_t)1) << (shift - 1))) return (prod >> shift) + ((uint16_t)1);
   return prod >> shift;
 }
 

@@ -14,9 +14,10 @@
  * for unsigned types. Y ranges from 1 to two less than the word length of
  * the integer type for signed types.
  *
- * The correct operation of shiftround on negative signed inputs requires the
- * compiler to encode right shifts on signed types as arithmetic right shifts
- * rather than logical right shifts. Verify that your implementation does this.
+ * Correct operation for negative signed inputs requires two things:
+ * 1. The representation of signed integers must be 2's complement.
+ * 2. The compiler must encode right shifts on signed types as arithmetic
+ *    right shifts rather than logical right shifts.
  *
  * Written in 2018 by Ben Tesch.
  *

@@ -13,9 +13,10 @@
  * types. shift may range from 1 to two less than the word length of type for
  * signed types.
  *
- * The correct operation of shiftround on negative signed inputs requires the
- * compiler to encode right shifts on signed types as arithmetic right shifts
- * rather than logical right shifts. Verify that your implementation does this.
+ * Correct operation for negative signed inputs requires two things:
+ * 1. The representation of signed integers must be 2's complement.
+ * 2. The compiler must encode right shifts on signed types as arithmetic
+ *    right shifts rather than logical right shifts.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -44,37 +45,37 @@ template <typename type, int8_t shift> type shiftround(const type num) {
 
 /* Returns ROUND(num / 2^1) */
 template <> int8_t shiftround<int8_t, 1>(const int8_t num) {
-  if ((num & 0x81u) == 0x01) return (num >> 1) + 1;
+  if ((num & static_cast<uint8_t>(0x81)) == static_cast<int8_t>(0x01)) return (num >> 1) + static_cast<int8_t>(1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 template <> int8_t shiftround<int8_t, 2>(const int8_t num) {
-  if (((num & 0x03) >= 0x02) & ((num & 0x83u) != 0x82u)) return (num >> 2) + 1;
+  if (((num & static_cast<int8_t>(0x03)) >= static_cast<int8_t>(0x02)) & ((num & static_cast<uint8_t>(0x83)) != static_cast<uint8_t>(0x82))) return (num >> 2) + static_cast<int8_t>(1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 template <> int8_t shiftround<int8_t, 3>(const int8_t num) {
-  if (((num & 0x07) >= 0x04) & ((num & 0x87u) != 0x84u)) return (num >> 3) + 1;
+  if (((num & static_cast<int8_t>(0x07)) >= static_cast<int8_t>(0x04)) & ((num & static_cast<uint8_t>(0x87)) != static_cast<uint8_t>(0x84))) return (num >> 3) + static_cast<int8_t>(1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 template <> int8_t shiftround<int8_t, 4>(const int8_t num) {
-  if (((num & 0x0F) >= 0x08) & ((num & 0x8Fu) != 0x88u)) return (num >> 4) + 1;
+  if (((num & static_cast<int8_t>(0x0F)) >= static_cast<int8_t>(0x08)) & ((num & static_cast<uint8_t>(0x8F)) != static_cast<uint8_t>(0x88))) return (num >> 4) + static_cast<int8_t>(1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 template <> int8_t shiftround<int8_t, 5>(const int8_t num) {
-  if (((num & 0x1F) >= 0x10) & ((num & 0x9Fu) != 0x90u)) return (num >> 5) + 1;
+  if (((num & static_cast<int8_t>(0x1F)) >= static_cast<int8_t>(0x10)) & ((num & static_cast<uint8_t>(0x9F)) != static_cast<uint8_t>(0x90))) return (num >> 5) + static_cast<int8_t>(1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 template <> int8_t shiftround<int8_t, 6>(const int8_t num) {
-  if (((num & 0x3F) >= 0x20) & ((num & 0xBFu) != 0xA0u)) return (num >> 6) + 1;
+  if (((num & static_cast<int8_t>(0x3F)) >= static_cast<int8_t>(0x20)) & ((num & static_cast<uint8_t>(0xBF)) != static_cast<uint8_t>(0xA0))) return (num >> 6) + static_cast<int8_t>(1);
   return num >> 6;
 }
 
@@ -84,85 +85,85 @@ template <> int8_t shiftround<int8_t, 6>(const int8_t num) {
 
 /* Returns ROUND(num / 2^1) */
 template <> int16_t shiftround<int16_t, 1>(const int16_t num) {
-  if ((num & 0x8001u) == 0x0001) return (num >> 1) + 1;
+  if ((num & static_cast<uint16_t>(0x8001)) == static_cast<int16_t>(0x0001)) return (num >> 1) + static_cast<int16_t>(1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 template <> int16_t shiftround<int16_t, 2>(const int16_t num) {
-  if (((num & 0x0003) >= 0x0002) & ((num & 0x8003u) != 0x8002u)) return (num >> 2) + 1;
+  if (((num & static_cast<int16_t>(0x0003)) >= static_cast<int16_t>(0x0002)) & ((num & static_cast<uint16_t>(0x8003)) != static_cast<uint16_t>(0x8002))) return (num >> 2) + static_cast<int16_t>(1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 template <> int16_t shiftround<int16_t, 3>(const int16_t num) {
-  if (((num & 0x0007) >= 0x0004) & ((num & 0x8007u) != 0x8004u)) return (num >> 3) + 1;
+  if (((num & static_cast<int16_t>(0x0007)) >= static_cast<int16_t>(0x0004)) & ((num & static_cast<uint16_t>(0x8007)) != static_cast<uint16_t>(0x8004))) return (num >> 3) + static_cast<int16_t>(1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 template <> int16_t shiftround<int16_t, 4>(const int16_t num) {
-  if (((num & 0x000F) >= 0x0008) & ((num & 0x800Fu) != 0x8008u)) return (num >> 4) + 1;
+  if (((num & static_cast<int16_t>(0x000F)) >= static_cast<int16_t>(0x0008)) & ((num & static_cast<uint16_t>(0x800F)) != static_cast<uint16_t>(0x8008))) return (num >> 4) + static_cast<int16_t>(1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 template <> int16_t shiftround<int16_t, 5>(const int16_t num) {
-  if (((num & 0x001F) >= 0x0010) & ((num & 0x801Fu) != 0x8010u)) return (num >> 5) + 1;
+  if (((num & static_cast<int16_t>(0x001F)) >= static_cast<int16_t>(0x0010)) & ((num & static_cast<uint16_t>(0x801F)) != static_cast<uint16_t>(0x8010))) return (num >> 5) + static_cast<int16_t>(1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 template <> int16_t shiftround<int16_t, 6>(const int16_t num) {
-  if (((num & 0x003F) >= 0x0020) & ((num & 0x803Fu) != 0x8020u)) return (num >> 6) + 1;
+  if (((num & static_cast<int16_t>(0x003F)) >= static_cast<int16_t>(0x0020)) & ((num & static_cast<uint16_t>(0x803F)) != static_cast<uint16_t>(0x8020))) return (num >> 6) + static_cast<int16_t>(1);
   return num >> 6;
 }
 
 /* Returns ROUND(num / 2^7) */
 template <> int16_t shiftround<int16_t, 7>(const int16_t num) {
-  if (((num & 0x007F) >= 0x0040) & ((num & 0x807Fu) != 0x8040u)) return (num >> 7) + 1;
+  if (((num & static_cast<int16_t>(0x007F)) >= static_cast<int16_t>(0x0040)) & ((num & static_cast<uint16_t>(0x807F)) != static_cast<uint16_t>(0x8040))) return (num >> 7) + static_cast<int16_t>(1);
   return num >> 7;
 }
 
 /* Returns ROUND(num / 2^8) */
 template <> int16_t shiftround<int16_t, 8>(const int16_t num) {
-  if (((num & 0x00FF) >= 0x0080) & ((num & 0x80FFu) != 0x8080u)) return (num >> 8) + 1;
+  if (((num & static_cast<int16_t>(0x00FF)) >= static_cast<int16_t>(0x0080)) & ((num & static_cast<uint16_t>(0x80FF)) != static_cast<uint16_t>(0x8080))) return (num >> 8) + static_cast<int16_t>(1);
   return num >> 8;
 }
 
 /* Returns ROUND(num / 2^9) */
 template <> int16_t shiftround<int16_t, 9>(const int16_t num) {
-  if (((num & 0x01FF) >= 0x0100) & ((num & 0x81FFu) != 0x8100u)) return (num >> 9) + 1;
+  if (((num & static_cast<int16_t>(0x01FF)) >= static_cast<int16_t>(0x0100)) & ((num & static_cast<uint16_t>(0x81FF)) != static_cast<uint16_t>(0x8100))) return (num >> 9) + static_cast<int16_t>(1);
   return num >> 9;
 }
 
 /* Returns ROUND(num / 2^10) */
 template <> int16_t shiftround<int16_t, 10>(const int16_t num) {
-  if (((num & 0x03FF) >= 0x0200) & ((num & 0x83FFu) != 0x8200u)) return (num >> 10) + 1;
+  if (((num & static_cast<int16_t>(0x03FF)) >= static_cast<int16_t>(0x0200)) & ((num & static_cast<uint16_t>(0x83FF)) != static_cast<uint16_t>(0x8200))) return (num >> 10) + static_cast<int16_t>(1);
   return num >> 10;
 }
 
 /* Returns ROUND(num / 2^11) */
 template <> int16_t shiftround<int16_t, 11>(const int16_t num) {
-  if (((num & 0x07FF) >= 0x0400) & ((num & 0x87FFu) != 0x8400u)) return (num >> 11) + 1;
+  if (((num & static_cast<int16_t>(0x07FF)) >= static_cast<int16_t>(0x0400)) & ((num & static_cast<uint16_t>(0x87FF)) != static_cast<uint16_t>(0x8400))) return (num >> 11) + static_cast<int16_t>(1);
   return num >> 11;
 }
 
 /* Returns ROUND(num / 2^12) */
 template <> int16_t shiftround<int16_t, 12>(const int16_t num) {
-  if (((num & 0x0FFF) >= 0x0800) & ((num & 0x8FFFu) != 0x8800u)) return (num >> 12) + 1;
+  if (((num & static_cast<int16_t>(0x0FFF)) >= static_cast<int16_t>(0x0800)) & ((num & static_cast<uint16_t>(0x8FFF)) != static_cast<uint16_t>(0x8800))) return (num >> 12) + static_cast<int16_t>(1);
   return num >> 12;
 }
 
 /* Returns ROUND(num / 2^13) */
 template <> int16_t shiftround<int16_t, 13>(const int16_t num) {
-  if (((num & 0x1FFF) >= 0x1000) & ((num & 0x9FFFu) != 0x9000u)) return (num >> 13) + 1;
+  if (((num & static_cast<int16_t>(0x1FFF)) >= static_cast<int16_t>(0x1000)) & ((num & static_cast<uint16_t>(0x9FFF)) != static_cast<uint16_t>(0x9000))) return (num >> 13) + static_cast<int16_t>(1);
   return num >> 13;
 }
 
 /* Returns ROUND(num / 2^14) */
 template <> int16_t shiftround<int16_t, 14>(const int16_t num) {
-  if (((num & 0x3FFF) >= 0x2000) & ((num & 0xBFFFu) != 0xA000u)) return (num >> 14) + 1;
+  if (((num & static_cast<int16_t>(0x3FFF)) >= static_cast<int16_t>(0x2000)) & ((num & static_cast<uint16_t>(0xBFFF)) != static_cast<uint16_t>(0xA000))) return (num >> 14) + static_cast<int16_t>(1);
   return num >> 14;
 }
 
@@ -732,43 +733,43 @@ template <> int64_t shiftround<int64_t, 62>(const int64_t num) {
 
 /* Returns ROUND(num / 2^1) */
 template <> uint8_t shiftround<uint8_t, 1>(const uint8_t num) {
-  if (num & 0x01u) return (num >> 1) + 1u;
+  if (num & static_cast<uint8_t>(0x01)) return (num >> 1) + static_cast<uint8_t>(1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 template <> uint8_t shiftround<uint8_t, 2>(const uint8_t num) {
-  if ((num & 0x03u) >= 0x02u) return (num >> 2) + 1u;
+  if ((num & static_cast<uint8_t>(0x03)) >= static_cast<uint8_t>(0x02)) return (num >> 2) + static_cast<uint8_t>(1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 template <> uint8_t shiftround<uint8_t, 3>(const uint8_t num) {
-  if ((num & 0x07u) >= 0x04u) return (num >> 3) + 1u;
+  if ((num & static_cast<uint8_t>(0x07)) >= static_cast<uint8_t>(0x04)) return (num >> 3) + static_cast<uint8_t>(1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 template <> uint8_t shiftround<uint8_t, 4>(const uint8_t num) {
-  if ((num & 0x0Fu) >= 0x08u) return (num >> 4) + 1u;
+  if ((num & static_cast<uint8_t>(0x0F)) >= static_cast<uint8_t>(0x08)) return (num >> 4) + static_cast<uint8_t>(1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 template <> uint8_t shiftround<uint8_t, 5>(const uint8_t num) {
-  if ((num & 0x1Fu) >= 0x10u) return (num >> 5) + 1u;
+  if ((num & static_cast<uint8_t>(0x1F)) >= static_cast<uint8_t>(0x10)) return (num >> 5) + static_cast<uint8_t>(1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 template <> uint8_t shiftround<uint8_t, 6>(const uint8_t num) {
-  if ((num & 0x3Fu) >= 0x20u) return (num >> 6) + 1u;
+  if ((num & static_cast<uint8_t>(0x3F)) >= static_cast<uint8_t>(0x20)) return (num >> 6) + static_cast<uint8_t>(1);
   return num >> 6;
 }
 
 /* Returns ROUND(num / 2^7) */
 template <> uint8_t shiftround<uint8_t, 7>(const uint8_t num) {
-  if ((num & 0x7Fu) >= 0x40u) return (num >> 7) + 1u;
+  if ((num & static_cast<uint8_t>(0x7F)) >= static_cast<uint8_t>(0x40)) return (num >> 7) + static_cast<uint8_t>(1);
   return num >> 7;
 }
 
@@ -778,91 +779,91 @@ template <> uint8_t shiftround<uint8_t, 7>(const uint8_t num) {
 
 /* Returns ROUND(num / 2^1) */
 template <> uint16_t shiftround<uint16_t, 1>(const uint16_t num) {
-  if (num & 0x0001u) return (num >> 1) + 1u;
+  if (num & static_cast<uint16_t>(0x0001)) return (num >> 1) + static_cast<uint16_t>(1);
   return num >> 1;
 }
 
 /* Returns ROUND(num / 2^2) */
 template <> uint16_t shiftround<uint16_t, 2>(const uint16_t num) {
-  if ((num & 0x0003u) >= 0x0002u) return (num >> 2) + 1u;
+  if ((num & static_cast<uint16_t>(0x0003)) >= static_cast<uint16_t>(0x0002)) return (num >> 2) + static_cast<uint16_t>(1);
   return num >> 2;
 }
 
 /* Returns ROUND(num / 2^3) */
 template <> uint16_t shiftround<uint16_t, 3>(const uint16_t num) {
-  if ((num & 0x0007u) >= 0x0004u) return (num >> 3) + 1u;
+  if ((num & static_cast<uint16_t>(0x0007)) >= static_cast<uint16_t>(0x0004)) return (num >> 3) + static_cast<uint16_t>(1);
   return num >> 3;
 }
 
 /* Returns ROUND(num / 2^4) */
 template <> uint16_t shiftround<uint16_t, 4>(const uint16_t num) {
-  if ((num & 0x000Fu) >= 0x0008u) return (num >> 4) + 1u;
+  if ((num & static_cast<uint16_t>(0x000F)) >= static_cast<uint16_t>(0x0008)) return (num >> 4) + static_cast<uint16_t>(1);
   return num >> 4;
 }
 
 /* Returns ROUND(num / 2^5) */
 template <> uint16_t shiftround<uint16_t, 5>(const uint16_t num) {
-  if ((num & 0x001Fu) >= 0x0010u) return (num >> 5) + 1u;
+  if ((num & static_cast<uint16_t>(0x001F)) >= static_cast<uint16_t>(0x0010)) return (num >> 5) + static_cast<uint16_t>(1);
   return num >> 5;
 }
 
 /* Returns ROUND(num / 2^6) */
 template <> uint16_t shiftround<uint16_t, 6>(const uint16_t num) {
-  if ((num & 0x003Fu) >= 0x0020u) return (num >> 6) + 1u;
+  if ((num & static_cast<uint16_t>(0x003F)) >= static_cast<uint16_t>(0x0020)) return (num >> 6) + static_cast<uint16_t>(1);
   return num >> 6;
 }
 
 /* Returns ROUND(num / 2^7) */
 template <> uint16_t shiftround<uint16_t, 7>(const uint16_t num) {
-  if ((num & 0x007Fu) >= 0x0040u) return (num >> 7) + 1u;
+  if ((num & static_cast<uint16_t>(0x007F)) >= static_cast<uint16_t>(0x0040)) return (num >> 7) + static_cast<uint16_t>(1);
   return num >> 7;
 }
 
 /* Returns ROUND(num / 2^8) */
 template <> uint16_t shiftround<uint16_t, 8>(const uint16_t num) {
-  if ((num & 0x00FFu) >= 0x0080u) return (num >> 8) + 1u;
+  if ((num & static_cast<uint16_t>(0x00FF)) >= static_cast<uint16_t>(0x0080)) return (num >> 8) + static_cast<uint16_t>(1);
   return num >> 8;
 }
 
 /* Returns ROUND(num / 2^9) */
 template <> uint16_t shiftround<uint16_t, 9>(const uint16_t num) {
-  if ((num & 0x01FFu) >= 0x0100u) return (num >> 9) + 1u;
+  if ((num & static_cast<uint16_t>(0x01FF)) >= static_cast<uint16_t>(0x0100)) return (num >> 9) + static_cast<uint16_t>(1);
   return num >> 9;
 }
 
 /* Returns ROUND(num / 2^10) */
 template <> uint16_t shiftround<uint16_t, 10>(const uint16_t num) {
-  if ((num & 0x03FFu) >= 0x0200u) return (num >> 10) + 1u;
+  if ((num & static_cast<uint16_t>(0x03FF)) >= static_cast<uint16_t>(0x0200)) return (num >> 10) + static_cast<uint16_t>(1);
   return num >> 10;
 }
 
 /* Returns ROUND(num / 2^11) */
 template <> uint16_t shiftround<uint16_t, 11>(const uint16_t num) {
-  if ((num & 0x07FFu) >= 0x0400u) return (num >> 11) + 1u;
+  if ((num & static_cast<uint16_t>(0x07FF)) >= static_cast<uint16_t>(0x0400)) return (num >> 11) + static_cast<uint16_t>(1);
   return num >> 11;
 }
 
 /* Returns ROUND(num / 2^12) */
 template <> uint16_t shiftround<uint16_t, 12>(const uint16_t num) {
-  if ((num & 0x0FFFu) >= 0x0800u) return (num >> 12) + 1u;
+  if ((num & static_cast<uint16_t>(0x0FFF)) >= static_cast<uint16_t>(0x0800)) return (num >> 12) + static_cast<uint16_t>(1);
   return num >> 12;
 }
 
 /* Returns ROUND(num / 2^13) */
 template <> uint16_t shiftround<uint16_t, 13>(const uint16_t num) {
-  if ((num & 0x1FFFu) >= 0x1000u) return (num >> 13) + 1u;
+  if ((num & static_cast<uint16_t>(0x1FFF)) >= static_cast<uint16_t>(0x1000)) return (num >> 13) + static_cast<uint16_t>(1);
   return num >> 13;
 }
 
 /* Returns ROUND(num / 2^14) */
 template <> uint16_t shiftround<uint16_t, 14>(const uint16_t num) {
-  if ((num & 0x3FFFu) >= 0x2000u) return (num >> 14) + 1u;
+  if ((num & static_cast<uint16_t>(0x3FFF)) >= static_cast<uint16_t>(0x2000)) return (num >> 14) + static_cast<uint16_t>(1);
   return num >> 14;
 }
 
 /* Returns ROUND(num / 2^15) */
 template <> uint16_t shiftround<uint16_t, 15>(const uint16_t num) {
-  if ((num & 0x7FFFu) >= 0x4000u) return (num >> 15) + 1u;
+  if ((num & static_cast<uint16_t>(0x7FFF)) >= static_cast<uint16_t>(0x4000)) return (num >> 15) + static_cast<uint16_t>(1);
   return num >> 15;
 }
 
