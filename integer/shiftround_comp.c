@@ -1,9 +1,11 @@
 /**
- * shiftround.c
+ * shiftround_comp.c
  * Defines functions of the form
  *     type shiftround_X_Y(const type num);
  * where X is a type abbreviation and Y is a shift value. These functions
  * return the value ROUND(num / 2^Y) without using the division operator.
+ * The _comp in shiftround_comp.c indicates the shift value must be known
+ * at compile time.
  *
  * These functions are implemented for the types int8_t, int16_t, int32_t,
  * int64_t, uint8_t, uint16_t, uint32_t, and uint64_t.
@@ -25,7 +27,7 @@
  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "shiftround.h"
+#include "shiftround_comp.h"
 
 /********************************************************************************
  ********                        int8_t functions                        ********

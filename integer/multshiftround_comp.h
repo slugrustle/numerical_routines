@@ -1,10 +1,11 @@
 /**
- * multshiftround.h
+ * multshiftround_comp.h
  * Declares functions of the form
  *     type multshiftround_X_Y(const type num, const type mul);
  * where X is a type abbreviation and Y is a shift value. These functions
  * return the value ROUND((num * mul) / 2^Y) without using the division
- * operator.
+ * operator. The _comp in multshiftround_comp.h indicates that the shift
+ * argument must be known at compile time.
  *
  * These functions are implemented for the types int8_t, int16_t, int32_t,
  * int64_t, uint8_t, uint16_t, uint32_t, and uint64_t.
@@ -30,14 +31,14 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef MULSHFTRND_H_
-#define MULSHFTRND_H_
+#ifndef MULTSHIFTROUND_COMP_H_
+#define MULTSHIFTROUND_COMP_H_
 
 #include <stdint.h>
 
- /********************************************************************************
-  ********                        int8_t functions                        ********
-  ********************************************************************************/
+/********************************************************************************
+ ********                        int8_t functions                        ********
+ ********************************************************************************/
 
 int8_t multshiftround_i8_1(const int8_t num, const int8_t mul);
 int8_t multshiftround_i8_2(const int8_t num, const int8_t mul);
@@ -303,7 +304,7 @@ uint64_t multshiftround_u64_61(const uint64_t num, const uint64_t mul);
 uint64_t multshiftround_u64_62(const uint64_t num, const uint64_t mul);
 uint64_t multshiftround_u64_63(const uint64_t num, const uint64_t mul);
 
-#endif /* #ifndef MULSHFTRND_H_ */
+#endif /* #ifndef MULTSHIFTROUND_COMP_H_ */
 
 /*
 Creative Commons Legal Code

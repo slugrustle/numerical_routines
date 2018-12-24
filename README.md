@@ -8,11 +8,7 @@ I may add a variety of other numerical routines if time permits.
 
 ## Getting Started
 
-Everything interesting is in the integer/ directory.
-
-For C++, see shiftround.hpp and multshiftround.hpp.
-
-For C, see shiftround.c, shiftround.h, multshiftround.c, and multshiftround.h.
+Presently, everything interesting is in the integer/ directory.
 
 ## Contributing
 

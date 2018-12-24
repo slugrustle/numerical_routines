@@ -1,9 +1,11 @@
 /**
- * shiftround.h
+ * shiftround_comp.h
  * Declares functions of the form
- *     type shiftround_X_Y(const type num);
+ *     type shiftround_X(const type num);
  * where X is a type abbreviation and Y is a shift value. These functions
  * return the value ROUND(num / 2^Y) without using the division operator.
+ * The _comp in shiftround_comp.h indicates the shift value must be known
+ * at compile time.
  *
  * These functions are implemented for the types int8_t, int16_t, int32_t,
  * int64_t, uint8_t, uint16_t, uint32_t, and uint64_t.
@@ -24,14 +26,14 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef SHFTRND_H_
-#define SHFTRND_H_
+#ifndef SHIFTROUND_COMP_H_
+#define SHIFTROUND_COMP_H_
 
 #include <stdint.h>
 
- /********************************************************************************
-  ********                        int8_t functions                        ********
-  ********************************************************************************/
+/********************************************************************************
+ ********                        int8_t functions                        ********
+ ********************************************************************************/
 
 int8_t shiftround_i8_1(const int8_t num);
 int8_t shiftround_i8_2(const int8_t num);
@@ -297,7 +299,7 @@ uint64_t shiftround_u64_61(const uint64_t num);
 uint64_t shiftround_u64_62(const uint64_t num);
 uint64_t shiftround_u64_63(const uint64_t num);
 
-#endif /* #ifndef SHFTRND_H_ */
+#endif /* #ifndef SHIFTROUND_COMP_H_ */
 
 /*
 Creative Commons Legal Code

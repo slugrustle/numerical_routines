@@ -1,9 +1,10 @@
 /**
- * shiftround.hpp
+ * shiftround_comp.hpp
  * Specifies the templated function
  *     type shiftround<typename type, int8_t shift>(const type num);
  * which returns the value ROUND(num / 2^shift) without using the division
- * operator.
+ * operator. The _comp in shiftround_comp.hpp indicates that the shift
+ * argument must be known at compile time.
  *
  * type may be int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t,
  * uint64_t, or any type equivalent to these.
@@ -24,17 +25,17 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef SHFTRND_HPP_
-#define SHFTRND_HPP_
+#ifndef SHIFTROUND_COMP_HPP_
+#define SHIFTROUND_COMP_HPP_
 
 #include <cinttypes>
 
 /**
- * The shiftround primary template is a catch-all for invalid
- * and/or presently unimplemented template arguments.
+ * This shiftround primary template is a catch-all for invalid and/or presently
+ * unimplemented template arguments.
  */
 template <typename type, int8_t shift> type shiftround(const type num) {
-  static_assert(false, "type shiftround<type,shift>(const type num) is not defined for the specified type and/or shift value.");
+  static_assert(false, "type shiftround<type,shift>(const type num); is not defined for the specified type and/or shift value.");
 }
 
 /********************************************************************************
@@ -1437,7 +1438,7 @@ template <> uint64_t shiftround<uint64_t, 63>(const uint64_t num) {
   return num >> 63;
 }
 
-#endif /* #ifndef SHFTRND_HPP_ */
+#endif /* #ifndef SHIFTROUND_COMP_HPP_ */
 
 /*
 Creative Commons Legal Code
