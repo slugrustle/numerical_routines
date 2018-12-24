@@ -372,7 +372,7 @@ int main() {
   }
 
   std::printf("Testing divround<int64_t>.\n");
-  int64_t dividend_i64 = std::numeric_limits<int64_t>::lowest();
+  dividend_i64 = std::numeric_limits<int64_t>::lowest();
   while (true) {
     int64_t divisor = std::numeric_limits<int64_t>::lowest();
     while (true) {
@@ -424,7 +424,7 @@ int main() {
   }
 
   std::printf("Testing divround<uint64_t>.\n");
-  uint64_t dividend_u64 = std::numeric_limits<uint64_t>::lowest();
+  dividend_u64 = std::numeric_limits<uint64_t>::lowest();
   while (true) {
     uint64_t divisor = 1ull;
     while (true) {
