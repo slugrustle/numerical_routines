@@ -1,10 +1,33 @@
 For files in the integer/boost directory, see integer/boost_license_report.html,
 integer/LICENSE_1_0.txt, and the files themselves.
 
-The files multshiftround.c, multshiftround.h, multshiftround.hpp,
-shiftround.c, shiftround.h, shiftround.hpp, multshiftround_shiftround_test.cpp,
-and optimal_base2_rational.cpp are published under the CC0 1.0 Universal
-Public Domain Dedication, which is reproduced below.
+All files produced by the author of this repository, including
+divround.c
+divround.h 
+divround.hpp
+divround_test.cpp 
+multshiftround_comp.c 
+multshiftround_comp.h 
+multshiftround_comp.hpp 
+multshiftround_run.c 
+multshiftround_run.h 
+multshiftround_run.hpp 
+multshiftround_shiftround_masks.c 
+multshiftround_shiftround_masks.h
+multshiftround_shiftround_test.cpp 
+optimal_base2_rational.cpp 
+saturate_value.c 
+saturate_value.h 
+saturate_value.hpp 
+saturate_value_test.cpp 
+shiftround_comp.c 
+shiftround_comp.h 
+shiftround_comp.hpp 
+shiftround_run.c 
+shiftround_run.h 
+shiftround_run.hpp 
+are published under the CC0 1.0 Universal Public Domain Dedication,
+which is reproduced below.
 
 Creative Commons Legal Code
 
