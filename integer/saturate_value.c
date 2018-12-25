@@ -1,26 +1,15 @@
 /**
- * divround.hpp
- * Specifies the templated function
- *     type divround<typename type>(const type dividend, const type divisor);
- * which returns the value ROUND(dividend / divisor).
+ * saturate_value.c
+ * Defines functions of the form
+ *   void saturate_value_X(type *value, const type lower_bound, const type upper_bound);
+ * which modifies value (if necessary) so that it lies on the range
+ * [lower_bound, upper_bound]. X is a type abbreviation.
  *
- * type may be int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t,
- * uint64_t, or any type equivalent to these.
+ * These functions are implemented for int8_t, int16_t, int32_t, int64_t,
+ * uint8_t, uint16_t, uint32_t, and uint64_t.
  *
- * divisor must not be 0.
- *
- * For signed types, the most negative number must not be divided by -1 in
- * order to avoid overflow. Explicitly, the following must be avoided:
- * int8_t:  -128 / -1                   or   -2^7 / -1
- * int16_t: -32768 / -1                 or   -2^15 / -1
- * int32_t: -2147483648 / -1            or   -2^31 / -1
- * int64_t: -9223372036854775808 / -1   or   -2^63 / -1
- * This assumes a 2's complement representation of signed integers.
- *
- * Correct rounding for negative signed divisor arguments requires two things:
- * 1. The representation of signed integers must be 2's complement.
- * 2. The compiler must encode right shifts on signed types as arithmetic
- *    right shifts rather than logical right shifts.
+ * To obtain sensical results, upper_bound must be greater than or equal to
+ * lower_bound.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -30,200 +19,63 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef DIVROUND_HPP_
-#define DIVROUND_HPP_
+#include "saturate_value.h"
 
-#include <cinttypes>
+/********************************************************************************
+ ********                  int8_t and uint8_t functions                  ********
+ ********************************************************************************/
 
-/**
- * This divround primary template is a catch-all for presently unimplemented
- * template arguments.
- */
-template <typename type> type divround(const type dividend, const type divisor) {
-  static_assert(false, "type divround(const type dividend, const type divisor); is not defined for the specified type.");
+void saturate_value_i8(int8_t *value, const int8_t lower_bound, const int8_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
+}
+
+void saturate_value_u8(uint8_t *value, const uint8_t lower_bound, const uint8_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
 
 /********************************************************************************
- ********           int8_t and uint8_t template specializations          ********
+ ********                 int16_t and uint16_t functions                 ********
  ********************************************************************************/
 
-/** 
- * Returns ROUND(dividend / divisor). divisor must never be 0. 
- * divisor must not be -1 when dividend is -127 (-2^7).
- */
-template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor) {
-  int8_t quotient = dividend / divisor;
-  int8_t remainder = dividend - (quotient * divisor);
-  int8_t div_half = divisor >> 1;
-  if ((divisor & static_cast<uint8_t>(0x81)) == static_cast<int8_t>(0x01)) div_half++;
-  if (remainder < static_cast<int8_t>(0)) {
-    if (div_half < static_cast<int8_t>(0)) {
-      if (remainder <= div_half) return quotient + static_cast<int8_t>(1);
-      return quotient;
-    }
-    else {
-      if (-remainder >= div_half) return quotient - static_cast<int8_t>(1);
-      return quotient;
-    }
-  }
-  else {
-    if (div_half >= static_cast<int8_t>(0)) {
-      if (remainder >= div_half) return quotient + static_cast<int8_t>(1);
-      return quotient;
-    }
-    else {
-      if (-remainder <= div_half) return quotient - static_cast<int8_t>(1);
-      return quotient;
-    }
-  }
+void saturate_value_i16(int16_t *value, const int16_t lower_bound, const int16_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
 
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divisor) {
-  uint8_t quotient = dividend / divisor;
-  uint8_t remainder = dividend - (quotient * divisor);
-  uint8_t div_half = divisor >> 1;
-  if (divisor & static_cast<uint8_t>(0x01)) div_half++;
-  if (remainder >= div_half) return quotient + static_cast<uint8_t>(1);
-  return quotient;
+void saturate_value_u16(uint16_t *value, const uint16_t lower_bound, const uint16_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
 
 /********************************************************************************
- ********          int16_t and uint16_t template specializations         ********
+ ********                 int32_t and uint32_t functions                 ********
  ********************************************************************************/
 
-/**
- * Returns ROUND(dividend / divisor). divisor must never be 0.
- * divisor must not be -1 when dividend is -32768 (-2^15).
- */
-template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divisor) {
-  int16_t quotient = dividend / divisor;
-  int16_t remainder = dividend - (quotient * divisor);
-  int16_t div_half = divisor >> 1;
-  if ((divisor & static_cast<uint16_t>(0x8001)) == static_cast<int16_t>(0x0001)) div_half++;
-  if (remainder < static_cast<int16_t>(0)) {
-    if (div_half < static_cast<int16_t>(0)) {
-      if (remainder <= div_half) return quotient + static_cast<int16_t>(1);
-      return quotient;
-    }
-    else {
-      if (-remainder >= div_half) return quotient - static_cast<int16_t>(1);
-      return quotient;
-    }
-  }
-  else {
-    if (div_half >= static_cast<int16_t>(0)) {
-      if (remainder >= div_half) return quotient + static_cast<int16_t>(1);
-      return quotient;
-    }
-    else {
-      if (-remainder <= div_half) return quotient - static_cast<int16_t>(1);
-      return quotient;
-    }
-  }
+void saturate_value_i32(int32_t *value, const int32_t lower_bound, const int32_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
 
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t divisor) {
-  uint16_t quotient = dividend / divisor;
-  uint16_t remainder = dividend - (quotient * divisor);
-  uint16_t div_half = divisor >> 1;
-  if (divisor & static_cast<uint16_t>(0x0001)) div_half++;
-  if (remainder >= div_half) return quotient + static_cast<uint16_t>(1);
-  return quotient;
+void saturate_value_u32(uint32_t *value, const uint32_t lower_bound, const uint32_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
 
 /********************************************************************************
- ********          int32_t and uint32_t template specializations         ********
+ ********                 int64_t and uint64_t functions                 ********
  ********************************************************************************/
 
-/**
- * Returns ROUND(dividend / divisor). divisor must never be 0. 
- * divisor must not be -1 when dividend is -2147483648 (-2^31).
- */
-template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divisor) {
-  int32_t quotient = dividend / divisor;
-  int32_t remainder = dividend - (quotient * divisor);
-  int32_t div_half = divisor >> 1;
-  if ((divisor & 0x80000001u) == 0x00000001) div_half++;
-  if (remainder < 0) {
-    if (div_half < 0) {
-      if (remainder <= div_half) return quotient + 1;
-      return quotient;
-    }
-    else {
-      if (-remainder >= div_half) return quotient - 1;
-      return quotient;
-    }
-  }
-  else {
-    if (div_half >= 0) {
-      if (remainder >= div_half) return quotient + 1;
-      return quotient;
-    }
-    else {
-      if (-remainder <= div_half) return quotient - 1;
-      return quotient;
-    }
-  }
+void saturate_value_i64(int64_t *value, const int64_t lower_bound, const int64_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
 
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t divisor) {
-  uint32_t quotient = dividend / divisor;
-  uint32_t remainder = dividend - (quotient * divisor);
-  uint32_t div_half = divisor >> 1;
-  if (divisor & 0x00000001u) div_half++;
-  if (remainder >= div_half) return quotient + 1u;
-  return quotient;
+void saturate_value_u64(uint64_t *value, const uint64_t lower_bound, const uint64_t upper_bound) {
+  if (*value < lower_bound) *value = lower_bound;
+  if (*value > upper_bound) *value = upper_bound;
 }
-
-/********************************************************************************
- ********          int64_t and uint64_t template specializations         ********
- ********************************************************************************/
-
-/**
- * Returns ROUND(dividend / divisor). divisor must never be 0. 
- * divisor must not be -1 when dividend is -9223372036854775808 (-2^63).
- */
-template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divisor) {
-  int64_t quotient = dividend / divisor;
-  int64_t remainder = dividend - (quotient * divisor);
-  int64_t div_half = divisor >> 1;
-  if ((divisor & 0x8000000000000001ull) == 0x0000000000000001ll) div_half++;
-  if (remainder < 0ll) {
-    if (div_half < 0ll) {
-      if (remainder <= div_half) return quotient + 1ll;
-      return quotient;
-    }
-    else {
-      if (-remainder >= div_half) return quotient - 1ll;
-      return quotient;
-    }
-  }
-  else {
-    if (div_half >= 0ll) {
-      if (remainder >= div_half) return quotient + 1ll;
-      return quotient;
-    }
-    else {
-      if (-remainder <= div_half) return quotient - 1ll;
-      return quotient;
-    }
-  }
-}
-
-/* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint64_t divround<uint64_t>(const uint64_t dividend, const uint64_t divisor) {
-  uint64_t quotient = dividend / divisor;
-  uint64_t remainder = dividend - (quotient * divisor);
-  uint64_t div_half = divisor >> 1;
-  if (divisor & 0x0000000000000001ull) div_half++;
-  if (remainder >= div_half) return quotient + 1ull;
-  return quotient;
-}
-
-#endif /* #ifndef DIVROUND_HPP_ */
 
 /*
 Creative Commons Legal Code
