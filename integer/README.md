@@ -1,3 +1,7 @@
+## saturate\_value
+
+The saturate\_value functions modify the value argument, if necessary, so that it lies on the range [lower\_bound, upper\_bound].
+
 ## divround
 
 The divround functions perform the operation ROUND(dividend / divisor).
@@ -22,11 +26,15 @@ All functions are defined for the int8\_t, int16\_t, int32\_t, int64\_t, uint8\_
 
 C&#x2011;style functions are found in the .c and .h files. Templated C++&#x2011;style functions are found in the .hpp files.
 
-Test code for both C&#x2011;style and C++&#x2011;style divround functions is in divround\_test.cpp. divround\_test.exe is a 64&#x2011;bit windows executable meant to be run from the command line.
+Test code for both C&#x2011;style and C++&#x2011;style saturate\_value functions will be in saturate\_value\_test.cpp.
 
-Test code for both C&#x2011;style and C++&#x2011;style shiftround and multshiftround functions is in multshiftround\_shiftround\_test.cpp. multshiftround\_shiftround\_test.exe is a 64&#x2011;bit windows executable meant to be run from the command line.
+Test code for both C&#x2011;style and C++&#x2011;style divround functions is in divround\_test.cpp. 
 
-boost code is only used in divround\_test.cpp, multshiftround\_shiftround\_test.cpp, and optimal\_base2\_rational.cpp. The divround, shiftround, and multshiftround routines only depend on stdint.h and/or cinttypes.
+Test code for both C&#x2011;style and C++&#x2011;style shiftround and multshiftround functions is in multshiftround\_shiftround\_test.cpp.
+
+The .exe file corresponding to each ...\_test.cpp file is a 64&#x2011;bit windows executable meant to be run from the command line.
+
+boost code is only used in divround\_test.cpp, multshiftround\_shiftround\_test.cpp, and optimal\_base2\_rational.cpp. The saturate\_value, divround, shiftround, and multshiftround routines only depend on stdint.h and/or cinttypes.
 
 ## optimal\_base2\_rational
 

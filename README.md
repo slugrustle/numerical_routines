@@ -1,6 +1,6 @@
 # numerical\_routines
 
-This repository holds efficient routines for performing rounded division and shift operations. These routines are intended for programmers who use fixed point arithmetic on microcontrollers or other constrained devices.
+This repository holds efficient routines for performing value saturation, rounded division, and rounded shift operations on integer types. These routines are intended for programmers who use fixed point arithmetic on microcontrollers or other constrained devices.
 
 I may add a variety of other numerical routines if time permits.
 
@@ -24,4 +24,4 @@ A portion of the boost library is distributed in the integer/boost directory. Se
 
 ## Acknowledgment
 
-[boost](https://www.boost.org/) provides, among other things, high precision floating point types that made the test programs and helper utility in the integer directory much easier to develop.
+[boost](https://www.boost.org/) provides, among other things, high precision floating point types that made the helper utility and some of the test programs in the integer directory much easier to develop.
