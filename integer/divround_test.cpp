@@ -406,7 +406,7 @@ int main() {
     uint64_t divisor = 1ull;
     while (true) {
       uint64_t dr = divround_u64(dividend_u64, divisor);
-      uint64_t dbl_dr = boost::math::round(cpp_bin_float_80(dividend_u32) / cpp_bin_float_80(divisor)).convert_to<uint64_t>();
+      uint64_t dbl_dr = boost::math::round(cpp_bin_float_80(dividend_u64) / cpp_bin_float_80(divisor)).convert_to<uint64_t>();
       if (dr != dbl_dr) {
         uint64_t quotient = dividend_u64 / divisor;
         uint64_t remainder = dividend_u64 - (quotient * divisor);
@@ -429,7 +429,7 @@ int main() {
     uint64_t divisor = 1ull;
     while (true) {
       uint64_t dr = divround<uint64_t>(dividend_u64, divisor);
-      uint64_t dbl_dr = boost::math::round(cpp_bin_float_80(dividend_u32) / cpp_bin_float_80(divisor)).convert_to<uint64_t>();
+      uint64_t dbl_dr = boost::math::round(cpp_bin_float_80(dividend_u64) / cpp_bin_float_80(divisor)).convert_to<uint64_t>();
       if (dr != dbl_dr) {
         uint64_t quotient = dividend_u64 / divisor;
         uint64_t remainder = dividend_u64 - (quotient * divisor);
