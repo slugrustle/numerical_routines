@@ -1,8 +1,17 @@
 /**
  * saturate_value_test.cpp
- * TODO: proper header
- * TODO: actual saturate_value unit tests
+ * Performs basic unit tests on all versions of
+ *   void saturate_value_X(type *value, const type lower_bound, const type upper_bound);
+ * and
+ *   void saturate_value<typename type>(type &value, const type lower_bound, const type upper_bound);
+ * where X is a type abbreviation.
+ * 
+ * lower_bound is set to upper_bound - 2.
  *
+ * Input values less than lower_bound, equal to lower_bound, between
+ * lower_bound and uppper_bound, equal to upper_bound, and greater than
+ * upper_bound are tested for all functions.
+
  * Written in 2018 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
@@ -19,7 +28,287 @@ extern "C"
 }
 
 int main () {
-  std::printf("This test program is just a stub; no tests are actually conducted.\n");
+  int8_t res_i8;
+  std::printf("Testing saturate_value_i8\n");
+  res_i8 = -2;
+  saturate_value_i8(&res_i8, -1, 1);
+  if (res_i8 != -1) std::printf("\nERROR: res_i8 = -2; saturate_value_i8(&res_i8, -1, 1); res_i8: %i, expected -1.\n\n", res_i8);
+  res_i8 = -1;
+  saturate_value_i8(&res_i8, -1, 1);
+  if (res_i8 != -1) std::printf("\nERROR: res_i8 = -1; saturate_value_i8(&res_i8, -1, 1); res_i8: %i, expected -1.\n\n", res_i8);
+  res_i8 = 0;
+  saturate_value_i8(&res_i8, -1, 1);
+  if (res_i8 != 0) std::printf("\nERROR: res_i8 = 0; saturate_value_i8(&res_i8, -1, 1); res_i8: %i, expected 0.\n\n", res_i8);
+  res_i8 = 1;
+  saturate_value_i8(&res_i8, -1, 1);
+  if (res_i8 != 1) std::printf("\nERROR: res_i8 = 1; saturate_value_i8(&res_i8, -1, 1); res_i8: %i, expected 1.\n\n", res_i8);
+  res_i8 = 2;
+  saturate_value_i8(&res_i8, -1, 1);
+  if (res_i8 != 1) std::printf("\nERROR: res_i8 = 2; saturate_value_i8(&res_i8, -1, 1); res_i8: %i, expected 1.\n\n", res_i8);
+
+  std::printf("Testing saturate_value<int8_t>\n");
+  res_i8 = -2;
+  saturate_value<int8_t>(res_i8, -1, 1);
+  if (res_i8 != -1) std::printf("\nERROR: res_i8 = -2; saturate_value<int8_t>(res_i8, -1, 1); res_i8: %i, expected -1.\n\n", res_i8);
+  res_i8 = -1;
+  saturate_value<int8_t>(res_i8, -1, 1);
+  if (res_i8 != -1) std::printf("\nERROR: res_i8 = -1; saturate_value<int8_t>(res_i8, -1, 1); res_i8: %i, expected -1.\n\n", res_i8);
+  res_i8 = 0;
+  saturate_value<int8_t>(res_i8, -1, 1);
+  if (res_i8 != 0) std::printf("\nERROR: res_i8 = 0; saturate_value<int8_t>(res_i8, -1, 1); res_i8: %i, expected 0.\n\n", res_i8);
+  res_i8 = 1;
+  saturate_value<int8_t>(res_i8, -1, 1);
+  if (res_i8 != 1) std::printf("\nERROR: res_i8 = 1; saturate_value<int8_t>(res_i8, -1, 1); res_i8: %i, expected 1.\n\n", res_i8);
+  res_i8 = 2;
+  saturate_value<int8_t>(res_i8, -1, 1);
+  if (res_i8 != 1) std::printf("\nERROR: res_i8 = 2; saturate_value<int8_t>(res_i8, -1, 1); res_i8: %i, expected 1.\n\n", res_i8);
+
+  int16_t res_i16;
+  std::printf("Testing saturate_value_i16\n");
+  res_i16 = -2;
+  saturate_value_i16(&res_i16, -1, 1);
+  if (res_i16 != -1) std::printf("\nERROR: res_i16 = -2; saturate_value_i16(&res_i16, -1, 1); res_i16: %i, expected -1.\n\n", res_i16);
+  res_i16 = -1;
+  saturate_value_i16(&res_i16, -1, 1);
+  if (res_i16 != -1) std::printf("\nERROR: res_i16 = -1; saturate_value_i16(&res_i16, -1, 1); res_i16: %i, expected -1.\n\n", res_i16);
+  res_i16 = 0;
+  saturate_value_i16(&res_i16, -1, 1);
+  if (res_i16 != 0) std::printf("\nERROR: res_i16 = 0; saturate_value_i16(&res_i16, -1, 1); res_i16: %i, expected 0.\n\n", res_i16);
+  res_i16 = 1;
+  saturate_value_i16(&res_i16, -1, 1);
+  if (res_i16 != 1) std::printf("\nERROR: res_i16 = 1; saturate_value_i16(&res_i16, -1, 1); res_i16: %i, expected 1.\n\n", res_i16);
+  res_i16 = 2;
+  saturate_value_i16(&res_i16, -1, 1);
+  if (res_i16 != 1) std::printf("\nERROR: res_i16 = 2; saturate_value_i16(&res_i16, -1, 1); res_i16: %i, expected 1.\n\n", res_i16);
+
+  std::printf("Testing saturate_value<int16_t>\n");
+  res_i16 = -2;
+  saturate_value<int16_t>(res_i16, -1, 1);
+  if (res_i16 != -1) std::printf("\nERROR: res_i16 = -2; saturate_value<int16_t>(res_i16, -1, 1); res_i16: %i, expected -1.\n\n", res_i16);
+  res_i16 = -1;
+  saturate_value<int16_t>(res_i16, -1, 1);
+  if (res_i16 != -1) std::printf("\nERROR: res_i16 = -1; saturate_value<int16_t>(res_i16, -1, 1); res_i16: %i, expected -1.\n\n", res_i16);
+  res_i16 = 0;
+  saturate_value<int16_t>(res_i16, -1, 1);
+  if (res_i16 != 0) std::printf("\nERROR: res_i16 = 0; saturate_value<int16_t>(res_i16, -1, 1); res_i16: %i, expected 0.\n\n", res_i16);
+  res_i16 = 1;
+  saturate_value<int16_t>(res_i16, -1, 1);
+  if (res_i16 != 1) std::printf("\nERROR: res_i16 = 1; saturate_value<int16_t>(res_i16, -1, 1); res_i16: %i, expected 1.\n\n", res_i16);
+  res_i16 = 2;
+  saturate_value<int16_t>(res_i16, -1, 1);
+  if (res_i16 != 1) std::printf("\nERROR: res_i16 = 2; saturate_value<int16_t>(res_i16, -1, 1); res_i16: %i, expected 1.\n\n", res_i16);
+
+  int32_t res_i32;
+  std::printf("Testing saturate_value_i32\n");
+  res_i32 = -2;
+  saturate_value_i32(&res_i32, -1, 1);
+  if (res_i32 != -1) std::printf("\nERROR: res_i32 = -2; saturate_value_i32(&res_i32, -1, 1); res_i32: %i, expected -1.\n\n", res_i32);
+  res_i32 = -1;
+  saturate_value_i32(&res_i32, -1, 1);
+  if (res_i32 != -1) std::printf("\nERROR: res_i32 = -1; saturate_value_i32(&res_i32, -1, 1); res_i32: %i, expected -1.\n\n", res_i32);
+  res_i32 = 0;
+  saturate_value_i32(&res_i32, -1, 1);
+  if (res_i32 != 0) std::printf("\nERROR: res_i32 = 0; saturate_value_i32(&res_i32, -1, 1); res_i32: %i, expected 0.\n\n", res_i32);
+  res_i32 = 1;
+  saturate_value_i32(&res_i32, -1, 1);
+  if (res_i32 != 1) std::printf("\nERROR: res_i32 = 1; saturate_value_i32(&res_i32, -1, 1); res_i32: %i, expected 1.\n\n", res_i32);
+  res_i32 = 2;
+  saturate_value_i32(&res_i32, -1, 1);
+  if (res_i32 != 1) std::printf("\nERROR: res_i32 = 2; saturate_value_i32(&res_i32, -1, 1); res_i32: %i, expected 1.\n\n", res_i32);
+
+  std::printf("Testing saturate_value<int32_t>\n");
+  res_i32 = -2;
+  saturate_value<int32_t>(res_i32, -1, 1);
+  if (res_i32 != -1) std::printf("\nERROR: res_i32 = -2; saturate_value<int32_t>(res_i32, -1, 1); res_i32: %i, expected -1.\n\n", res_i32);
+  res_i32 = -1;
+  saturate_value<int32_t>(res_i32, -1, 1);
+  if (res_i32 != -1) std::printf("\nERROR: res_i32 = -1; saturate_value<int32_t>(res_i32, -1, 1); res_i32: %i, expected -1.\n\n", res_i32);
+  res_i32 = 0;
+  saturate_value<int32_t>(res_i32, -1, 1);
+  if (res_i32 != 0) std::printf("\nERROR: res_i32 = 0; saturate_value<int32_t>(res_i32, -1, 1); res_i32: %i, expected 0.\n\n", res_i32);
+  res_i32 = 1;
+  saturate_value<int32_t>(res_i32, -1, 1);
+  if (res_i32 != 1) std::printf("\nERROR: res_i32 = 1; saturate_value<int32_t>(res_i32, -1, 1); res_i32: %i, expected 1.\n\n", res_i32);
+  res_i32 = 2;
+  saturate_value<int32_t>(res_i32, -1, 1);
+  if (res_i32 != 1) std::printf("\nERROR: res_i32 = 2; saturate_value<int32_t>(res_i32, -1, 1); res_i32: %i, expected 1.\n\n", res_i32);
+
+  int64_t res_i64;
+  std::printf("Testing saturate_value_i64\n");
+  res_i64 = -2ll;
+  saturate_value_i64(&res_i64, -1ll, 1ll);
+  if (res_i64 != -1ll) std::printf("\nERROR: res_i64 = -2; saturate_value_i64(&res_i64, -1, 1); res_i64: %" PRIi64 ", expected -1.\n\n", res_i64);
+  res_i64 = -1ll;
+  saturate_value_i64(&res_i64, -1ll, 1ll);
+  if (res_i64 != -1ll) std::printf("\nERROR: res_i64 = -1; saturate_value_i64(&res_i64, -1, 1); res_i64: %" PRIi64 ", expected -1.\n\n", res_i64);
+  res_i64 = 0ll;
+  saturate_value_i64(&res_i64, -1ll, 1ll);
+  if (res_i64 != 0ll) std::printf("\nERROR: res_i64 = 0; saturate_value_i64(&res_i64, -1, 1); res_i64: %" PRIi64 ", expected 0.\n\n", res_i64);
+  res_i64 = 1ll;
+  saturate_value_i64(&res_i64, -1ll, 1ll);
+  if (res_i64 != 1ll) std::printf("\nERROR: res_i64 = 1; saturate_value_i64(&res_i64, -1, 1); res_i64: %" PRIi64 ", expected 1.\n\n", res_i64);
+  res_i64 = 2ll;
+  saturate_value_i64(&res_i64, -1ll, 1ll);
+  if (res_i64 != 1ll) std::printf("\nERROR: res_i64 = 2; saturate_value_i64(&res_i64, -1, 1); res_i64: %" PRIi64 ", expected 1.\n\n", res_i64);
+
+  std::printf("Testing saturate_value<int64_t>\n");
+  res_i64 = -2ll;
+  saturate_value<int64_t>(res_i64, -1ll, 1ll);
+  if (res_i64 != -1ll) std::printf("\nERROR: res_i64 = -2; saturate_value<int64_t>(res_i64, -1, 1); res_i64: %" PRIi64 ", expected -1.\n\n", res_i64);
+  res_i64 = -1ll;
+  saturate_value<int64_t>(res_i64, -1ll, 1ll);
+  if (res_i64 != -1ll) std::printf("\nERROR: res_i64 = -1; saturate_value<int64_t>(res_i64, -1, 1); res_i64: %" PRIi64 ", expected -1.\n\n", res_i64);
+  res_i64 = 0ll;
+  saturate_value<int64_t>(res_i64, -1ll, 1ll);
+  if (res_i64 != 0ll) std::printf("\nERROR: res_i64 = 0; saturate_value<int64_t>(res_i64, -1, 1); res_i64: %" PRIi64 ", expected 0.\n\n", res_i64);
+  res_i64 = 1ll;
+  saturate_value<int64_t>(res_i64, -1ll, 1ll);
+  if (res_i64 != 1ll) std::printf("\nERROR: res_i64 = 1; saturate_value<int64_t>(res_i64, -1, 1); res_i64: %" PRIi64 ", expected 1.\n\n", res_i64);
+  res_i64 = 2ll;
+  saturate_value<int64_t>(res_i64, -1ll, 1ll);
+  if (res_i64 != 1ll) std::printf("\nERROR: res_i64 = 2; saturate_value<int64_t>(res_i64, -1, 1); res_i64: %" PRIi64 ", expected 1.\n\n", res_i64);
+
+  uint8_t res_u8;
+  std::printf("Testing saturate_value_u8\n");
+  res_u8 = 0;
+  saturate_value_u8(&res_u8, 1, 3);
+  if (res_u8 != 1) std::printf("\nERROR: res_u8 = 0; saturate_value_u8(&res_u8, 1, 3); res_u8: %u, expected 1.\n\n", res_u8);
+  res_u8 = 1;
+  saturate_value_u8(&res_u8, 1, 3);
+  if (res_u8 != 1) std::printf("\nERROR: res_u8 = 1; saturate_value_u8(&res_u8, 1, 3); res_u8: %u, expected 1.\n\n", res_u8);
+  res_u8 = 2;
+  saturate_value_u8(&res_u8, 1, 3);
+  if (res_u8 != 2) std::printf("\nERROR: res_u8 = 2; saturate_value_u8(&res_u8, 1, 3); res_u8: %u, expected 2.\n\n", res_u8);
+  res_u8 = 3;
+  saturate_value_u8(&res_u8, 1, 3);
+  if (res_u8 != 3) std::printf("\nERROR: res_u8 = 3; saturate_value_u8(&res_u8, 1, 3); res_u8: %u, expected 3.\n\n", res_u8);
+  res_u8 = 4;
+  saturate_value_u8(&res_u8, 1, 3);
+  if (res_u8 != 3) std::printf("\nERROR: res_u8 = 4; saturate_value_u8(&res_u8, 1, 3); res_u8: %u, expected 3.\n\n", res_u8);
+
+  std::printf("Testing saturate_value<uint8_t>\n");
+  res_u8 = 0;
+  saturate_value<uint8_t>(res_u8, 1, 3);
+  if (res_u8 != 1) std::printf("\nERROR: res_u8 = 0; saturate_value<uint8_t>(res_u8, 1, 3); res_u8: %u, expected 1.\n\n", res_u8);
+  res_u8 = 1;
+  saturate_value<uint8_t>(res_u8, 1, 3);
+  if (res_u8 != 1) std::printf("\nERROR: res_u8 = 1; saturate_value<uint8_t>(res_u8, 1, 3); res_u8: %u, expected 1.\n\n", res_u8);
+  res_u8 = 2;
+  saturate_value<uint8_t>(res_u8, 1, 3);
+  if (res_u8 != 2) std::printf("\nERROR: res_u8 = 2; saturate_value<uint8_t>(res_u8, 1, 3); res_u8: %u, expected 2.\n\n", res_u8);
+  res_u8 = 3;
+  saturate_value<uint8_t>(res_u8, 1, 3);
+  if (res_u8 != 3) std::printf("\nERROR: res_u8 = 3; saturate_value<uint8_t>(res_u8, 1, 3); res_u8: %u, expected 3.\n\n", res_u8);
+  res_u8 = 4;
+  saturate_value<uint8_t>(res_u8, 1, 3);
+  if (res_u8 != 3) std::printf("\nERROR: res_u8 = 4; saturate_value<uint8_t>(res_u8, 1, 3); res_u8: %u, expected 3.\n\n", res_u8);
+
+  uint16_t res_u16;
+  std::printf("Testing saturate_value_u16\n");
+  res_u16 = 0;
+  saturate_value_u16(&res_u16, 1, 3);
+  if (res_u16 != 1) std::printf("\nERROR: res_u16 = 0; saturate_value_u16(&res_u16, 1, 3); res_u16: %u, expected 1.\n\n", res_u16);
+  res_u16 = 1;
+  saturate_value_u16(&res_u16, 1, 3);
+  if (res_u16 != 1) std::printf("\nERROR: res_u16 = 1; saturate_value_u16(&res_u16, 1, 3); res_u16: %u, expected 1.\n\n", res_u16);
+  res_u16 = 2;
+  saturate_value_u16(&res_u16, 1, 3);
+  if (res_u16 != 2) std::printf("\nERROR: res_u16 = 2; saturate_value_u16(&res_u16, 1, 3); res_u16: %u, expected 2.\n\n", res_u16);
+  res_u16 = 3;
+  saturate_value_u16(&res_u16, 1, 3);
+  if (res_u16 != 3) std::printf("\nERROR: res_u16 = 3; saturate_value_u16(&res_u16, 1, 3); res_u16: %u, expected 3.\n\n", res_u16);
+  res_u16 = 4;
+  saturate_value_u16(&res_u16, 1, 3);
+  if (res_u16 != 3) std::printf("\nERROR: res_u16 = 4; saturate_value_u16(&res_u16, 1, 3); res_u16: %u, expected 3.\n\n", res_u16);
+
+  std::printf("Testing saturate_value<uint16_t>\n");
+  res_u16 = 0;
+  saturate_value<uint16_t>(res_u16, 1, 3);
+  if (res_u16 != 1) std::printf("\nERROR: res_u16 = 0; saturate_value<uint16_t>(res_u16, 1, 3); res_u16: %u, expected 1.\n\n", res_u16);
+  res_u16 = 1;
+  saturate_value<uint16_t>(res_u16, 1, 3);
+  if (res_u16 != 1) std::printf("\nERROR: res_u16 = 1; saturate_value<uint16_t>(res_u16, 1, 3); res_u16: %u, expected 1.\n\n", res_u16);
+  res_u16 = 2;
+  saturate_value<uint16_t>(res_u16, 1, 3);
+  if (res_u16 != 2) std::printf("\nERROR: res_u16 = 2; saturate_value<uint16_t>(res_u16, 1, 3); res_u16: %u, expected 2.\n\n", res_u16);
+  res_u16 = 3;
+  saturate_value<uint16_t>(res_u16, 1, 3);
+  if (res_u16 != 3) std::printf("\nERROR: res_u16 = 3; saturate_value<uint16_t>(res_u16, 1, 3); res_u16: %u, expected 3.\n\n", res_u16);
+  res_u16 = 4;
+  saturate_value<uint16_t>(res_u16, 1, 3);
+  if (res_u16 != 3) std::printf("\nERROR: res_u16 = 4; saturate_value<uint16_t>(res_u16, 1, 3); res_u16: %u, expected 3.\n\n", res_u16);
+
+  uint32_t res_u32;
+  std::printf("Testing saturate_value_u32\n");
+  res_u32 = 0u;
+  saturate_value_u32(&res_u32, 1u, 3u);
+  if (res_u32 != 1u) std::printf("\nERROR: res_u32 = 0; saturate_value_u32(&res_u32, 1, 3); res_u32: %u, expected 1.\n\n", res_u32);
+  res_u32 = 1u;
+  saturate_value_u32(&res_u32, 1u, 3u);
+  if (res_u32 != 1u) std::printf("\nERROR: res_u32 = 1; saturate_value_u32(&res_u32, 1, 3); res_u32: %u, expected 1.\n\n", res_u32);
+  res_u32 = 2u;
+  saturate_value_u32(&res_u32, 1u, 3u);
+  if (res_u32 != 2u) std::printf("\nERROR: res_u32 = 2; saturate_value_u32(&res_u32, 1, 3); res_u32: %u, expected 2.\n\n", res_u32);
+  res_u32 = 3u;
+  saturate_value_u32(&res_u32, 1u, 3u);
+  if (res_u32 != 3u) std::printf("\nERROR: res_u32 = 3; saturate_value_u32(&res_u32, 1, 3); res_u32: %u, expected 3.\n\n", res_u32);
+  res_u32 = 4u;
+  saturate_value_u32(&res_u32, 1u, 3u);
+  if (res_u32 != 3u) std::printf("\nERROR: res_u32 = 4; saturate_value_u32(&res_u32, 1, 3); res_u32: %u, expected 3.\n\n", res_u32);
+
+  std::printf("Testing saturate_value<uint32_t>\n");
+  res_u32 = 0u;
+  saturate_value<uint32_t>(res_u32, 1u, 3u);
+  if (res_u32 != 1u) std::printf("\nERROR: res_u32 = 0; saturate_value<uint32_t>(res_u32, 1, 3); res_u32: %u, expected 1.\n\n", res_u32);
+  res_u32 = 1u;
+  saturate_value<uint32_t>(res_u32, 1u, 3u);
+  if (res_u32 != 1u) std::printf("\nERROR: res_u32 = 1; saturate_value<uint32_t>(res_u32, 1, 3); res_u32: %u, expected 1.\n\n", res_u32);
+  res_u32 = 2u;
+  saturate_value<uint32_t>(res_u32, 1u, 3u);
+  if (res_u32 != 2u) std::printf("\nERROR: res_u32 = 2; saturate_value<uint32_t>(res_u32, 1, 3); res_u32: %u, expected 2.\n\n", res_u32);
+  res_u32 = 3u;
+  saturate_value<uint32_t>(res_u32, 1u, 3u);
+  if (res_u32 != 3u) std::printf("\nERROR: res_u32 = 3; saturate_value<uint32_t>(res_u32, 1, 3); res_u32: %u, expected 3.\n\n", res_u32);
+  res_u32 = 4u;
+  saturate_value<uint32_t>(res_u32, 1u, 3u);
+  if (res_u32 != 3u) std::printf("\nERROR: res_u32 = 4; saturate_value<uint32_t>(res_u32, 1, 3); res_u32: %u, expected 3.\n\n", res_u32);
+
+  uint64_t res_u64;
+  std::printf("Testing saturate_value_u64\n");
+  res_u64 = 0ull;
+  saturate_value_u64(&res_u64, 1ull, 3ull);
+  if (res_u64 != 1ull) std::printf("\nERROR: res_u64 = 0; saturate_value_u64(&res_u64, 1, 3); res_u64: %" PRIu64 ", expected 1.\n\n", res_u64);
+  res_u64 = 1ull;
+  saturate_value_u64(&res_u64, 1ull, 3ull);
+  if (res_u64 != 1ull) std::printf("\nERROR: res_u64 = 1; saturate_value_u64(&res_u64, 1, 3); res_u64: %" PRIu64 ", expected 1.\n\n", res_u64);
+  res_u64 = 2ull;
+  saturate_value_u64(&res_u64, 1ull, 3ull);
+  if (res_u64 != 2ull) std::printf("\nERROR: res_u64 = 2; saturate_value_u64(&res_u64, 1, 3); res_u64: %" PRIu64 ", expected 2.\n\n", res_u64);
+  res_u64 = 3ull;
+  saturate_value_u64(&res_u64, 1ull, 3ull);
+  if (res_u64 != 3ull) std::printf("\nERROR: res_u64 = 3; saturate_value_u64(&res_u64, 1, 3); res_u64: %" PRIu64 ", expected 3.\n\n", res_u64);
+  res_u64 = 4ull;
+  saturate_value_u64(&res_u64, 1ull, 3ull);
+  if (res_u64 != 3ull) std::printf("\nERROR: res_u64 = 4; saturate_value_u64(&res_u64, 1, 3); res_u64: %" PRIu64 ", expected 3.\n\n", res_u64);
+
+  std::printf("Testing saturate_value<uint64_t>\n");
+  res_u64 = 0ull;
+  saturate_value<uint64_t>(res_u64, 1ull, 3ull);
+  if (res_u64 != 1ull) std::printf("\nERROR: res_u64 = 0; saturate_value<uint64_t>(res_u64, 1, 3); res_u64: %" PRIu64 ", expected 1.\n\n", res_u64);
+  res_u64 = 1ull;
+  saturate_value<uint64_t>(res_u64, 1ull, 3ull);
+  if (res_u64 != 1ull) std::printf("\nERROR: res_u64 = 1; saturate_value<uint64_t>(res_u64, 1, 3); res_u64: %" PRIu64 ", expected 1.\n\n", res_u64);
+  res_u64 = 2ull;
+  saturate_value<uint64_t>(res_u64, 1ull, 3ull);
+  if (res_u64 != 2ull) std::printf("\nERROR: res_u64 = 2; saturate_value<uint64_t>(res_u64, 1, 3); res_u64: %" PRIu64 ", expected 2.\n\n", res_u64);
+  res_u64 = 3ull;
+  saturate_value<uint64_t>(res_u64, 1ull, 3ull);
+  if (res_u64 != 3ull) std::printf("\nERROR: res_u64 = 3; saturate_value<uint64_t>(res_u64, 1, 3); res_u64: %" PRIu64 ", expected 3.\n\n", res_u64);
+  res_u64 = 4ull;
+  saturate_value<uint64_t>(res_u64, 1ull, 3ull);
+  if (res_u64 != 3ull) std::printf("\nERROR: res_u64 = 4; saturate_value<uint64_t>(res_u64, 1, 3); res_u64: %" PRIu64 ", expected 3.\n\n", res_u64);
+
+  std::printf("\nIf there are no errors above, the tests succeeded.\n\n");
   return 0;
 }
 

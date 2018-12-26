@@ -20,7 +20,7 @@ All functions are defined for the int8\_t, int16\_t, int32\_t, int64\_t, uint8\_
 
 C&#x2011;style functions are found in the .c and .h files. Templated C++&#x2011;style functions are found in the .hpp files.
 
-Test code for both C&#x2011;style and C++&#x2011;style saturate\_value functions will be in saturate\_value\_test.cpp.
+Test code for both C&#x2011;style and C++&#x2011;style saturate\_value functions is in saturate\_value\_test.cpp.
 
 Test code for both C&#x2011;style and C++&#x2011;style divround functions is in divround\_test.cpp. 
 
