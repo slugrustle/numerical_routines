@@ -1,0 +1,39 @@
+# Run 
+# nmake /F makefile-nmake 
+# from the Visual Studio Command Prompt to build all executables
+# in this directory.
+#
+# Run 
+# nmake /F makefile-nmake clean
+# to delete all .exe and .obj files created during the build.
+#
+# Run 
+# nmake /F makefile-nmake cleanobj
+# to delete all .obj files created during the build.
+
+BASE_OPTIONS = /O2 /Ob2 /Oi /Ot /Oy /favor:blend /Zc:wchar_t- /Zc:inline /GR- /GF /Gm- /GS- /EHsc /guard:cf- /fp:strict /Qspectre- /Qpar- /GL /permissive- /nologo /Y- /utf-8 /validate-charset /W4 /MT
+NON_BOOST_OPTIONS = /Za
+BOOST_OPTIONS = /I.
+LINK_OPTIONS = /link /INCREMENTAL:NO /OPT:REF /OPT:ICF /DYNAMICBASE:NO /NXCOMPAT:NO /LTCG
+OBJ_FILES = divround.obj divround_test.obj multshiftround_comp.obj multshiftround_run.obj multshiftround_shiftround_masks.obj multshiftround_shiftround_test.obj optimal_base2_rational.obj saturate_value.obj saturate_value_test.obj shiftround_comp.obj shiftround_run.obj
+EXE_FILES = saturate_value_test.exe divround_test.exe multshiftround_shiftround_test.exe optimal_base2_rational.exe
+
+all: $(EXE_FILES)
+
+saturate_value_test.exe:saturate_value_test.cpp saturate_value.c saturate_value.h saturate_value.hpp
+	cl $(BASE_OPTIONS) $(NON_BOOST_OPTIONS) saturate_value.c saturate_value_test.cpp $(LINK_OPTIONS) /OUT:$(@F)
+
+divround_test.exe:divround_test.cpp divround.c divround.h divround.hpp
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) divround.c divround_test.cpp $(LINK_OPTIONS) /OUT:$(@F)
+
+multshiftround_shiftround_test.exe:multshiftround_shiftround_test.cpp multshiftround_comp.c multshiftround_run.c shiftround_comp.c shiftround_run.c multshiftround_shiftround_masks.c multshiftround_comp.h multshiftround_run.h shiftround_comp.h shiftround_run.h multshiftround_shiftround_masks.h multshiftround_comp.hpp multshiftround_run.hpp shiftround_comp.hpp shiftround_run.hpp
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) multshiftround_comp.c multshiftround_run.c shiftround_comp.c shiftround_run.c multshiftround_shiftround_masks.c multshiftround_shiftround_test.cpp $(LINK_OPTIONS) /OUT:$(@F)
+
+optimal_base2_rational.exe:optimal_base2_rational.cpp
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /wd4101 $** $(LINK_OPTIONS) /OUT:$(@F)
+
+clean:
+	del $(EXE_FILES) $(OBJ_FILES)
+
+cleanobj:
+	del $(OBJ_FILES)
