@@ -54,7 +54,7 @@ extern "C"
 typedef boost::multiprecision::number<boost::multiprecision::backends::cpp_bin_float<80, boost::multiprecision::backends::digit_base_2, void, boost::int16_t, -16382, 16383>, boost::multiprecision::et_off> cpp_bin_float_80;
 
 int main() {
-  std::printf("Testing divround_i8.\n");
+  std::printf("Testing divround_i8\n");
   int8_t dividend_i8 = std::numeric_limits<int8_t>::lowest();
   while (true) {
     int8_t divisor = std::numeric_limits<int8_t>::lowest();
@@ -70,7 +70,7 @@ int main() {
         int8_t remainder = dividend_i8 - (quotient * divisor);
         int8_t div_half = divisor >> 1;
         if ((divisor & static_cast<uint8_t>(0x81)) == static_cast<int8_t>(0x01)) div_half++;
-        std::printf("ROUND(%i / %i) = %i, but divround_i8 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i8, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%i / %i) = %i, but divround_i8 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i8, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int8_t>::max()) break;
       divisor++;
@@ -79,7 +79,7 @@ int main() {
     dividend_i8++;
   }
 
-  std::printf("Testing divround_<int8_t>.\n");
+  std::printf("Testing divround_<int8_t>\n");
   dividend_i8 = std::numeric_limits<int8_t>::lowest();
   while (true) {
     int8_t divisor = std::numeric_limits<int8_t>::lowest();
@@ -95,7 +95,7 @@ int main() {
         int8_t remainder = dividend_i8 - (quotient * divisor);
         int8_t div_half = divisor >> 1;
         if ((divisor & static_cast<uint8_t>(0x81)) == static_cast<int8_t>(0x01)) div_half++;
-        std::printf("ROUND(%i / %i) = %i, but divround<int8_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i8, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%i / %i) = %i, but divround<int8_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i8, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int8_t>::max()) break;
       divisor++;
@@ -104,7 +104,7 @@ int main() {
     dividend_i8++;
   }
 
-  std::printf("Testing divround_u8.\n");
+  std::printf("Testing divround_u8\n");
   uint8_t dividend_u8 = std::numeric_limits<uint8_t>::lowest();
   while (true) {
     uint8_t divisor = static_cast<uint8_t>(1);
@@ -116,7 +116,7 @@ int main() {
         uint8_t remainder = dividend_u8 - (quotient * divisor);
         uint8_t div_half = divisor >> 1;
         if (divisor & static_cast<uint8_t>(0x01)) div_half++;
-        std::printf("ROUND(%u / %u) = %u, but divround_u8 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u8, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%u / %u) = %u, but divround_u8 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u8, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<uint8_t>::max()) break;
       divisor++;
@@ -125,7 +125,7 @@ int main() {
     dividend_u8++;
   }
 
-  std::printf("Testing divround<uint8_t>.\n");
+  std::printf("Testing divround<uint8_t>\n");
   dividend_u8 = std::numeric_limits<uint8_t>::lowest();
   while (true) {
     uint8_t divisor = static_cast<uint8_t>(1);
@@ -137,7 +137,7 @@ int main() {
         uint8_t remainder = dividend_u8 - (quotient * divisor);
         uint8_t div_half = divisor >> 1;
         if (divisor & static_cast<uint8_t>(0x01)) div_half++;
-        std::printf("ROUND(%u / %u) = %u, but divround<uint8_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u8, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%u / %u) = %u, but divround<uint8_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u8, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<uint8_t>::max()) break;
       divisor++;
@@ -146,7 +146,7 @@ int main() {
     dividend_u8++;
   }
 
-  std::printf("Testing divround_i16.\n");
+  std::printf("Testing divround_i16\n");
   int16_t dividend_i16 = std::numeric_limits<int16_t>::lowest();
   while (true) {
     int16_t divisor = std::numeric_limits<int16_t>::lowest();
@@ -162,7 +162,7 @@ int main() {
         int16_t remainder = dividend_i16 - (quotient * divisor);
         int16_t div_half = divisor >> 1;
         if ((divisor & static_cast<uint16_t>(0x8001)) == static_cast<int16_t>(1)) div_half++;
-        std::printf("ROUND(%i / %i) = %i, but divround_i16 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i16, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%i / %i) = %i, but divround_i16 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int16_t>::max()) break;
       divisor++;
@@ -171,7 +171,7 @@ int main() {
     dividend_i16++;
   }
   
-  std::printf("Testing divround<int16_t>.\n");
+  std::printf("Testing divround<int16_t>\n");
   dividend_i16 = std::numeric_limits<int16_t>::lowest();
   while (true) {
     int16_t divisor = std::numeric_limits<int16_t>::lowest();
@@ -187,7 +187,7 @@ int main() {
         int16_t remainder = dividend_i16 - (quotient * divisor);
         int16_t div_half = divisor >> 1;
         if ((divisor & static_cast<uint16_t>(0x8001)) == static_cast<int16_t>(1)) div_half++;
-        std::printf("ROUND(%i / %i) = %i, but divround<int16_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i16, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%i / %i) = %i, but divround<int16_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int16_t>::max()) break;
       divisor++;
@@ -196,7 +196,7 @@ int main() {
     dividend_i16++;
   }
 
-  std::printf("Testing divround_u16.\n");
+  std::printf("Testing divround_u16\n");
   uint16_t dividend_u16 = std::numeric_limits<uint16_t>::lowest();
   while (true) {
     uint16_t divisor = static_cast<uint16_t>(1);
@@ -208,7 +208,7 @@ int main() {
         uint16_t remainder = dividend_u16 - (quotient * divisor);
         uint16_t div_half = divisor >> 1;
         if (divisor & static_cast<uint16_t>(0x0001)) div_half++;
-        std::printf("ROUND(%u / %u) = %u, but divround_u16 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u16, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%u / %u) = %u, but divround_u16 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<uint16_t>::max()) break;
       divisor++;
@@ -217,7 +217,7 @@ int main() {
     dividend_u16++;
   }
 
-  std::printf("Testing divround<uint16_t>.\n");
+  std::printf("Testing divround<uint16_t>\n");
   dividend_u16 = std::numeric_limits<uint16_t>::lowest();
   while (true) {
     uint16_t divisor = static_cast<uint16_t>(1);
@@ -229,7 +229,7 @@ int main() {
         uint16_t remainder = dividend_u16 - (quotient * divisor);
         uint16_t div_half = divisor >> 1;
         if (divisor & static_cast<uint16_t>(0x0001)) div_half++;
-        std::printf("ROUND(%u / %u) = %u, but divround<uint16_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u16, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%u / %u) = %u, but divround<uint16_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<uint16_t>::max()) break;
       divisor++;
@@ -238,7 +238,7 @@ int main() {
     dividend_u16++;
   }
 
-  std::printf("Testing divround_i32.\n");
+  std::printf("Testing divround_i32\n");
   int32_t dividend_i32 = std::numeric_limits<int32_t>::lowest();
   while (true) {
     int32_t divisor = std::numeric_limits<int32_t>::lowest();
@@ -254,7 +254,7 @@ int main() {
         int32_t remainder = dividend_i32 - (quotient * divisor);
         int32_t div_half = divisor >> 1;
         if ((divisor & 0x80000001u) == 1) div_half++;
-        std::printf("ROUND(%i / %i) = %i, but divround_i32 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i32, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%i / %i) = %i, but divround_i32 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i32, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int32_t>::lowest() + (1 << 16)) divisor = -(1 << 16);
       else if (divisor == (1 << 16)) divisor = std::numeric_limits<int32_t>::max() - (1 << 16);
@@ -267,7 +267,7 @@ int main() {
     else dividend_i32++;
   }
 
-  std::printf("Testing divround<int32_t>.\n");
+  std::printf("Testing divround<int32_t>\n");
   dividend_i32 = std::numeric_limits<int32_t>::lowest();
   while (true) {
     int32_t divisor = std::numeric_limits<int32_t>::lowest();
@@ -283,7 +283,7 @@ int main() {
         int32_t remainder = dividend_i32 - (quotient * divisor);
         int32_t div_half = divisor >> 1;
         if ((divisor & 0x80000001u) == 1) div_half++;
-        std::printf("ROUND(%i / %i) = %i, but divround<int32_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i32, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%i / %i) = %i, but divround<int32_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i32, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int32_t>::lowest() + (1 << 16)) divisor = -(1 << 16);
       else if (divisor == (1 << 16)) divisor = std::numeric_limits<int32_t>::max() - (1 << 16);
@@ -296,7 +296,7 @@ int main() {
     else dividend_i32++;
   }
 
-  std::printf("Testing divround_u32.\n");
+  std::printf("Testing divround_u32\n");
   uint32_t dividend_u32 = std::numeric_limits<uint32_t>::lowest();
   while (true) {
     uint32_t divisor = 1u;
@@ -308,7 +308,7 @@ int main() {
         uint32_t remainder = dividend_u32 - (quotient * divisor);
         uint32_t div_half = divisor >> 1;
         if (divisor & 0x00000001u) div_half++;
-        std::printf("ROUND(%u / %u) = %u, but divround_u32 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u32, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%u / %u) = %u, but divround_u32 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u32, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1u << 17)) divisor = std::numeric_limits<uint32_t>::max() - (1u << 17);
       else if (divisor == std::numeric_limits<uint32_t>::max()) break;
@@ -319,7 +319,7 @@ int main() {
     else dividend_u32++;
   }
 
-  std::printf("Testing divround<uint32_t>.\n");
+  std::printf("Testing divround<uint32_t>\n");
   dividend_u32 = std::numeric_limits<uint32_t>::lowest();
   while (true) {
     uint32_t divisor = 1u;
@@ -331,7 +331,7 @@ int main() {
         uint32_t remainder = dividend_u32 - (quotient * divisor);
         uint32_t div_half = divisor >> 1;
         if (divisor & 0x00000001u) div_half++;
-        std::printf("ROUND(%u / %u) = %u, but divround<uint32_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u32, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%u / %u) = %u, but divround<uint32_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u32, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1u << 17)) divisor = std::numeric_limits<uint32_t>::max() - (1u << 17);
       else if (divisor == std::numeric_limits<uint32_t>::max()) break;
@@ -342,7 +342,7 @@ int main() {
     else dividend_u32++;
   }
 
-  std::printf("Testing divround_i64.\n");
+  std::printf("Testing divround_i64\n");
   int64_t dividend_i64 = std::numeric_limits<int64_t>::lowest();
   while (true) {
     int64_t divisor = std::numeric_limits<int64_t>::lowest();
@@ -358,7 +358,7 @@ int main() {
         int64_t remainder = dividend_i64 - (quotient * divisor);
         int64_t div_half = divisor >> 1;
         if ((divisor & 0x8000000000000001ull) == 1ll) div_half++;
-        std::printf("ROUND(%" PRIi64 " / %" PRIi64 ") = %" PRIi64 ", but divround_i64 returns %" PRIi64 "\n  remainder = %" PRIi64 ", div_half = %" PRIi64 "\n\n", dividend_i64, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%" PRIi64 " / %" PRIi64 ") = %" PRIi64 ", but divround_i64 returns %" PRIi64 "\n  remainder = %" PRIi64 ", div_half = %" PRIi64 "\n\n", dividend_i64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int64_t>::lowest() + (1 << 16)) divisor = -(1 << 16);
       else if (divisor == (1 << 16)) divisor = std::numeric_limits<int64_t>::max() - (1 << 16);
@@ -371,7 +371,7 @@ int main() {
     else dividend_i64++;
   }
 
-  std::printf("Testing divround<int64_t>.\n");
+  std::printf("Testing divround<int64_t>\n");
   dividend_i64 = std::numeric_limits<int64_t>::lowest();
   while (true) {
     int64_t divisor = std::numeric_limits<int64_t>::lowest();
@@ -387,7 +387,7 @@ int main() {
         int64_t remainder = dividend_i64 - (quotient * divisor);
         int64_t div_half = divisor >> 1;
         if ((divisor & 0x8000000000000001ull) == 1ll) div_half++;
-        std::printf("ROUND(%" PRIi64 " / %" PRIi64 ") = %" PRIi64 ", but divround<int64_t> returns %" PRIi64 "\n  remainder = %" PRIi64 ", div_half = %" PRIi64 "\n\n", dividend_i64, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%" PRIi64 " / %" PRIi64 ") = %" PRIi64 ", but divround<int64_t> returns %" PRIi64 "\n  remainder = %" PRIi64 ", div_half = %" PRIi64 "\n\n", dividend_i64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int64_t>::lowest() + (1 << 16)) divisor = -(1 << 16);
       else if (divisor == (1 << 16)) divisor = std::numeric_limits<int64_t>::max() - (1 << 16);
@@ -400,7 +400,7 @@ int main() {
     else dividend_i64++;
   }
 
-  std::printf("Testing divround_u64.\n");
+  std::printf("Testing divround_u64\n");
   uint64_t dividend_u64 = std::numeric_limits<uint64_t>::lowest();
   while (true) {
     uint64_t divisor = 1ull;
@@ -412,7 +412,7 @@ int main() {
         uint64_t remainder = dividend_u64 - (quotient * divisor);
         uint64_t div_half = divisor >> 1;
         if (divisor & 0x0000000000000001ull) div_half++;
-        std::printf("ROUND(%" PRIu64 " / %" PRIu64 ") = %" PRIu64 ", but divround_u64 returns %" PRIu64 "\n  remainder = %" PRIu64 ", div_half = %" PRIu64 "\n\n", dividend_u64, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%" PRIu64 " / %" PRIu64 ") = %" PRIu64 ", but divround_u64 returns %" PRIu64 "\n  remainder = %" PRIu64 ", div_half = %" PRIu64 "\n\n", dividend_u64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1ull << 17)) divisor = std::numeric_limits<uint64_t>::max() - (1ull << 17);
       else if (divisor == std::numeric_limits<uint64_t>::max()) break;
@@ -423,7 +423,7 @@ int main() {
     else dividend_u64++;
   }
 
-  std::printf("Testing divround<uint64_t>.\n");
+  std::printf("Testing divround<uint64_t>\n");
   dividend_u64 = std::numeric_limits<uint64_t>::lowest();
   while (true) {
     uint64_t divisor = 1ull;
@@ -435,7 +435,7 @@ int main() {
         uint64_t remainder = dividend_u64 - (quotient * divisor);
         uint64_t div_half = divisor >> 1;
         if (divisor & 0x0000000000000001ull) div_half++;
-        std::printf("ROUND(%" PRIu64 " / %" PRIu64 ") = %" PRIu64 ", but divround<uint64_t> returns %" PRIu64 "\n  remainder = %" PRIu64 ", div_half = %" PRIu64 "\n\n", dividend_u64, divisor, dbl_dr, dr, remainder, div_half);
+        std::printf("\nERROR: ROUND(%" PRIu64 " / %" PRIu64 ") = %" PRIu64 ", but divround<uint64_t> returns %" PRIu64 "\n  remainder = %" PRIu64 ", div_half = %" PRIu64 "\n\n", dividend_u64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1ull << 17)) divisor = std::numeric_limits<uint64_t>::max() - (1ull << 17);
       else if (divisor == std::numeric_limits<uint64_t>::max()) break;
@@ -445,7 +445,9 @@ int main() {
     else if (dividend_u64 == std::numeric_limits<uint64_t>::max()) break;
     else dividend_u64++;
   }
+  std::printf("\n");
 
+  std::printf("If there are no errors above, the tests were successful.\n\n");
   return 0;
 }
 
