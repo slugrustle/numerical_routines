@@ -60,18 +60,15 @@ template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor)
     if (div_half < static_cast<int8_t>(0)) {
       if (remainder <= div_half) return quotient + static_cast<int8_t>(1);
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder >= div_half) return quotient - static_cast<int8_t>(1);
       return quotient;
     }
-  }
-  else {
+  } else {
     if (div_half >= static_cast<int8_t>(0)) {
       if (remainder >= div_half) return quotient + static_cast<int8_t>(1);
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder <= div_half) return quotient - static_cast<int8_t>(1);
       return quotient;
     }
@@ -105,18 +102,15 @@ template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divi
     if (div_half < static_cast<int16_t>(0)) {
       if (remainder <= div_half) return quotient + static_cast<int16_t>(1);
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder >= div_half) return quotient - static_cast<int16_t>(1);
       return quotient;
     }
-  }
-  else {
+  } else {
     if (div_half >= static_cast<int16_t>(0)) {
       if (remainder >= div_half) return quotient + static_cast<int16_t>(1);
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder <= div_half) return quotient - static_cast<int16_t>(1);
       return quotient;
     }
@@ -150,18 +144,15 @@ template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divi
     if (div_half < 0) {
       if (remainder <= div_half) return quotient + 1;
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder >= div_half) return quotient - 1;
       return quotient;
     }
-  }
-  else {
+  } else {
     if (div_half >= 0) {
       if (remainder >= div_half) return quotient + 1;
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder <= div_half) return quotient - 1;
       return quotient;
     }
@@ -195,18 +186,15 @@ template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divi
     if (div_half < 0ll) {
       if (remainder <= div_half) return quotient + 1ll;
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder >= div_half) return quotient - 1ll;
       return quotient;
     }
-  }
-  else {
+  } else {
     if (div_half >= 0ll) {
       if (remainder >= div_half) return quotient + 1ll;
       return quotient;
-    }
-    else {
+    } else {
       if (-remainder <= div_half) return quotient - 1ll;
       return quotient;
     }
