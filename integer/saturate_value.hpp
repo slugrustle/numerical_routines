@@ -24,12 +24,15 @@
 
 #include <cinttypes>
 
+/* Allows static_assert message in saturate_value primary template to compile. */
+template <typename type> static bool always_false_saturate_value(void) { return false; }
+
 /**
  * This saturate_value primary template is a catch-all for presently unimplemented
  * template arguments.
  */
 template <typename type> void saturate_value(type &value, const type lower_bound, const type upper_bound) {
-  static_assert(false, "void saturate_value(type &value, const type lower_bound, const type upper_bound); is not defined for the specified type.");
+  static_assert(always_false_saturate_value<type>(), "void saturate_value(type &value, const type lower_bound, const type upper_bound); is not defined for the specified type.");
 }
 
 /********************************************************************************

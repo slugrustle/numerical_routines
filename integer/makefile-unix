@@ -1,0 +1,59 @@
+# Run 
+# make -f makefile-unix
+# from the command line to build all executables in this directory.
+#
+# Run 
+# make -f makefile-unix clean
+# to delete all executables and .o files created during the build.
+#
+# Run 
+# make -f makefile-unix cleanobj
+# to delete all .o files created during the build.
+
+C_OPTIONS = -O3 -static -static-libgcc -std=c99
+BASE_OPTIONS = -O3 -static -static-libstdc++ -std=c++14
+NON_BOOST_OPTIONS = 
+BOOST_OPTIONS = -I.
+OBJ_FILES = saturate_value.o divround.o multshiftround_comp.o multshiftround_run.o shiftround_comp.o shiftround_run.o multshiftround_shiftround_masks.o
+EXE_FILES = saturate_value_test divround_test multshiftround_shiftround_test optimal_base2_rational
+
+all: $(EXE_FILES)
+
+saturate_value.o:saturate_value.c saturate_value.h
+	gcc $(C_OPTIONS) -c -o $@ saturate_value.c
+
+saturate_value_test:saturate_value.o saturate_value_test.cpp saturate_value.hpp
+	g++ $(BASE_OPTIONS) $(NON_BOOST_OPTIONS) -o $@ saturate_value.o saturate_value_test.cpp
+
+divround.o:divround.c divround.h
+	gcc $(C_OPTIONS) -c -o $@ divround.c
+
+divround_test:divround.o divround_test.cpp divround.hpp
+	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) -o $@ divround.o divround_test.cpp
+
+multshiftround_comp.o:multshiftround_comp.c multshiftround_comp.h
+	gcc $(C_OPTIONS) -c -o $@ multshiftround_comp.c
+
+multshiftround_run.o:multshiftround_run.c multshiftround_run.h
+	gcc $(C_OPTIONS) -c -o $@ multshiftround_run.c
+
+shiftround_comp.o:shiftround_comp.c shiftround_comp.h
+	gcc $(C_OPTIONS) -c -o $@ shiftround_comp.c
+
+shiftround_run.o:shiftround_run.c shiftround_run.h
+	gcc $(C_OPTIONS) -c -o $@ shiftround_run.c
+
+multshiftround_shiftround_masks.o:multshiftround_shiftround_masks.c multshiftround_shiftround_masks.h
+	gcc $(C_OPTIONS) -c -o $@ multshiftround_shiftround_masks.c
+
+multshiftround_shiftround_test:multshiftround_comp.o multshiftround_run.o shiftround_comp.o shiftround_run.o multshiftround_shiftround_masks.o multshiftround_shiftround_test.cpp multshiftround_comp.hpp multshiftround_run.hpp shiftround_comp.hpp shiftround_run.hpp
+	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) -o $@ multshiftround_comp.o multshiftround_run.o shiftround_comp.o shiftround_run.o multshiftround_shiftround_masks.o multshiftround_shiftround_test.cpp
+
+optimal_base2_rational:optimal_base2_rational.cpp
+	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) -o $@ optimal_base2_rational.cpp
+
+clean:
+	rm -f $(EXE_FILES) $(OBJ_FILES)
+
+cleanobj:
+	rm -f $(OBJ_FILES)

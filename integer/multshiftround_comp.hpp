@@ -35,12 +35,15 @@
 
 #include <cinttypes>
 
+/* Allows static_assert message in multshiftround primary template to compile. */
+template <typename type> static bool always_false_multshiftround_comp(void) { return false; }
+
 /**
  * The multshiftround primary template is a catch-all for invalid
  * and/or presently unimplemented template arguments.
  */
 template <typename type, int8_t shift> type multshiftround(const type num, const type mul) {
-  static_assert(false, "type multshiftround<type,shift>(const type num, const type mul) is not defined for the specified type and/or shift value.");
+  static_assert(always_false_multshiftround_comp<type>(), "type multshiftround<type,shift>(const type num, const type mul) is not defined for the specified type and/or shift value.");
 }
 
 /********************************************************************************

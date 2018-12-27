@@ -39,12 +39,15 @@ extern "C"
   #include "multshiftround_shiftround_masks.h"
 }
 
+/* Allows static_assert message in multshiftround primary template to compile. */
+template <typename type> static bool always_false_multshiftround_run(void) { return false; }
+
 /**
  * This multshiftround primary template is a catch-all for presently unimplemented
  * template arguments.
  */
 template <typename type> type multshiftround(const type num, const type mul, const int8_t shift) {
-  static_assert(false, "type multshiftround(const type num, const type mul, const int8_t shift); is not defined for the specified type.");
+  static_assert(always_false_multshiftround_run<type>(), "type multshiftround(const type num, const type mul, const int8_t shift); is not defined for the specified type.");
 }
 
 /********************************************************************************

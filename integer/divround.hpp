@@ -35,12 +35,15 @@
 
 #include <cinttypes>
 
+/* Allows static_assert message in divround primary template to compile. */
+template <typename type> static bool always_false_divround(void) { return false; }
+
 /**
  * This divround primary template is a catch-all for presently unimplemented
  * template arguments.
  */
 template <typename type> type divround(const type dividend, const type divisor) {
-  static_assert(false, "type divround(const type dividend, const type divisor); is not defined for the specified type.");
+  static_assert(always_false_divround<type>(), "type divround(const type dividend, const type divisor); is not defined for the specified type.");
 }
 
 /********************************************************************************

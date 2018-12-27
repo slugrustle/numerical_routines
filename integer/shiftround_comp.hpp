@@ -31,12 +31,15 @@
 
 #include <cinttypes>
 
+/* Allows static_assert message in shiftround primary template to compile. */
+template <typename type> static bool always_false_shiftround_comp(void) { return false; }
+
 /**
  * This shiftround primary template is a catch-all for invalid and/or presently
  * unimplemented template arguments.
  */
 template <typename type, int8_t shift> type shiftround(const type num) {
-  static_assert(false, "type shiftround<type,shift>(const type num); is not defined for the specified type and/or shift value.");
+  static_assert(always_false_shiftround_comp<type>(), "type shiftround<type,shift>(const type num); is not defined for the specified type and/or shift value.");
 }
 
 /********************************************************************************
