@@ -2,7 +2,7 @@
 See below for example output from thermistor\_tolerance.exe, as run on 64-bit Windows.
 ___
 ```
-powershell> .\thermistor_tolerance.exe
+powershell> .\thermistor_tolerance.exe 27k 1 100 33k 3 3950 2 4096 3 2.8 1.3 1.7 -40 0 25 85
 
 Monte Carlo tolerance analysis of an NTC thermistor and pullup resistor
 measured by an ADC. Error due to self-heating is not modelled.
