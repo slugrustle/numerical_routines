@@ -25,7 +25,8 @@ shiftround_comp.h
 shiftround_comp.hpp 
 shiftround_run.c 
 shiftround_run.h 
-shiftround_run.hpp 
+shiftround_run.hpp
+thermistor_tolerance.cpp
 are published under the CC0 1.0 Universal Public Domain Dedication,
 which is reproduced below.
 
