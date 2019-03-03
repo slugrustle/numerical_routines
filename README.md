@@ -2,11 +2,11 @@
 
 This repository holds efficient routines for performing value saturation, rounded division, and rounded shift operations on integer types. These routines are intended for programmers who use fixed point arithmetic on microcontrollers or other constrained devices.
 
-I may add a variety of other numerical routines if time permits.
+There is also a numerical simulator of the measurement errors encountered when monitoring a thermistor with a typical ADC.
 
 ## Getting Started
 
-Presently, everything interesting is in the integer directory.
+Take a look in the integer/ and The thermistor\_tolerance/ directories.
 
 ## Contributing
 
