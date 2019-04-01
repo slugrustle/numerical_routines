@@ -22,6 +22,13 @@
  * Conceptually, multshiftround allows one to multiply the argument num by a
  * rational number with a base-2 denominator of the form mul / 2^Y. This is a
  * useful operation in fixed point arithmetic.
+ * 
+ * If you #define DEBUG_INTMATH, checks for numerical overflow in the internal
+ * product num * mul will be enabled. This requires the availability of
+ * stderr and fprintf() on the target system and is most appropriate for
+ * testing purposes. The debug code for 64-bit multshiftround routines
+ * additionally requires detect_product_overflow.c and detect_product_overflow.h,
+ * which includes stdbool.h.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -34,7 +41,7 @@
 #ifndef MULTSHIFTROUND_COMP_H_
 #define MULTSHIFTROUND_COMP_H_
 
-#include <stdint.h>
+#include "inttypes.h"
 
 /********************************************************************************
  ********                        int8_t functions                        ********

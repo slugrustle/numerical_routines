@@ -18,6 +18,10 @@
  * 1. The representation of signed integers must be 2's complement.
  * 2. The compiler must encode right shifts on signed types as arithmetic
  *    right shifts rather than logical right shifts.
+ * 
+ * If you #define DEBUG_INTMATH, checks for invalid shift arguments will be
+ * enabled. This requires the availability of stderr and fprintf() on the
+ * target system and is most appropriate for testing purposes.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -30,35 +34,35 @@
 #ifndef SHIFTROUND_RUN_H_
 #define SHIFTROUND_RUN_H_
 
-#include <stdint.h>
+#include "inttypes.h"
 
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********
  ********************************************************************************/
 
-int8_t shiftround_i8(const int8_t num, const int8_t shift);
-uint8_t shiftround_u8(const uint8_t num, const int8_t shift);
+int8_t shiftround_i8(const int8_t num, const uint8_t shift);
+uint8_t shiftround_u8(const uint8_t num, const uint8_t shift);
 
 /********************************************************************************
  ********                 int16_t and uint16_t functions                 ********
  ********************************************************************************/
 
-int16_t shiftround_i16(const int16_t num, const int8_t shift);
-uint16_t shiftround_u16(const uint16_t num, const int8_t shift);
+int16_t shiftround_i16(const int16_t num, const uint8_t shift);
+uint16_t shiftround_u16(const uint16_t num, const uint8_t shift);
 
 /********************************************************************************
  ********                 int32_t and uint32_t functions                 ********
  ********************************************************************************/
 
-int32_t shiftround_i32(const int32_t num, const int8_t shift);
-uint32_t shiftround_u32(const uint32_t num, const int8_t shift);
+int32_t shiftround_i32(const int32_t num, const uint8_t shift);
+uint32_t shiftround_u32(const uint32_t num, const uint8_t shift);
 
 /********************************************************************************
  ********                 int64_t and uint64_t functions                 ********
  ********************************************************************************/
 
-int64_t shiftround_i64(const int64_t num, const int8_t shift);
-uint64_t shiftround_u64(const uint64_t num, const int8_t shift);
+int64_t shiftround_i64(const int64_t num, const uint8_t shift);
+uint64_t shiftround_u64(const uint64_t num, const uint8_t shift);
 
 #endif /* #ifndef SHIFTROUND_RUN_H_ */
 

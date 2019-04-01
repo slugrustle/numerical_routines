@@ -1,13 +1,14 @@
 /**
- * multshiftround_shiftround_masks.h
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead declared in this file.
- *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays declared below.
- *
- * Written in 2018 by Ben Tesch.
+ * detect_product_overflow.c
+ * detect_product_overflow_u64 and detect_product_overflow_i64 detect
+ * overflow in the multiplication of two uint64_t or int64_t numbers,
+ * respectively. These functions are called in the debug code for c style
+ * and c++ style, _run type and _comp type, 64-bit multshiftround routines.
+ * 
+ * detect_product_overflow_u64 and detect_product_overflow_i64 do not
+ * rely on potentially non-portable 128-bit types.
+ * 
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,17 +16,108 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_
-#define MULTSHIFTROUND_SHIFTROUND_MASKS_H_
 
-#include "inttypes.h"
+#include "detect_product_overflow.h"
 
-extern const uint8_t masks_8bit[7];
-extern const uint16_t masks_16bit[15];
-extern const uint32_t masks_32bit[31];
-extern const uint64_t masks_64bit[63];
+/**
+ * Returns true if the product a * b would overflow the range
+ * of a uin64_t and false otherwise.
+ */
+bool detect_product_overflow_u64(const uint64_t a, const uint64_t b) {
+  /**
+   * a * b = 2^64 * (a_hi * b_hi) + 
+   *         2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *         a_lo * b_lo
+   * All of the products a_hi*b_hi, a_hi*b_lo,
+   * a_lo*b_hi, and a_lo*b_lo will be on the range
+   * [0,2^64-2^33+1].
+   */
+  uint64_t a_hi = (a & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t a_lo =  a & 0x00000000FFFFFFFFull;
+  uint64_t b_hi = (b & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t b_lo =  b & 0x00000000FFFFFFFFull;
 
-#endif /* #ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_ */
+  if (a_hi * b_hi > 0ull) return true;
+  /**
+   * Now we know that a_hi * b_hi == 0.
+   * Consequently,
+   * a * b = 2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *         a_lo * b_lo
+   */
+
+  uint64_t mid_prod_1 = a_hi * b_lo;
+  uint64_t mid_prod_2 = a_lo * b_hi;
+
+  if (UINT64_MAX - mid_prod_2 < mid_prod_1) return true;
+  /* Now we know that mid_prod_1 + mid_prod_2 <= UINT64_MAX. */
+  uint64_t mid_prod = mid_prod_1 + mid_prod_2;
+  
+  if (mid_prod >= (1ull << 32)) return true;
+  /* Now we know that 2^32 * mid_prod < UINT64_MAX. */
+  if (UINT64_MAX - a_lo * b_lo < mid_prod << 32) return true;
+
+  return false;
+}
+
+/**
+ * Returns a uint64_t representation of the absolute value of
+ * the input argument a.
+ */
+static uint64_t i64_to_u64_abs(const int64_t a) {
+  if (a == INT64_MIN) return 1ull << 63;
+  if (a < 0ll) return (uint64_t)(-a);
+  return (uint64_t)(a);
+}
+
+/**
+ * Returns true if the product a * b would overflow or
+ * underflow the range of an in64_t and false otherwise.
+ */
+bool detect_product_overflow_i64(const int64_t a, const int64_t b) {
+  bool product_negative = ((a < 0ll) & (b > 0ll)) | ((a > 0ll) & (b < 0ll));
+  uint64_t a_abs = i64_to_u64_abs(a);
+  uint64_t b_abs = i64_to_u64_abs(b);
+
+  /**
+   * a_abs * b_abs = 2^64 * (a_hi * b_hi) + 
+   *                 2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *                 a_lo * b_lo
+   * All of the products a_hi*b_hi, a_hi*b_lo,
+   * a_lo*b_hi, and a_lo*b_lo will be on the range
+   * [0,2^64-2^33+1].
+   */
+  uint64_t a_hi = (a_abs & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t a_lo =  a_abs & 0x00000000FFFFFFFFull;
+  uint64_t b_hi = (b_abs & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t b_lo =  b_abs & 0x00000000FFFFFFFFull;
+
+  if (a_hi * b_hi > 0ull) return true;
+  /**
+   * Now we know that a_hi * b_hi == 0.
+   * Consequently,
+   * a_abs * b_abs = 2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *                 a_lo * b_lo
+   */
+
+  uint64_t mid_prod_1 = a_hi * b_lo;
+  uint64_t mid_prod_2 = a_lo * b_hi;
+
+  if (UINT64_MAX - mid_prod_2 < mid_prod_1) return true;
+  /* Now we know that mid_prod_1 + mid_prod_2 <= UINT64_MAX. */
+  uint64_t mid_prod = mid_prod_1 + mid_prod_2;
+
+  if (product_negative) {
+    if (mid_prod > (1ull << 31)) return true;
+    /* Now we know that 2^32 * mid_prod <= 2^63. */
+    if ((1ull << 63) - a_lo * b_lo < mid_prod << 32) return true;
+  } else {
+    if (mid_prod >= (1ull << 31)) return true;
+    /* Now we know that 2^32 * mid_prod < INT64_MAX. */
+    if ((uint64_t)INT64_MAX - a_lo * b_lo < mid_prod << 32) return true;
+  }
+  
+  return false;
+}
 
 /*
 Creative Commons Legal Code

@@ -22,6 +22,10 @@
  * 2. The compiler must encode right shifts on signed types as arithmetic
  *    right shifts rather than logical right shifts.
  *
+ * If you #define DEBUG_INTMATH, checks for division by 0 and for numerical
+ * overflow will be enabled. This requires the availability of stderr and
+ * fprintf() on the target system and is most appropriate for testing purposes.
+ * 
  * Written in 2018 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
@@ -33,15 +37,27 @@
 
 #include "divround.h"
 
+#ifdef DEBUG_INTMATH
+  #include "stdio.h"
+#endif
+
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********
  ********************************************************************************/
 
 /**
  * Returns ROUND(dividend / divisor). divisor must never be 0.
- * divisor must not be -1 when dividend is -127 (-2^7).
+ * divisor must not be -1 when dividend is -128 (-2^7).
  */
 int8_t divround_i8(const int8_t dividend, const int8_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == (int8_t)0)
+      fprintf(stderr, "ERROR: divround_i8(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == INT8_MIN && divisor == (int8_t)-1)
+      fprintf(stderr, "ERROR: divround_i8(%i, %i) numerical overflow due to dividing %i by -1.\n", dividend, divisor, INT8_MIN);
+  #endif
+
   int8_t quotient = dividend / divisor;
   int8_t remainder = dividend - (quotient * divisor);
   int8_t div_half = divisor >> 1;
@@ -67,6 +83,11 @@ int8_t divround_i8(const int8_t dividend, const int8_t divisor) {
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint8_t divround_u8(const uint8_t dividend, const uint8_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == (uint8_t)0)
+      fprintf(stderr, "ERROR: divround_u8(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint8_t quotient = dividend / divisor;
   uint8_t remainder = dividend - (quotient * divisor);
   uint8_t div_half = divisor >> 1;
@@ -84,6 +105,14 @@ uint8_t divround_u8(const uint8_t dividend, const uint8_t divisor) {
  * divisor must not be -1 when dividend is -32768 (-2^15).
  */
 int16_t divround_i16(const int16_t dividend, const int16_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == (int16_t)0)
+      fprintf(stderr, "ERROR: divround_i16(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == INT16_MIN && divisor == (int16_t)-1)
+      fprintf(stderr, "ERROR: divround_i16(%i, %i) numerical overflow due to dividing %i by -1.\n", dividend, divisor, INT16_MIN);
+  #endif
+
   int16_t quotient = dividend / divisor;
   int16_t remainder = dividend - (quotient * divisor);
   int16_t div_half = divisor >> 1;
@@ -109,6 +138,11 @@ int16_t divround_i16(const int16_t dividend, const int16_t divisor) {
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint16_t divround_u16(const uint16_t dividend, const uint16_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == (uint16_t)0)
+      fprintf(stderr, "ERROR: divround_u16(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint16_t quotient = dividend / divisor;
   uint16_t remainder = dividend - (quotient * divisor);
   uint16_t div_half = divisor >> 1;
@@ -126,6 +160,14 @@ uint16_t divround_u16(const uint16_t dividend, const uint16_t divisor) {
  * divisor must not be -1 when dividend is -2147483648 (-2^31).
  */
 int32_t divround_i32(const int32_t dividend, const int32_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0)
+      fprintf(stderr, "ERROR: divround_i32(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == INT32_MIN && divisor == -1)
+      fprintf(stderr, "ERROR: divround_i32(%i, %i) numerical overflow due to dividing %i by -1.\n", dividend, divisor, INT32_MIN);
+  #endif
+
   int32_t quotient = dividend / divisor;
   int32_t remainder = dividend - (quotient * divisor);
   int32_t div_half = divisor >> 1;
@@ -151,6 +193,11 @@ int32_t divround_i32(const int32_t dividend, const int32_t divisor) {
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint32_t divround_u32(const uint32_t dividend, const uint32_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0u)
+      fprintf(stderr, "ERROR: divround_u32(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint32_t quotient = dividend / divisor;
   uint32_t remainder = dividend - (quotient * divisor);
   uint32_t div_half = divisor >> 1;
@@ -168,6 +215,14 @@ uint32_t divround_u32(const uint32_t dividend, const uint32_t divisor) {
  * divisor must not be -1 when dividend is -9223372036854775808 (-2^63).
  */
 int64_t divround_i64(const int64_t dividend, const int64_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0ll)
+      fprintf(stderr, "ERROR: divround_i64(%" PRIi64 ", %" PRIi64 ") divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == INT64_MIN && divisor == -1ll)
+      fprintf(stderr, "ERROR: divround_i64(%" PRIi64 ", %" PRIi64 ") numerical overflow due to dividing %" PRIi64 " by -1.\n", dividend, divisor, INT64_MIN);
+  #endif
+
   int64_t quotient = dividend / divisor;
   int64_t remainder = dividend - (quotient * divisor);
   int64_t div_half = divisor >> 1;
@@ -193,6 +248,11 @@ int64_t divround_i64(const int64_t dividend, const int64_t divisor) {
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 uint64_t divround_u64(const uint64_t dividend, const uint64_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0ull)
+      fprintf(stderr, "ERROR: divround_u64(%" PRIu64 ", %" PRIu64 ") divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint64_t quotient = dividend / divisor;
   uint64_t remainder = dividend - (quotient * divisor);
   uint64_t div_half = divisor >> 1;

@@ -22,6 +22,13 @@
  * Conceptually, multshiftround allows one to multiply the argument num by a
  * rational number with a base-2 denominator of the form mul / 2^shift. This
  * is a useful operation in fixed point arithmetic.
+ * 
+ * If you #define DEBUG_INTMATH, checks for invalid shift arguments and for
+ * numerical overflow in the internal product num * mul will be enabled.
+ * This requires the availability of stderr and fprintf() on the target system
+ * and is most appropriate for testing purposes. The debug code for 64-bit
+ * multshiftround routines additionally requires detect_product_overflow.c
+ * and detect_product_overflow.h, which includes stdbool.h.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -34,35 +41,35 @@
 #ifndef MULTSHIFTROUND_RUN_H_
 #define MULTSHIFTROUND_RUN_H_
 
-#include <stdint.h>
+#include "inttypes.h"
 
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********
  ********************************************************************************/
 
-int8_t multshiftround_i8(const int8_t num, const int8_t mul, const int8_t shift);
-uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const int8_t shift);
+int8_t multshiftround_i8(const int8_t num, const int8_t mul, const uint8_t shift);
+uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const uint8_t shift);
 
 /********************************************************************************
  ********                 int16_t and uint16_t functions                 ********
  ********************************************************************************/
 
-int16_t multshiftround_i16(const int16_t num, const int16_t mul, const int8_t shift);
-uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const int8_t shift);
+int16_t multshiftround_i16(const int16_t num, const int16_t mul, const uint8_t shift);
+uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const uint8_t shift);
 
 /********************************************************************************
  ********                 int32_t and uint32_t functions                 ********
  ********************************************************************************/
 
-int32_t multshiftround_i32(const int32_t num, const int32_t mul, const int8_t shift);
-uint32_t multshiftround_u32(const uint32_t num, const uint32_t mul, const int8_t shift);
+int32_t multshiftround_i32(const int32_t num, const int32_t mul, const uint8_t shift);
+uint32_t multshiftround_u32(const uint32_t num, const uint32_t mul, const uint8_t shift);
 
 /********************************************************************************
  ********                 int64_t and uint64_t functions                 ********
  ********************************************************************************/
 
-int64_t multshiftround_i64(const int64_t num, const int64_t mul, const int8_t shift);
-uint64_t multshiftround_u64(const uint64_t num, const uint64_t mul, const int8_t shift);
+int64_t multshiftround_i64(const int64_t num, const int64_t mul, const uint8_t shift);
+uint64_t multshiftround_u64(const uint64_t num, const uint64_t mul, const uint8_t shift);
 
 #endif /* #ifndef MULTSHIFTROUND_RUN_H_ */
 

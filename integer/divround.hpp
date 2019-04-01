@@ -21,6 +21,10 @@
  * 1. The representation of signed integers must be 2's complement.
  * 2. The compiler must encode right shifts on signed types as arithmetic
  *    right shifts rather than logical right shifts.
+ * 
+ * If you #define DEBUG_INTMATH, checks for division by 0 and for numerical
+ * overflow will be enabled. This requires the availability of stderr and
+ * fprintf() on the target system and is most appropriate for testing purposes.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -34,6 +38,11 @@
 #define DIVROUND_HPP_
 
 #include <cinttypes>
+
+#ifdef DEBUG_INTMATH
+  #include <cstdio>
+  #include <limits>
+#endif
 
 /* Allows static_assert message in divround primary template to compile. */
 template <typename type> static bool always_false_divround(void) { return false; }
@@ -52,9 +61,17 @@ template <typename type> type divround(const type dividend, const type divisor) 
 
 /** 
  * Returns ROUND(dividend / divisor). divisor must never be 0. 
- * divisor must not be -1 when dividend is -127 (-2^7).
+ * divisor must not be -1 when dividend is -128 (-2^7).
  */
 template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == static_cast<int8_t>(0))
+      std::fprintf(stderr, "ERROR: divround<int8_t>(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == std::numeric_limits<int8_t>::min() && divisor == static_cast<int8_t>(-1))
+      std::fprintf(stderr, "ERROR: divround<int8_t>(%i, %i) numerical overflow due to dividing %i by -1.\n", dividend, divisor, std::numeric_limits<int8_t>::min());
+  #endif
+
   int8_t quotient = dividend / divisor;
   int8_t remainder = dividend - (quotient * divisor);
   int8_t div_half = divisor >> 1;
@@ -80,6 +97,11 @@ template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor)
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 template <> uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == static_cast<uint8_t>(0))
+      std::fprintf(stderr, "ERROR: divround<uint8_t>(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint8_t quotient = dividend / divisor;
   uint8_t remainder = dividend - (quotient * divisor);
   uint8_t div_half = divisor >> 1;
@@ -97,6 +119,14 @@ template <> uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divi
  * divisor must not be -1 when dividend is -32768 (-2^15).
  */
 template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == static_cast<int16_t>(0))
+      std::fprintf(stderr, "ERROR: divround<int16_t>(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == std::numeric_limits<int16_t>::min() && divisor == static_cast<int16_t>(-1))
+      std::fprintf(stderr, "ERROR: divround<int16_t>(%i, %i) numerical overflow due to dividing %i by -1.\n", dividend, divisor, std::numeric_limits<int16_t>::min());
+  #endif
+
   int16_t quotient = dividend / divisor;
   int16_t remainder = dividend - (quotient * divisor);
   int16_t div_half = divisor >> 1;
@@ -122,6 +152,11 @@ template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divi
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 template <> uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == static_cast<uint16_t>(0))
+      std::fprintf(stderr, "ERROR: divround<uint16_t>(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint16_t quotient = dividend / divisor;
   uint16_t remainder = dividend - (quotient * divisor);
   uint16_t div_half = divisor >> 1;
@@ -139,6 +174,14 @@ template <> uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t 
  * divisor must not be -1 when dividend is -2147483648 (-2^31).
  */
 template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0)
+      std::fprintf(stderr, "ERROR: divround<int32_t>(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == std::numeric_limits<int32_t>::min() && divisor == -1)
+      std::fprintf(stderr, "ERROR: divround<int32_t>(%i, %i) numerical overflow due to dividing %i by -1.\n", dividend, divisor, std::numeric_limits<int32_t>::min());
+  #endif
+
   int32_t quotient = dividend / divisor;
   int32_t remainder = dividend - (quotient * divisor);
   int32_t div_half = divisor >> 1;
@@ -164,6 +207,11 @@ template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divi
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 template <> uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0)
+      std::fprintf(stderr, "ERROR: divround<uint32_t>(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint32_t quotient = dividend / divisor;
   uint32_t remainder = dividend - (quotient * divisor);
   uint32_t div_half = divisor >> 1;
@@ -181,6 +229,14 @@ template <> uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t 
  * divisor must not be -1 when dividend is -9223372036854775808 (-2^63).
  */
 template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0ll)
+      std::fprintf(stderr, "ERROR: divround<int64_t>(%" PRIi64 ", %" PRIi64 ") divisor argument must not be 0.\n", dividend, divisor);
+    
+    if (dividend == std::numeric_limits<int64_t>::min() && divisor == -1ll)
+      std::fprintf(stderr, "ERROR: divround<int64_t>(%" PRIi64 ", %" PRIi64 ") numerical overflow due to dividing %" PRIi64 " by -1.\n", dividend, divisor, std::numeric_limits<int64_t>::min());
+  #endif
+
   int64_t quotient = dividend / divisor;
   int64_t remainder = dividend - (quotient * divisor);
   int64_t div_half = divisor >> 1;
@@ -206,6 +262,11 @@ template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divi
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
 template <> uint64_t divround<uint64_t>(const uint64_t dividend, const uint64_t divisor) {
+  #ifdef DEBUG_INTMATH
+    if (divisor == 0ull)
+      std::fprintf(stderr, "ERROR: divround<uint64_t>(%" PRIu64 ", %" PRIu64 ") divisor argument must not be 0.\n", dividend, divisor);
+  #endif
+
   uint64_t quotient = dividend / divisor;
   uint64_t remainder = dividend - (quotient * divisor);
   uint64_t div_half = divisor >> 1;

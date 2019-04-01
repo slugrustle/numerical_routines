@@ -33,7 +33,7 @@
 #ifndef DIVROUND_H_
 #define DIVROUND_H_
 
-#include "stdint.h"
+#include "inttypes.h"
 
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********

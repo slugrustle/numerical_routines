@@ -2,6 +2,8 @@ For files in the integer/boost directory, see integer/boost_license_report.html,
 integer/LICENSE_1_0.txt, and the files themselves.
 
 All files produced by the author of this repository, including
+detect_product_overflow.c
+detect_product_overflow.h
 divround.c
 divround.h 
 divround.hpp
@@ -26,6 +28,7 @@ shiftround_comp.hpp
 shiftround_run.c 
 shiftround_run.h 
 shiftround_run.hpp
+test_debug_code.cpp
 thermistor_tolerance.cpp
 are published under the CC0 1.0 Universal Public Domain Dedication,
 which is reproduced below.

@@ -10,8 +10,8 @@
  * These functions are implemented for the types int8_t, int16_t, int32_t,
  * int64_t, uint8_t, uint16_t, uint32_t, and uint64_t.
  *
- * shift ranges from 1 to one less than the the word length of the integer
- * type for unsigned types. shift ranges from 1 to two less than the word
+ * shift ranges from 0 to one less than the the word length of the integer
+ * type for unsigned types. shift ranges from 0 to two less than the word
  * length of the integer type for signed types.
  *
  * Correct operation for negative signed inputs requires two things:
@@ -23,6 +23,13 @@
  * rational number with a base-2 denominator of the form mul / 2^shift. This
  * is a useful operation in fixed point arithmetic.
  *
+ * If you #define DEBUG_INTMATH, checks for invalid shift arguments and for
+ * numerical overflow in the internal product num * mul will be enabled.
+ * This requires the availability of stderr and fprintf() on the target system
+ * and is most appropriate for testing purposes. The debug code for 64-bit
+ * multshiftround routines additionally requires detect_product_overflow.c
+ * and detect_product_overflow.h, which includes stdbool.h.
+ * 
  * Written in 2018 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
@@ -35,26 +42,58 @@
 #include "multshiftround_run.h"
 #include "multshiftround_shiftround_masks.h"
 
+#ifdef DEBUG_INTMATH
+  #include "stdio.h"
+  #include "detect_product_overflow.h" 
+#endif
+
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********
  ********************************************************************************/
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,6]. */
-int8_t multshiftround_i8(const int8_t num, const int8_t mul, const int8_t shift) {
-  uint8_t mask = masks_8bit[shift - 1];
-  uint8_t half_remainder = ((uint8_t)1) << (shift - 1);
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,6]. */
+int8_t multshiftround_i8(const int8_t num, const int8_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)6)
+	    fprintf(stderr, "ERROR: multshiftround_i8(%i, %i, %u), shift = %u is invalid; it must be on the range [0,6].\n", num, mul, shift, shift);
+
+    int16_t debug_product = (int16_t)num * (int16_t)mul;
+    if (debug_product > (int16_t)INT8_MAX)
+      fprintf(stderr, "ERROR: multshiftround_i8(%i, %i, %u), numerical overflow in the product %i * %i = %i > %i.\n", num, mul, shift, num, mul, debug_product, INT8_MAX);
+
+    if (debug_product < (int16_t)INT8_MIN)
+      fprintf(stderr, "ERROR: multshiftround_i8(%i, %i, %u), numerical underflow in the product %i * %i = %i < %i.\n", num, mul, shift, num, mul, debug_product, INT8_MIN);
+  #endif
+
+  if (shift > (uint8_t)6) return (int8_t)0;
   int8_t prod = num * mul;
+  if (shift == (uint8_t)0) return prod;
+  uint8_t mask = masks_8bit[shift - (uint8_t)1];
+  uint8_t half_remainder = (uint8_t)1 << (shift - (uint8_t)1);
   if ((prod & mask) >= half_remainder) {
-    if ((prod & (((uint8_t)0x80) | mask)) == (((uint8_t)0x80) | half_remainder)) return prod >> shift;
-    return (prod >> shift) + ((int8_t)1);
+    if ((prod & ((uint8_t)0x80 | mask)) == ((uint8_t)0x80 | half_remainder)) return prod >> shift;
+    return (prod >> shift) + (int8_t)1;
   }
   return prod >> shift;
 }
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,7]. */
-uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const int8_t shift) {
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,7]. */
+uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)7)
+  	  fprintf(stderr, "ERROR: multshiftround_u8(%u, %u, %u), shift = %u is invalid; it must be on the range [0,7].\n", num, mul, shift, shift);
+
+    uint16_t debug_product = (uint16_t)num * (uint16_t)mul;
+    if (debug_product > (uint16_t)UINT8_MAX)
+      fprintf(stderr, "ERROR: multshiftround_u8(%u, %u, %u), numerical overflow in the product %u * %u = %u > %u.\n", num, mul, shift, num, mul, debug_product, UINT8_MAX);
+  #endif
+
+  if (shift > (uint8_t)7) return (uint8_t)0;
   uint8_t prod = num * mul;
-  if ((prod & masks_8bit[shift - 1]) >= (((uint8_t)1) << (shift - 1))) return (prod >> shift) + ((uint8_t)1);
+  if (shift == (uint8_t)0) return prod;
+  if ((prod & masks_8bit[shift - (uint8_t)1]) >= 
+      ((uint8_t)1 << (shift - 1))) return (prod >> shift) + (uint8_t)1;
+
   return prod >> shift;
 }
 
@@ -62,22 +101,49 @@ uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const int8_t shi
  ********                 int16_t and uint16_t functions                 ********
  ********************************************************************************/
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,14]. */
-int16_t multshiftround_i16(const int16_t num, const int16_t mul, const int8_t shift) {
-  uint16_t mask = masks_16bit[shift - 1];
-  uint16_t half_remainder = ((uint16_t)1) << (shift - 1);
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,14]. */
+int16_t multshiftround_i16(const int16_t num, const int16_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)14)
+	    fprintf(stderr, "ERROR: multshiftround_i16(%i, %i, %u), shift = %u is invalid; it must be on the range [0,14].\n", num, mul, shift, shift);
+
+    int32_t debug_product = (int32_t)num * (int32_t)mul;
+    if (debug_product > (int32_t)INT16_MAX)
+      fprintf(stderr, "ERROR: multshiftround_i16(%i, %i, %u), numerical overflow in the product %i * %i = %i > %i.\n", num, mul, shift, num, mul, debug_product, INT16_MAX);
+
+    if (debug_product < (int32_t)INT16_MIN)
+      fprintf(stderr, "ERROR: multshiftround_i16(%i, %i, %u), numerical underflow in the product %i * %i = %i < %i.\n", num, mul, shift, num, mul, debug_product, INT16_MIN);
+  #endif
+
+  if (shift > (uint8_t)14) return (int16_t)0;
   int16_t prod = num * mul;
+  if (shift == (uint8_t)0) return prod;
+  uint16_t mask = masks_16bit[shift - (uint8_t)1];
+  uint16_t half_remainder = (uint16_t)1 << (shift - (uint8_t)1);
   if ((prod & mask) >= half_remainder) {
-    if ((prod & (((uint16_t)0x8000) | mask)) == (((uint16_t)0x8000) | half_remainder)) return prod >> shift;
-    return (prod >> shift) + ((int16_t)1);
+    if ((prod & ((uint16_t)0x8000 | mask)) == ((uint16_t)0x8000 | half_remainder)) return prod >> shift;
+    return (prod >> shift) + (int16_t)1;
   }
   return prod >> shift;
 }
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,15]. */
-uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const int8_t shift) {
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,15]. */
+uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)15)
+  	  fprintf(stderr, "ERROR: multshiftround_u16(%u, %u, %u), shift = %u is invalid; it must be on the range [0,15].\n", num, mul, shift, shift);
+
+    uint32_t debug_product = (uint32_t)num * (uint32_t)mul;
+    if (debug_product > (uint32_t)UINT16_MAX)
+      fprintf(stderr, "ERROR: multshiftround_u16(%u, %u, %u), numerical overflow in the product %u * %u = %u > %u.\n", num, mul, shift, num, mul, debug_product, UINT16_MAX);
+  #endif
+
+  if (shift > (uint8_t)15) return (uint16_t)0;
   uint16_t prod = num * mul;
-  if ((prod & masks_16bit[shift - 1]) >= (((uint16_t)1) << (shift - 1))) return (prod >> shift) + ((uint16_t)1);
+  if (shift == (uint8_t)0) return prod;
+  if ((prod & masks_16bit[shift - (uint8_t)1]) >=
+      ((uint16_t)1 << (shift - (uint8_t)1))) return (prod >> shift) + (uint16_t)1;
+
   return prod >> shift;
 }
 
@@ -85,11 +151,25 @@ uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const int8_t
  ********                 int32_t and uint32_t functions                 ********
  ********************************************************************************/
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,30]. */
-int32_t multshiftround_i32(const int32_t num, const int32_t mul, const int8_t shift) {
-  uint32_t mask = masks_32bit[shift - 1];
-  uint32_t half_remainder = 1u << (shift - 1);
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,30]. */
+int32_t multshiftround_i32(const int32_t num, const int32_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)30)
+	    fprintf(stderr, "ERROR: multshiftround_i32(%i, %i, %u), shift = %u is invalid; it must be on the range [0,30].\n", num, mul, shift, shift);
+
+    int64_t debug_product = (int64_t)num * (int64_t)mul;
+    if (debug_product > (int64_t)INT32_MAX)
+      fprintf(stderr, "ERROR: multshiftround_i32(%i, %i, %u), numerical overflow in the product %i * %i = %" PRIi64 " > %i.\n", num, mul, shift, num, mul, debug_product, INT32_MAX);
+
+    if (debug_product < (int64_t)INT32_MIN)
+      fprintf(stderr, "ERROR: multshiftround_i32(%i, %i, %u), numerical underflow in the product %i * %i = %" PRIi64 " < %i.\n", num, mul, shift, num, mul, debug_product, INT32_MIN);
+  #endif
+
+  if (shift > (uint8_t)30) return 0;
   int32_t prod = num * mul;
+  if (shift == (uint8_t)0) return prod;
+  uint32_t mask = masks_32bit[shift - (uint8_t)1];
+  uint32_t half_remainder = 1u << (shift - (uint8_t)1);
   if ((prod & mask) >= half_remainder) {
     if ((prod & (0x80000000u | mask)) == (0x80000000u | half_remainder)) return prod >> shift;
     return (prod >> shift) + 1;
@@ -97,10 +177,23 @@ int32_t multshiftround_i32(const int32_t num, const int32_t mul, const int8_t sh
   return prod >> shift;
 }
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,31]. */
-uint32_t multshiftround_u32(const uint32_t num, const uint32_t mul, const int8_t shift) {
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,31]. */
+uint32_t multshiftround_u32(const uint32_t num, const uint32_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)31)
+	    fprintf(stderr, "ERROR: multshiftround_u32(%u, %u, %u), shift = %u is invalid; it must be on the range [0,31].\n", num, mul, shift, shift);
+
+    uint64_t debug_product = (uint64_t)num * (uint64_t)mul;
+    if (debug_product > (uint64_t)UINT32_MAX)
+      fprintf(stderr, "ERROR: multshiftround_u32(%u, %u, %u), numerical overflow in the product %u * %u = %" PRIu64 " > %u.\n", num, mul, shift, num, mul, debug_product, UINT32_MAX);
+  #endif
+
+  if (shift > (uint8_t)31) return 0u;
   uint32_t prod = num * mul;
-  if ((prod & masks_32bit[shift - 1]) >= (1u << (shift - 1))) return (prod >> shift) + 1u;
+  if (shift == (uint8_t)0) return prod;
+  if ((prod & masks_32bit[shift - (uint8_t)1]) >=
+      (1u << (shift - (uint8_t)1))) return (prod >> shift) + 1u;
+
   return prod >> shift;
 }
 
@@ -108,11 +201,21 @@ uint32_t multshiftround_u32(const uint32_t num, const uint32_t mul, const int8_t
  ********                 int64_t and uint64_t functions                 ********
  ********************************************************************************/
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,62]. */
-int64_t multshiftround_i64(const int64_t num, const int64_t mul, const int8_t shift) {
-  uint64_t mask = masks_64bit[shift - 1];
-  uint64_t half_remainder = 1ull << (shift - 1);
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,62]. */
+int64_t multshiftround_i64(const int64_t num, const int64_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)62)
+	    fprintf(stderr, "ERROR: multshiftround_i64(%" PRIi64 ", %" PRIi64 ", %u), shift = %u is invalid; it must be on the range [0,62].\n", num, mul, shift, shift);
+
+    if (detect_product_overflow_i64(num, mul))
+      fprintf(stderr, "ERROR: multshiftround_i64(%" PRIi64 ", %" PRIi64 ", %u), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, shift, num, mul);
+  #endif
+
+  if (shift > (uint8_t)62) return 0ll;
   int64_t prod = num * mul;
+  if (shift == (uint8_t)0) return prod;
+  uint64_t mask = masks_64bit[shift - (uint8_t)1];
+  uint64_t half_remainder = 1ull << (shift - (uint8_t)1);
   if ((prod & mask) >= half_remainder) {
     if ((prod & (0x8000000000000000ull | mask)) == (0x8000000000000000ull | half_remainder)) return prod >> shift;
     return (prod >> shift) + 1ll;
@@ -120,10 +223,22 @@ int64_t multshiftround_i64(const int64_t num, const int64_t mul, const int8_t sh
   return prod >> shift;
 }
 
-/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [1,63]. */
-uint64_t multshiftround_u64(const uint64_t num, const uint64_t mul, const int8_t shift) {
+/* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,63]. */
+uint64_t multshiftround_u64(const uint64_t num, const uint64_t mul, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)63)
+	    fprintf(stderr, "ERROR: multshiftround<uint64_t>(%" PRIu64 ", %" PRIu64 ", %u), shift = %u is invalid; it must be on the range [0,63].\n", num, mul, shift, shift);
+
+    if (detect_product_overflow_u64(num, mul))
+      fprintf(stderr, "ERROR: multshiftround<uint64_t>(%" PRIu64 ", %" PRIu64 ", %u), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, shift, num, mul);
+  #endif
+
+  if (shift > (uint8_t)63) return 0ull;
   uint64_t prod = num * mul;
-  if ((prod & masks_64bit[shift - 1]) >= (1ull << (shift - 1))) return (prod >> shift) + 1ull;
+  if (shift == (uint8_t)0) return prod;
+  if ((prod & masks_64bit[shift - (uint8_t)1]) >=
+      (1ull << (shift - (uint8_t)1))) return (prod >> shift) + 1ull;
+
   return prod >> shift;
 }
 

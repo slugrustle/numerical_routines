@@ -18,6 +18,10 @@
  * 1. The representation of signed integers must be 2's complement.
  * 2. The compiler must encode right shifts on signed types as arithmetic
  *    right shifts rather than logical right shifts.
+ * 
+ * If you #define DEBUG_INTMATH, checks for invalid shift arguments will be
+ * enabled. This requires the availability of stderr and fprintf() on the
+ * target system and is most appropriate for testing purposes.
  *
  * Written in 2018 by Ben Tesch.
  *
@@ -31,24 +35,44 @@
 #include "shiftround_run.h"
 #include "multshiftround_shiftround_masks.h"
 
+#ifdef DEBUG_INTMATH
+  #include "stdio.h"
+#endif
+
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********
  ********************************************************************************/
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,6]. */
-int8_t shiftround_i8(const int8_t num, const int8_t shift) {
-  uint8_t mask = masks_8bit[shift - 1];
-  uint8_t half_remainder = ((uint8_t)1) << (shift - 1);
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,6]. */
+int8_t shiftround_i8(const int8_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)6)
+	    fprintf(stderr, "ERROR: shiftround_i8(%i, %u), shift = %u is invalid; it must be on the range [0,6].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)6) return (int8_t)0;
+  if (shift == (uint8_t)0) return num;
+  uint8_t mask = masks_8bit[shift - (uint8_t)1];
+  uint8_t half_remainder = (uint8_t)1 << (shift - (uint8_t)1);
   if ((num & mask) >= half_remainder) {
-    if ((num & (((uint8_t)0x80) | mask)) == (((uint8_t)0x80) | half_remainder)) return num >> shift;
-    return (num >> shift) + ((int8_t)1);
+    if ((num & ((uint8_t)0x80 | mask)) == ((uint8_t)0x80 | half_remainder)) return num >> shift;
+    return (num >> shift) + (int8_t)1;
   }
   return num >> shift;
 }
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,7]. */
-uint8_t shiftround_u8(const uint8_t num, const int8_t shift) {
-  if ((num & masks_8bit[shift - 1]) >= (((uint8_t)1) << (shift - 1))) return (num >> shift) + ((uint8_t)1);
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,7]. */
+uint8_t shiftround_u8(const uint8_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)7)
+	    fprintf(stderr, "ERROR: shiftround_u8(%u, %u), shift = %u is invalid; it must be on the range [0,7].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)7) return (uint8_t)0;
+  if (shift == (uint8_t)0) return num;
+  if ((num & masks_8bit[shift - (uint8_t)1]) >=
+      ((uint8_t)1 << (shift - (uint8_t)1))) return (num >> shift) + (uint8_t)1;
+
   return num >> shift;
 }
 
@@ -56,20 +80,36 @@ uint8_t shiftround_u8(const uint8_t num, const int8_t shift) {
  ********                 int16_t and uint16_t functions                 ********
  ********************************************************************************/
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,14]. */
-int16_t shiftround_i16(const int16_t num, const int8_t shift) {
-  uint16_t mask = masks_16bit[shift - 1];
-  uint16_t half_remainder = ((uint16_t)1) << (shift - 1);
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,14]. */
+int16_t shiftround_i16(const int16_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)14)
+	    fprintf(stderr, "ERROR: shiftround_i16(%i, %u), shift = %u is invalid; it must be on the range [0,14].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)14) return (int16_t)0;
+  if (shift == (uint8_t)0) return num;
+  uint16_t mask = masks_16bit[shift - (uint8_t)1];
+  uint16_t half_remainder = (uint16_t)1 << (shift - (uint8_t)1);
   if ((num & mask) >= half_remainder) {
-    if ((num & (((uint16_t)0x8000) | mask)) == (((uint16_t)0x8000) | half_remainder)) return num >> shift;
-    return (num >> shift) + ((int16_t)1);
+    if ((num & ((uint16_t)0x8000 | mask)) == ((uint16_t)0x8000 | half_remainder)) return num >> shift;
+    return (num >> shift) + (int16_t)1;
   }
   return num >> shift;
 }
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,15]. */
-uint16_t shiftround_u16(const uint16_t num, const int8_t shift) {
-  if ((num & masks_16bit[shift - 1]) >= (((uint16_t)1) << (shift - 1))) return (num >> shift) + ((uint16_t)1);
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,15]. */
+uint16_t shiftround_u16(const uint16_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)15)
+	    fprintf(stderr, "ERROR: shiftround_u16(%u, %u), shift = %u is invalid; it must be on the range [0,15].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)15) return (uint16_t)0;
+  if (shift == (uint8_t)0) return num;
+  if ((num & masks_16bit[shift - (uint8_t)1]) >=
+      ((uint16_t)1 << (shift - (uint8_t)1))) return (num >> shift) + (uint16_t)1;
+
   return num >> shift;
 }
 
@@ -77,10 +117,17 @@ uint16_t shiftround_u16(const uint16_t num, const int8_t shift) {
  ********                 int32_t and uint32_t functions                 ********
  ********************************************************************************/
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,30]. */
-int32_t shiftround_i32(const int32_t num, const int8_t shift) {
-  uint32_t mask = masks_32bit[shift - 1];
-  uint32_t half_remainder = 1u << (shift - 1);
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,30]. */
+int32_t shiftround_i32(const int32_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)30)
+	    fprintf(stderr, "ERROR: shiftround_i32(%i, %u), shift = %u is invalid; it must be on the range [0,30].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)30) return 0;
+  if (shift == (uint8_t)0) return num;
+  uint32_t mask = masks_32bit[shift - (uint8_t)1];
+  uint32_t half_remainder = 1u << (shift - (uint8_t)1);
   if ((num & mask) >= half_remainder) {
     if ((num & (0x80000000u | mask)) == (0x80000000u | half_remainder)) return num >> shift;
     return (num >> shift) + 1;
@@ -88,9 +135,16 @@ int32_t shiftround_i32(const int32_t num, const int8_t shift) {
   return num >> shift;
 }
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,31]. */
-uint32_t shiftround_u32(const uint32_t num, const int8_t shift) {
-  if ((num & masks_32bit[shift - 1]) >= (1u << (shift - 1))) return (num >> shift) + 1u;
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,31]. */
+uint32_t shiftround_u32(const uint32_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)31)
+	    fprintf(stderr, "ERROR: shiftround_u32(%u, %u), shift = %u is invalid; it must be on the range [0,31].\n", num, shift, shift);
+  #endif
+
+  if ((num & masks_32bit[shift - (uint8_t)1]) >=
+    (1u << (shift - (uint8_t)1))) return (num >> shift) + 1u;
+
   return num >> shift;
 }
 
@@ -98,10 +152,17 @@ uint32_t shiftround_u32(const uint32_t num, const int8_t shift) {
  ********                 int64_t and uint64_t functions                 ********
  ********************************************************************************/
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,62]. */
-int64_t shiftround_i64(const int64_t num, const int8_t shift) {
-  uint64_t mask = masks_64bit[shift - 1];
-  uint64_t half_remainder = 1ull << (shift - 1);
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,62]. */
+int64_t shiftround_i64(const int64_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)62)
+	    fprintf(stderr, "ERROR: shiftround_i64(%" PRIi64 ", %u), shift = %u is invalid; it must be on the range [0,62].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)62) return 0ll;
+  if (shift == (uint8_t)0) return num;
+  uint64_t mask = masks_64bit[shift - (uint8_t)1];
+  uint64_t half_remainder = 1ull << (shift - (uint8_t)1);
   if ((num & mask) >= half_remainder) {
     if ((num & (0x8000000000000000ull | mask)) == (0x8000000000000000ull | half_remainder)) return num >> shift;
     return (num >> shift) + 1ll;
@@ -109,9 +170,18 @@ int64_t shiftround_i64(const int64_t num, const int8_t shift) {
   return num >> shift;
 }
 
-/* Returns ROUND(num / 2^shift). shift must be on the range [1,63]. */
-uint64_t shiftround_u64(const uint64_t num, const int8_t shift) {
-  if ((num & masks_64bit[shift - 1]) >= (1ull << (shift - 1))) return (num >> shift) + 1ull;
+/* Returns ROUND(num / 2^shift). shift must be on the range [0,63]. */
+uint64_t shiftround_u64(const uint64_t num, const uint8_t shift) {
+  #ifdef DEBUG_INTMATH
+    if (shift > (uint8_t)63)
+	    fprintf(stderr, "ERROR: shiftround_u64(%" PRIu64 ", %u), shift = %u is invalid; it must be on the range [0,63].\n", num, shift, shift);
+  #endif
+
+  if (shift > (uint8_t)63) return 0ull;
+  if (shift == (uint8_t)0) return num;
+  if ((num & masks_64bit[shift - (uint8_t)1]) >=
+      (1ull << (shift - (uint8_t)1))) return (num >> shift) + 1ull;
+
   return num >> shift;
 }
 

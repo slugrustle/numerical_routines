@@ -1,13 +1,14 @@
 /**
- * multshiftround_shiftround_masks.h
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead declared in this file.
- *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays declared below.
- *
- * Written in 2018 by Ben Tesch.
+ * detect_product_overflow.h
+ * detect_product_overflow_u64 and detect_product_overflow_i64 detect
+ * overflow in the multiplication of two uint64_t or int64_t numbers,
+ * respectively. These functions are called in the debug code for c style
+ * and c++ style, _run type and _comp type, 64-bit multshiftround routines.
+ * 
+ * detect_product_overflow_u64 and detect_product_overflow_i64 do not
+ * rely on potentially non-portable 128-bit types.
+ * 
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,17 +16,25 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_
-#define MULTSHIFTROUND_SHIFTROUND_MASKS_H_
+#ifndef DETECT_PRODUCT_OVERFLOW_H_
+#define DETECT_PRODUCT_OVERFLOW_H_
 
 #include "inttypes.h"
+#include "stdbool.h"
 
-extern const uint8_t masks_8bit[7];
-extern const uint16_t masks_16bit[15];
-extern const uint32_t masks_32bit[31];
-extern const uint64_t masks_64bit[63];
+/**
+ * Returns true if the product a * b would overflow the range
+ * of a uin64_t and false otherwise.
+ */
+bool detect_product_overflow_u64(const uint64_t a, const uint64_t b);
 
-#endif /* #ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_ */
+/**
+ * Returns true if the product a * b would overflow or
+ * underflow the range of an in64_t and false otherwise.
+ */
+bool detect_product_overflow_i64(const int64_t a, const int64_t b);
+
+#endif /* #ifndef DETECT_PRODUCT_OVERFLOW_H_ */
 
 /*
 Creative Commons Legal Code

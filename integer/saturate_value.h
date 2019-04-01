@@ -22,7 +22,7 @@
 #ifndef SATURATE_VALUE_H_
 #define SATURATE_VALUE_H_
 
-#include "stdint.h"
+#include "inttypes.h"
 
 /********************************************************************************
  ********                  int8_t and uint8_t functions                  ********

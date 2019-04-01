@@ -30,7 +30,7 @@
 #ifndef SHIFTROUND_COMP_H_
 #define SHIFTROUND_COMP_H_
 
-#include <stdint.h>
+#include "inttypes.h"
 
 /********************************************************************************
  ********                        int8_t functions                        ********

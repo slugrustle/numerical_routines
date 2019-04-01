@@ -28,7 +28,7 @@ Test code for both C&#x2011;style and C++&#x2011;style shiftround and multshiftr
 
 The .exe file corresponding to each ...\_test.cpp file is a 64&#x2011;bit windows executable meant to be run from the command line.
 
-boost code is only used in divround\_test.cpp, multshiftround\_shiftround\_test.cpp, and optimal\_base2\_rational.cpp. The saturate\_value, divround, shiftround, and multshiftround routines only depend on stdint.h and/or cinttypes.
+boost code is only used in divround\_test.cpp, multshiftround\_shiftround\_test.cpp, and optimal\_base2\_rational.cpp. The saturate\_value, divround, shiftround, and multshiftround routines only depend on `"inttypes.h"` and/or `<cinttypes>`. If debug code is enabled by the directive `#define DEBUG_INTMATH`, these routines may also require some or all of `"stdio.h"`, `<cstdio>`, `<limits>`, detect_product_overflow.c, `"detect_product_overflow.h"`, and `"stdbool.h"`. 
 
 ## \_run and \_comp
 

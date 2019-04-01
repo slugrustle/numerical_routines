@@ -32,9 +32,16 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
  */
+
 #include <cstdio>
 #include <cmath>
 #include <limits>
+#include <vector>
+#include <utility>
+#include <thread>
+#include <chrono>
+#include <mutex>
+#include <atomic>
 #include "multshiftround_run.hpp"
 #include "multshiftround_comp.hpp"
 #include "shiftround_run.hpp"
@@ -75,12 +82,1850 @@ const double   dbl_mul_u32 = static_cast<double>(mul_u32);
 const uint64_t mul_u64 = 1ull;
 const cpp_bin_float_80 ldbl_mul_u64(mul_u64);
 
+/**
+ * There is one atomic bool for each thread, set to true upon
+ * thread initiation and set to false as the last computation 
+ * in the thread.
+ * This helps decide when to join a thread and replace it with
+ * a new thread.
+ * Plain C array because atomics don't have move or copy constructors.
+ */
+std::atomic<bool> *thread_running;
+
+/**
+ * Mutex for stdout when running multithreaded.
+ */
+std::mutex print_mutex;
+
+/**
+ * Test c++ style runtime int32_t multshiftround for num on [-2147483648, 2147483647].
+ * shift should range from 0 to 30.
+ */
+void test_multshiftround_i32_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<int32_t>(num, mul, %i)\n", shift);
+  }
+  
+	double dbl_twoexp = static_cast<double>(1ull << shift);
+	int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+	{
+		int32_t ms_res = multshiftround<int32_t>(num, mul_i32, shift);
+		int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+		if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<int32_t>(num, mul, %i): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    } 
+		if (num == std::numeric_limits<int32_t>::max()) break;
+		num++;
+	}
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime int32_t multshiftround for num on [-2147483648, 2147483647].
+ * shift should range from 0 to 30.
+ */
+void test_multshiftround_i32_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_i32(num, mul, %i)\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t ms_res = multshiftround_i32(num, mul_i32, shift);
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_i32(num, mul, %i): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time int32_t multshiftround for num on [-2147483648, 2147483647].
+ * shift should range from 1 to 30.
+ */
+void test_multshiftround_i32_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<int32_t, %i>()\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t ms_res = 0;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround<int32_t, 1>(num, mul_i32); break;
+      case  2: ms_res = multshiftround<int32_t, 2>(num, mul_i32); break;
+      case  3: ms_res = multshiftround<int32_t, 3>(num, mul_i32); break;
+      case  4: ms_res = multshiftround<int32_t, 4>(num, mul_i32); break;
+      case  5: ms_res = multshiftround<int32_t, 5>(num, mul_i32); break;
+      case  6: ms_res = multshiftround<int32_t, 6>(num, mul_i32); break;
+      case  7: ms_res = multshiftround<int32_t, 7>(num, mul_i32); break;
+      case  8: ms_res = multshiftround<int32_t, 8>(num, mul_i32); break;
+      case  9: ms_res = multshiftround<int32_t, 9>(num, mul_i32); break;
+      case 10: ms_res = multshiftround<int32_t,10>(num, mul_i32); break;
+      case 11: ms_res = multshiftround<int32_t,11>(num, mul_i32); break;
+      case 12: ms_res = multshiftround<int32_t,12>(num, mul_i32); break;
+      case 13: ms_res = multshiftround<int32_t,13>(num, mul_i32); break;
+      case 14: ms_res = multshiftround<int32_t,14>(num, mul_i32); break;
+      case 15: ms_res = multshiftround<int32_t,15>(num, mul_i32); break;
+      case 16: ms_res = multshiftround<int32_t,16>(num, mul_i32); break;
+      case 17: ms_res = multshiftround<int32_t,17>(num, mul_i32); break;
+      case 18: ms_res = multshiftround<int32_t,18>(num, mul_i32); break;
+      case 19: ms_res = multshiftround<int32_t,19>(num, mul_i32); break;
+      case 20: ms_res = multshiftround<int32_t,20>(num, mul_i32); break;
+      case 21: ms_res = multshiftround<int32_t,21>(num, mul_i32); break;
+      case 22: ms_res = multshiftround<int32_t,22>(num, mul_i32); break;
+      case 23: ms_res = multshiftround<int32_t,23>(num, mul_i32); break;
+      case 24: ms_res = multshiftround<int32_t,24>(num, mul_i32); break;
+      case 25: ms_res = multshiftround<int32_t,25>(num, mul_i32); break;
+      case 26: ms_res = multshiftround<int32_t,26>(num, mul_i32); break;
+      case 27: ms_res = multshiftround<int32_t,27>(num, mul_i32); break;
+      case 28: ms_res = multshiftround<int32_t,28>(num, mul_i32); break;
+      case 29: ms_res = multshiftround<int32_t,29>(num, mul_i32); break;
+      case 30: ms_res = multshiftround<int32_t,30>(num, mul_i32); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int32_t\n");
+          num = std::numeric_limits<int32_t>::max();
+          break;
+        }
+    }
+
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<int32_t, %i>(): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time int32_t multshiftround for num on [-2147483648, 2147483647].
+ * shift should range from 1 to 30.
+ */
+void test_multshiftround_i32_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_i32_%i()\n", shift);
+  }
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t ms_res = 0;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround_i32_1(num, mul_i32); break;
+      case  2: ms_res = multshiftround_i32_2(num, mul_i32); break;
+      case  3: ms_res = multshiftround_i32_3(num, mul_i32); break;
+      case  4: ms_res = multshiftround_i32_4(num, mul_i32); break;
+      case  5: ms_res = multshiftround_i32_5(num, mul_i32); break;
+      case  6: ms_res = multshiftround_i32_6(num, mul_i32); break;
+      case  7: ms_res = multshiftround_i32_7(num, mul_i32); break;
+      case  8: ms_res = multshiftround_i32_8(num, mul_i32); break;
+      case  9: ms_res = multshiftround_i32_9(num, mul_i32); break;
+      case 10: ms_res = multshiftround_i32_10(num, mul_i32); break;
+      case 11: ms_res = multshiftround_i32_11(num, mul_i32); break;
+      case 12: ms_res = multshiftround_i32_12(num, mul_i32); break;
+      case 13: ms_res = multshiftround_i32_13(num, mul_i32); break;
+      case 14: ms_res = multshiftround_i32_14(num, mul_i32); break;
+      case 15: ms_res = multshiftround_i32_15(num, mul_i32); break;
+      case 16: ms_res = multshiftround_i32_16(num, mul_i32); break;
+      case 17: ms_res = multshiftround_i32_17(num, mul_i32); break;
+      case 18: ms_res = multshiftround_i32_18(num, mul_i32); break;
+      case 19: ms_res = multshiftround_i32_19(num, mul_i32); break;
+      case 20: ms_res = multshiftround_i32_20(num, mul_i32); break;
+      case 21: ms_res = multshiftround_i32_21(num, mul_i32); break;
+      case 22: ms_res = multshiftround_i32_22(num, mul_i32); break;
+      case 23: ms_res = multshiftround_i32_23(num, mul_i32); break;
+      case 24: ms_res = multshiftround_i32_24(num, mul_i32); break;
+      case 25: ms_res = multshiftround_i32_25(num, mul_i32); break;
+      case 26: ms_res = multshiftround_i32_26(num, mul_i32); break;
+      case 27: ms_res = multshiftround_i32_27(num, mul_i32); break;
+      case 28: ms_res = multshiftround_i32_28(num, mul_i32); break;
+      case 29: ms_res = multshiftround_i32_29(num, mul_i32); break;
+      case 30: ms_res = multshiftround_i32_30(num, mul_i32); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int32_t\n"); 
+          num = std::numeric_limits<int32_t>::max();
+          break;
+        }
+    }
+
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_i32_%i(): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime int32_t shiftround for num on [-2147483648, 2147483647].
+ * shift should range from 0 to 30.
+ */
+void test_shiftround_i32_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<int32_t>(num, %i)\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t s_res = shiftround<int32_t>(num, shift);
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<int32_t>(num, %i): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime int32_t shiftround for num on [-2147483648, 2147483647].
+ * shift should range from 0 to 30.
+ */
+void test_shiftround_i32_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_i32(num, %i)\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t s_res = shiftround_i32(num, shift);
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_i32(num, %i): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time int32_t shiftround for num on [-2147483648, 2147483647].
+ * shift should range from 1 to 30.
+ */
+void test_shiftround_i32_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<int32_t, %i>()\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t s_res = 0;
+    switch (shift)
+    {
+      case  1: s_res = shiftround<int32_t,  1>(num); break;
+      case  2: s_res = shiftround<int32_t,  2>(num); break;
+      case  3: s_res = shiftround<int32_t,  3>(num); break;
+      case  4: s_res = shiftround<int32_t,  4>(num); break;
+      case  5: s_res = shiftround<int32_t,  5>(num); break;
+      case  6: s_res = shiftround<int32_t,  6>(num); break;
+      case  7: s_res = shiftround<int32_t,  7>(num); break;
+      case  8: s_res = shiftround<int32_t,  8>(num); break;
+      case  9: s_res = shiftround<int32_t,  9>(num); break;
+      case 10: s_res = shiftround<int32_t, 10>(num); break;
+      case 11: s_res = shiftround<int32_t, 11>(num); break;
+      case 12: s_res = shiftround<int32_t, 12>(num); break;
+      case 13: s_res = shiftround<int32_t, 13>(num); break;
+      case 14: s_res = shiftround<int32_t, 14>(num); break;
+      case 15: s_res = shiftround<int32_t, 15>(num); break;
+      case 16: s_res = shiftround<int32_t, 16>(num); break;
+      case 17: s_res = shiftround<int32_t, 17>(num); break;
+      case 18: s_res = shiftround<int32_t, 18>(num); break;
+      case 19: s_res = shiftround<int32_t, 19>(num); break;
+      case 20: s_res = shiftround<int32_t, 20>(num); break;
+      case 21: s_res = shiftround<int32_t, 21>(num); break;
+      case 22: s_res = shiftround<int32_t, 22>(num); break;
+      case 23: s_res = shiftround<int32_t, 23>(num); break;
+      case 24: s_res = shiftround<int32_t, 24>(num); break;
+      case 25: s_res = shiftround<int32_t, 25>(num); break;
+      case 26: s_res = shiftround<int32_t, 26>(num); break;
+      case 27: s_res = shiftround<int32_t, 27>(num); break;
+      case 28: s_res = shiftround<int32_t, 28>(num); break;
+      case 29: s_res = shiftround<int32_t, 29>(num); break;
+      case 30: s_res = shiftround<int32_t, 30>(num); break;
+      default:
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int32_t\n");
+          num = std::numeric_limits<int32_t>::max();
+          break;
+        }
+    }
+
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<int32_t, %i>(): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time int32_t shiftround for num on [-2147483648, 2147483647].
+ * shift should range from 1 to 30.
+ */
+void test_shiftround_i32_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_i32_%i()\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  int32_t num = std::numeric_limits<int32_t>::lowest();
+  while (true)
+  {
+    int32_t s_res = 0;
+    switch (shift)
+    {
+      case  1: s_res = shiftround_i32_1(num); break;
+      case  2: s_res = shiftround_i32_2(num); break;
+      case  3: s_res = shiftround_i32_3(num); break;
+      case  4: s_res = shiftround_i32_4(num); break;
+      case  5: s_res = shiftround_i32_5(num); break;
+      case  6: s_res = shiftround_i32_6(num); break;
+      case  7: s_res = shiftround_i32_7(num); break;
+      case  8: s_res = shiftround_i32_8(num); break;
+      case  9: s_res = shiftround_i32_9(num); break;
+      case 10: s_res = shiftround_i32_10(num); break;
+      case 11: s_res = shiftround_i32_11(num); break;
+      case 12: s_res = shiftround_i32_12(num); break;
+      case 13: s_res = shiftround_i32_13(num); break;
+      case 14: s_res = shiftround_i32_14(num); break;
+      case 15: s_res = shiftround_i32_15(num); break;
+      case 16: s_res = shiftround_i32_16(num); break;
+      case 17: s_res = shiftround_i32_17(num); break;
+      case 18: s_res = shiftround_i32_18(num); break;
+      case 19: s_res = shiftround_i32_19(num); break;
+      case 20: s_res = shiftround_i32_20(num); break;
+      case 21: s_res = shiftround_i32_21(num); break;
+      case 22: s_res = shiftround_i32_22(num); break;
+      case 23: s_res = shiftround_i32_23(num); break;
+      case 24: s_res = shiftround_i32_24(num); break;
+      case 25: s_res = shiftround_i32_25(num); break;
+      case 26: s_res = shiftround_i32_26(num); break;
+      case 27: s_res = shiftround_i32_27(num); break;
+      case 28: s_res = shiftround_i32_28(num); break;
+      case 29: s_res = shiftround_i32_29(num); break;
+      case 30: s_res = shiftround_i32_30(num); break;
+      default:
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int32_t\n");
+          num = std::numeric_limits<int32_t>::max();
+          break;
+        }
+    }
+
+    int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_i32_%i(): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
+    }
+    if (num == std::numeric_limits<int32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime uint32_t multshiftround for num on [0, 4294967295].
+ * shift should range from 0 to 31.
+ */
+void test_multshiftround_u32_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<uint32_t>(num, mul, %i)\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t ms_res = multshiftround<uint32_t>(num, mul_u32, shift);
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<uint32_t>(num, mul, %i): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime uint32_t multshiftround for num on [0, 4294967295].
+ * shift should range from 0 to 31.
+ */
+void test_multshiftround_u32_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_u32(num, mul, %i)\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t ms_res = multshiftround_u32(num, mul_u32, shift);
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_u32(num, mul, %i): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time uint32_t multshiftround for num on [0, 4294967295].
+ * shift should range from 1 to 31.
+ */
+void test_multshiftround_u32_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<uint32_t, %i>()\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t ms_res = 0u;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround<uint32_t,  1>(num, mul_u32); break;
+      case  2: ms_res = multshiftround<uint32_t,  2>(num, mul_u32); break;
+      case  3: ms_res = multshiftround<uint32_t,  3>(num, mul_u32); break;
+      case  4: ms_res = multshiftround<uint32_t,  4>(num, mul_u32); break;
+      case  5: ms_res = multshiftround<uint32_t,  5>(num, mul_u32); break;
+      case  6: ms_res = multshiftround<uint32_t,  6>(num, mul_u32); break;
+      case  7: ms_res = multshiftround<uint32_t,  7>(num, mul_u32); break;
+      case  8: ms_res = multshiftround<uint32_t,  8>(num, mul_u32); break;
+      case  9: ms_res = multshiftround<uint32_t,  9>(num, mul_u32); break;
+      case 10: ms_res = multshiftround<uint32_t, 10>(num, mul_u32); break;
+      case 11: ms_res = multshiftround<uint32_t, 11>(num, mul_u32); break;
+      case 12: ms_res = multshiftround<uint32_t, 12>(num, mul_u32); break;
+      case 13: ms_res = multshiftround<uint32_t, 13>(num, mul_u32); break;
+      case 14: ms_res = multshiftround<uint32_t, 14>(num, mul_u32); break;
+      case 15: ms_res = multshiftround<uint32_t, 15>(num, mul_u32); break;
+      case 16: ms_res = multshiftround<uint32_t, 16>(num, mul_u32); break;
+      case 17: ms_res = multshiftround<uint32_t, 17>(num, mul_u32); break;
+      case 18: ms_res = multshiftround<uint32_t, 18>(num, mul_u32); break;
+      case 19: ms_res = multshiftround<uint32_t, 19>(num, mul_u32); break;
+      case 20: ms_res = multshiftround<uint32_t, 20>(num, mul_u32); break;
+      case 21: ms_res = multshiftround<uint32_t, 21>(num, mul_u32); break;
+      case 22: ms_res = multshiftround<uint32_t, 22>(num, mul_u32); break;
+      case 23: ms_res = multshiftround<uint32_t, 23>(num, mul_u32); break;
+      case 24: ms_res = multshiftround<uint32_t, 24>(num, mul_u32); break;
+      case 25: ms_res = multshiftround<uint32_t, 25>(num, mul_u32); break;
+      case 26: ms_res = multshiftround<uint32_t, 26>(num, mul_u32); break;
+      case 27: ms_res = multshiftround<uint32_t, 27>(num, mul_u32); break;
+      case 28: ms_res = multshiftround<uint32_t, 28>(num, mul_u32); break;
+      case 29: ms_res = multshiftround<uint32_t, 29>(num, mul_u32); break;
+      case 30: ms_res = multshiftround<uint32_t, 30>(num, mul_u32); break;
+      case 31: ms_res = multshiftround<uint32_t, 31>(num, mul_u32); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint32_t\n");
+          num = std::numeric_limits<uint32_t>::max();
+          break;
+        }
+    }
+
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<uint32_t, %i>(): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time uint32_t multshiftround for num on [0, 4294967295].
+ * shift should range from 1 to 31.
+ */
+void test_multshiftround_u32_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_u32_%i()\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t ms_res = 0u;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround_u32_1(num, mul_u32); break;
+      case  2: ms_res = multshiftround_u32_2(num, mul_u32); break;
+      case  3: ms_res = multshiftround_u32_3(num, mul_u32); break;
+      case  4: ms_res = multshiftround_u32_4(num, mul_u32); break;
+      case  5: ms_res = multshiftround_u32_5(num, mul_u32); break;
+      case  6: ms_res = multshiftround_u32_6(num, mul_u32); break;
+      case  7: ms_res = multshiftround_u32_7(num, mul_u32); break;
+      case  8: ms_res = multshiftround_u32_8(num, mul_u32); break;
+      case  9: ms_res = multshiftround_u32_9(num, mul_u32); break;
+      case 10: ms_res = multshiftround_u32_10(num, mul_u32); break;
+      case 11: ms_res = multshiftround_u32_11(num, mul_u32); break;
+      case 12: ms_res = multshiftround_u32_12(num, mul_u32); break;
+      case 13: ms_res = multshiftround_u32_13(num, mul_u32); break;
+      case 14: ms_res = multshiftround_u32_14(num, mul_u32); break;
+      case 15: ms_res = multshiftround_u32_15(num, mul_u32); break;
+      case 16: ms_res = multshiftround_u32_16(num, mul_u32); break;
+      case 17: ms_res = multshiftround_u32_17(num, mul_u32); break;
+      case 18: ms_res = multshiftround_u32_18(num, mul_u32); break;
+      case 19: ms_res = multshiftround_u32_19(num, mul_u32); break;
+      case 20: ms_res = multshiftround_u32_20(num, mul_u32); break;
+      case 21: ms_res = multshiftround_u32_21(num, mul_u32); break;
+      case 22: ms_res = multshiftround_u32_22(num, mul_u32); break;
+      case 23: ms_res = multshiftround_u32_23(num, mul_u32); break;
+      case 24: ms_res = multshiftround_u32_24(num, mul_u32); break;
+      case 25: ms_res = multshiftround_u32_25(num, mul_u32); break;
+      case 26: ms_res = multshiftround_u32_26(num, mul_u32); break;
+      case 27: ms_res = multshiftround_u32_27(num, mul_u32); break;
+      case 28: ms_res = multshiftround_u32_28(num, mul_u32); break;
+      case 29: ms_res = multshiftround_u32_29(num, mul_u32); break;
+      case 30: ms_res = multshiftround_u32_30(num, mul_u32); break;
+      case 31: ms_res = multshiftround_u32_31(num, mul_u32); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint32_t\n"); 
+          num = std::numeric_limits<uint32_t>::max();
+          break;
+        }
+    }
+
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_u32_%i(): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime uint32_t shiftround for num on [0, 4294967295].
+ * shift should range from 0 to 31.
+ */
+void test_shiftround_u32_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<uint32_t>(num, %i)\n", shift);
+  }
+    
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t s_res = shiftround<uint32_t>(num, shift);
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<uint32_t>(num, %i): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime uint32_t shiftround for num on [0, 4294967295].
+ * shift should range from 0 to 31.
+ */
+void test_shiftround_u32_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_u32(num, %i)\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t s_res = shiftround_u32(num, shift);
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_u32(num, %i): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time uint32_t shiftround for num on [0, 4294967295].
+ * shift should range from 1 to 31.
+ */
+void test_shiftround_u32_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<uint32_t, %i>()\n", shift);
+  }
+    
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t s_res = 0u;
+    switch (shift)
+    {
+      case  1: s_res = shiftround<uint32_t,  1>(num); break;
+      case  2: s_res = shiftround<uint32_t,  2>(num); break;
+      case  3: s_res = shiftround<uint32_t,  3>(num); break;
+      case  4: s_res = shiftround<uint32_t,  4>(num); break;
+      case  5: s_res = shiftround<uint32_t,  5>(num); break;
+      case  6: s_res = shiftround<uint32_t,  6>(num); break;
+      case  7: s_res = shiftround<uint32_t,  7>(num); break;
+      case  8: s_res = shiftround<uint32_t,  8>(num); break;
+      case  9: s_res = shiftround<uint32_t,  9>(num); break;
+      case 10: s_res = shiftround<uint32_t, 10>(num); break;
+      case 11: s_res = shiftround<uint32_t, 11>(num); break;
+      case 12: s_res = shiftround<uint32_t, 12>(num); break;
+      case 13: s_res = shiftround<uint32_t, 13>(num); break;
+      case 14: s_res = shiftround<uint32_t, 14>(num); break;
+      case 15: s_res = shiftround<uint32_t, 15>(num); break;
+      case 16: s_res = shiftround<uint32_t, 16>(num); break;
+      case 17: s_res = shiftround<uint32_t, 17>(num); break;
+      case 18: s_res = shiftround<uint32_t, 18>(num); break;
+      case 19: s_res = shiftround<uint32_t, 19>(num); break;
+      case 20: s_res = shiftround<uint32_t, 20>(num); break;
+      case 21: s_res = shiftround<uint32_t, 21>(num); break;
+      case 22: s_res = shiftround<uint32_t, 22>(num); break;
+      case 23: s_res = shiftround<uint32_t, 23>(num); break;
+      case 24: s_res = shiftround<uint32_t, 24>(num); break;
+      case 25: s_res = shiftround<uint32_t, 25>(num); break;
+      case 26: s_res = shiftround<uint32_t, 26>(num); break;
+      case 27: s_res = shiftround<uint32_t, 27>(num); break;
+      case 28: s_res = shiftround<uint32_t, 28>(num); break;
+      case 29: s_res = shiftround<uint32_t, 29>(num); break;
+      case 30: s_res = shiftround<uint32_t, 30>(num); break;
+      case 31: s_res = shiftround<uint32_t, 31>(num); break;
+      default:
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint32_t\n");
+          num = std::numeric_limits<uint32_t>::max();
+          break;
+        }
+    }
+
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<uint32_t, %i>(): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time uint32_t shiftround for num on [0, 4294967295].
+ * shift should range from 1 to 31.
+ */
+void test_shiftround_u32_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_u32_%i()\n", shift);
+  }
+
+  double dbl_twoexp = static_cast<double>(1ull << shift);
+  uint32_t num = std::numeric_limits<uint32_t>::lowest();
+  while (true)
+  {
+    uint32_t s_res = 0u;
+    switch (shift)
+    {
+      case  1: s_res = shiftround_u32_1(num); break;
+      case  2: s_res = shiftround_u32_2(num); break;
+      case  3: s_res = shiftround_u32_3(num); break;
+      case  4: s_res = shiftround_u32_4(num); break;
+      case  5: s_res = shiftround_u32_5(num); break;
+      case  6: s_res = shiftround_u32_6(num); break;
+      case  7: s_res = shiftround_u32_7(num); break;
+      case  8: s_res = shiftround_u32_8(num); break;
+      case  9: s_res = shiftround_u32_9(num); break;
+      case 10: s_res = shiftround_u32_10(num); break;
+      case 11: s_res = shiftround_u32_11(num); break;
+      case 12: s_res = shiftround_u32_12(num); break;
+      case 13: s_res = shiftround_u32_13(num); break;
+      case 14: s_res = shiftround_u32_14(num); break;
+      case 15: s_res = shiftround_u32_15(num); break;
+      case 16: s_res = shiftround_u32_16(num); break;
+      case 17: s_res = shiftround_u32_17(num); break;
+      case 18: s_res = shiftround_u32_18(num); break;
+      case 19: s_res = shiftround_u32_19(num); break;
+      case 20: s_res = shiftround_u32_20(num); break;
+      case 21: s_res = shiftround_u32_21(num); break;
+      case 22: s_res = shiftround_u32_22(num); break;
+      case 23: s_res = shiftround_u32_23(num); break;
+      case 24: s_res = shiftround_u32_24(num); break;
+      case 25: s_res = shiftround_u32_25(num); break;
+      case 26: s_res = shiftround_u32_26(num); break;
+      case 27: s_res = shiftround_u32_27(num); break;
+      case 28: s_res = shiftround_u32_28(num); break;
+      case 29: s_res = shiftround_u32_29(num); break;
+      case 30: s_res = shiftround_u32_30(num); break;
+      case 31: s_res = shiftround_u32_31(num); break;
+      default:
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint32_t\n");
+          num = std::numeric_limits<uint32_t>::max();
+          break;
+        }
+    }
+
+    uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_u32_%i(): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
+    }
+    if (num == std::numeric_limits<uint32_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime int64_t multshiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 0 to 62.
+ */
+void test_multshiftround_i64_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<int64_t>(num, mul, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t ms_res = multshiftround<int64_t>(num, mul_i64, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<int64_t>(num, mul, %i): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime int64_t multshiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 0 to 62.
+ */
+void test_multshiftround_i64_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_i64(num, mul, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t ms_res = multshiftround_i64(num, mul_i64, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_i64(num, mul, %i): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time int64_t multshiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 1 to 62.
+ */
+void test_multshiftround_i64_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<int64_t, %i>()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t ms_res = 0ll;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround<int64_t,  1>(num, mul_i64); break;
+      case  2: ms_res = multshiftround<int64_t,  2>(num, mul_i64); break;
+      case  3: ms_res = multshiftround<int64_t,  3>(num, mul_i64); break;
+      case  4: ms_res = multshiftround<int64_t,  4>(num, mul_i64); break;
+      case  5: ms_res = multshiftround<int64_t,  5>(num, mul_i64); break;
+      case  6: ms_res = multshiftround<int64_t,  6>(num, mul_i64); break;
+      case  7: ms_res = multshiftround<int64_t,  7>(num, mul_i64); break;
+      case  8: ms_res = multshiftround<int64_t,  8>(num, mul_i64); break;
+      case  9: ms_res = multshiftround<int64_t,  9>(num, mul_i64); break;
+      case 10: ms_res = multshiftround<int64_t, 10>(num, mul_i64); break;
+      case 11: ms_res = multshiftround<int64_t, 11>(num, mul_i64); break;
+      case 12: ms_res = multshiftround<int64_t, 12>(num, mul_i64); break;
+      case 13: ms_res = multshiftround<int64_t, 13>(num, mul_i64); break;
+      case 14: ms_res = multshiftround<int64_t, 14>(num, mul_i64); break;
+      case 15: ms_res = multshiftround<int64_t, 15>(num, mul_i64); break;
+      case 16: ms_res = multshiftround<int64_t, 16>(num, mul_i64); break;
+      case 17: ms_res = multshiftround<int64_t, 17>(num, mul_i64); break;
+      case 18: ms_res = multshiftround<int64_t, 18>(num, mul_i64); break;
+      case 19: ms_res = multshiftround<int64_t, 19>(num, mul_i64); break;
+      case 20: ms_res = multshiftround<int64_t, 20>(num, mul_i64); break;
+      case 21: ms_res = multshiftround<int64_t, 21>(num, mul_i64); break;
+      case 22: ms_res = multshiftround<int64_t, 22>(num, mul_i64); break;
+      case 23: ms_res = multshiftround<int64_t, 23>(num, mul_i64); break;
+      case 24: ms_res = multshiftround<int64_t, 24>(num, mul_i64); break;
+      case 25: ms_res = multshiftround<int64_t, 25>(num, mul_i64); break;
+      case 26: ms_res = multshiftround<int64_t, 26>(num, mul_i64); break;
+      case 27: ms_res = multshiftround<int64_t, 27>(num, mul_i64); break;
+      case 28: ms_res = multshiftround<int64_t, 28>(num, mul_i64); break;
+      case 29: ms_res = multshiftround<int64_t, 29>(num, mul_i64); break;
+      case 30: ms_res = multshiftround<int64_t, 30>(num, mul_i64); break;
+      case 31: ms_res = multshiftround<int64_t, 31>(num, mul_i64); break;
+      case 32: ms_res = multshiftround<int64_t, 32>(num, mul_i64); break;
+      case 33: ms_res = multshiftround<int64_t, 33>(num, mul_i64); break;
+      case 34: ms_res = multshiftround<int64_t, 34>(num, mul_i64); break;
+      case 35: ms_res = multshiftround<int64_t, 35>(num, mul_i64); break;
+      case 36: ms_res = multshiftround<int64_t, 36>(num, mul_i64); break;
+      case 37: ms_res = multshiftround<int64_t, 37>(num, mul_i64); break;
+      case 38: ms_res = multshiftround<int64_t, 38>(num, mul_i64); break;
+      case 39: ms_res = multshiftround<int64_t, 39>(num, mul_i64); break;
+      case 40: ms_res = multshiftround<int64_t, 40>(num, mul_i64); break;
+      case 41: ms_res = multshiftround<int64_t, 41>(num, mul_i64); break;
+      case 42: ms_res = multshiftround<int64_t, 42>(num, mul_i64); break;
+      case 43: ms_res = multshiftround<int64_t, 43>(num, mul_i64); break;
+      case 44: ms_res = multshiftround<int64_t, 44>(num, mul_i64); break;
+      case 45: ms_res = multshiftround<int64_t, 45>(num, mul_i64); break;
+      case 46: ms_res = multshiftround<int64_t, 46>(num, mul_i64); break;
+      case 47: ms_res = multshiftround<int64_t, 47>(num, mul_i64); break;
+      case 48: ms_res = multshiftround<int64_t, 48>(num, mul_i64); break;
+      case 49: ms_res = multshiftround<int64_t, 49>(num, mul_i64); break;
+      case 50: ms_res = multshiftround<int64_t, 50>(num, mul_i64); break;
+      case 51: ms_res = multshiftround<int64_t, 51>(num, mul_i64); break;
+      case 52: ms_res = multshiftround<int64_t, 52>(num, mul_i64); break;
+      case 53: ms_res = multshiftround<int64_t, 53>(num, mul_i64); break;
+      case 54: ms_res = multshiftround<int64_t, 54>(num, mul_i64); break;
+      case 55: ms_res = multshiftround<int64_t, 55>(num, mul_i64); break;
+      case 56: ms_res = multshiftround<int64_t, 56>(num, mul_i64); break;
+      case 57: ms_res = multshiftround<int64_t, 57>(num, mul_i64); break;
+      case 58: ms_res = multshiftround<int64_t, 58>(num, mul_i64); break;
+      case 59: ms_res = multshiftround<int64_t, 59>(num, mul_i64); break;
+      case 60: ms_res = multshiftround<int64_t, 60>(num, mul_i64); break;
+      case 61: ms_res = multshiftround<int64_t, 61>(num, mul_i64); break;
+      case 62: ms_res = multshiftround<int64_t, 62>(num, mul_i64); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int64_t\n");
+          num = std::numeric_limits<int64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<int64_t, %i>(): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time int64_t multshiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 1 to 62.
+ */
+void test_multshiftround_i64_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_i64_%i()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t ms_res = 0ll;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround_i64_1(num, mul_i64); break;
+      case  2: ms_res = multshiftround_i64_2(num, mul_i64); break;
+      case  3: ms_res = multshiftround_i64_3(num, mul_i64); break;
+      case  4: ms_res = multshiftround_i64_4(num, mul_i64); break;
+      case  5: ms_res = multshiftround_i64_5(num, mul_i64); break;
+      case  6: ms_res = multshiftround_i64_6(num, mul_i64); break;
+      case  7: ms_res = multshiftround_i64_7(num, mul_i64); break;
+      case  8: ms_res = multshiftround_i64_8(num, mul_i64); break;
+      case  9: ms_res = multshiftround_i64_9(num, mul_i64); break;
+      case 10: ms_res = multshiftround_i64_10(num, mul_i64); break;
+      case 11: ms_res = multshiftround_i64_11(num, mul_i64); break;
+      case 12: ms_res = multshiftround_i64_12(num, mul_i64); break;
+      case 13: ms_res = multshiftround_i64_13(num, mul_i64); break;
+      case 14: ms_res = multshiftround_i64_14(num, mul_i64); break;
+      case 15: ms_res = multshiftround_i64_15(num, mul_i64); break;
+      case 16: ms_res = multshiftround_i64_16(num, mul_i64); break;
+      case 17: ms_res = multshiftround_i64_17(num, mul_i64); break;
+      case 18: ms_res = multshiftround_i64_18(num, mul_i64); break;
+      case 19: ms_res = multshiftround_i64_19(num, mul_i64); break;
+      case 20: ms_res = multshiftround_i64_20(num, mul_i64); break;
+      case 21: ms_res = multshiftround_i64_21(num, mul_i64); break;
+      case 22: ms_res = multshiftround_i64_22(num, mul_i64); break;
+      case 23: ms_res = multshiftround_i64_23(num, mul_i64); break;
+      case 24: ms_res = multshiftround_i64_24(num, mul_i64); break;
+      case 25: ms_res = multshiftround_i64_25(num, mul_i64); break;
+      case 26: ms_res = multshiftround_i64_26(num, mul_i64); break;
+      case 27: ms_res = multshiftround_i64_27(num, mul_i64); break;
+      case 28: ms_res = multshiftround_i64_28(num, mul_i64); break;
+      case 29: ms_res = multshiftround_i64_29(num, mul_i64); break;
+      case 30: ms_res = multshiftround_i64_30(num, mul_i64); break;
+      case 31: ms_res = multshiftround_i64_31(num, mul_i64); break;
+      case 32: ms_res = multshiftround_i64_32(num, mul_i64); break;
+      case 33: ms_res = multshiftround_i64_33(num, mul_i64); break;
+      case 34: ms_res = multshiftround_i64_34(num, mul_i64); break;
+      case 35: ms_res = multshiftround_i64_35(num, mul_i64); break;
+      case 36: ms_res = multshiftround_i64_36(num, mul_i64); break;
+      case 37: ms_res = multshiftround_i64_37(num, mul_i64); break;
+      case 38: ms_res = multshiftround_i64_38(num, mul_i64); break;
+      case 39: ms_res = multshiftround_i64_39(num, mul_i64); break;
+      case 40: ms_res = multshiftround_i64_40(num, mul_i64); break;
+      case 41: ms_res = multshiftround_i64_41(num, mul_i64); break;
+      case 42: ms_res = multshiftround_i64_42(num, mul_i64); break;
+      case 43: ms_res = multshiftround_i64_43(num, mul_i64); break;
+      case 44: ms_res = multshiftround_i64_44(num, mul_i64); break;
+      case 45: ms_res = multshiftround_i64_45(num, mul_i64); break;
+      case 46: ms_res = multshiftround_i64_46(num, mul_i64); break;
+      case 47: ms_res = multshiftround_i64_47(num, mul_i64); break;
+      case 48: ms_res = multshiftround_i64_48(num, mul_i64); break;
+      case 49: ms_res = multshiftround_i64_49(num, mul_i64); break;
+      case 50: ms_res = multshiftround_i64_50(num, mul_i64); break;
+      case 51: ms_res = multshiftround_i64_51(num, mul_i64); break;
+      case 52: ms_res = multshiftround_i64_52(num, mul_i64); break;
+      case 53: ms_res = multshiftround_i64_53(num, mul_i64); break;
+      case 54: ms_res = multshiftround_i64_54(num, mul_i64); break;
+      case 55: ms_res = multshiftround_i64_55(num, mul_i64); break;
+      case 56: ms_res = multshiftround_i64_56(num, mul_i64); break;
+      case 57: ms_res = multshiftround_i64_57(num, mul_i64); break;
+      case 58: ms_res = multshiftround_i64_58(num, mul_i64); break;
+      case 59: ms_res = multshiftround_i64_59(num, mul_i64); break;
+      case 60: ms_res = multshiftround_i64_60(num, mul_i64); break;
+      case 61: ms_res = multshiftround_i64_61(num, mul_i64); break;
+      case 62: ms_res = multshiftround_i64_62(num, mul_i64); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int64_t\n");
+          num = std::numeric_limits<int64_t>::max();  
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_i64_%i(): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime int64_t shiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 0 to 62.
+ */
+void test_shiftround_i64_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<int64_t>(num, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t s_res = shiftround<int64_t>(num, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<int64_t>(num, %i): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime int64_t shiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 0 to 62.
+ */
+void test_shiftround_i64_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_i64(num, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t s_res = shiftround_i64(num, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_i64(num, %i): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time int64_t shiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 1 to 62.
+ */
+void test_shiftround_i64_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<int64_t, %i>()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t s_res = 0ll;
+    switch (shift)
+    {
+      case  1: s_res = shiftround<int64_t,  1>(num); break;
+      case  2: s_res = shiftround<int64_t,  2>(num); break;
+      case  3: s_res = shiftround<int64_t,  3>(num); break;
+      case  4: s_res = shiftround<int64_t,  4>(num); break;
+      case  5: s_res = shiftround<int64_t,  5>(num); break;
+      case  6: s_res = shiftround<int64_t,  6>(num); break;
+      case  7: s_res = shiftround<int64_t,  7>(num); break;
+      case  8: s_res = shiftround<int64_t,  8>(num); break;
+      case  9: s_res = shiftround<int64_t,  9>(num); break;
+      case 10: s_res = shiftround<int64_t, 10>(num); break;
+      case 11: s_res = shiftround<int64_t, 11>(num); break;
+      case 12: s_res = shiftround<int64_t, 12>(num); break;
+      case 13: s_res = shiftround<int64_t, 13>(num); break;
+      case 14: s_res = shiftround<int64_t, 14>(num); break;
+      case 15: s_res = shiftround<int64_t, 15>(num); break;
+      case 16: s_res = shiftround<int64_t, 16>(num); break;
+      case 17: s_res = shiftround<int64_t, 17>(num); break;
+      case 18: s_res = shiftround<int64_t, 18>(num); break;
+      case 19: s_res = shiftround<int64_t, 19>(num); break;
+      case 20: s_res = shiftround<int64_t, 20>(num); break;
+      case 21: s_res = shiftround<int64_t, 21>(num); break;
+      case 22: s_res = shiftround<int64_t, 22>(num); break;
+      case 23: s_res = shiftround<int64_t, 23>(num); break;
+      case 24: s_res = shiftround<int64_t, 24>(num); break;
+      case 25: s_res = shiftround<int64_t, 25>(num); break;
+      case 26: s_res = shiftround<int64_t, 26>(num); break;
+      case 27: s_res = shiftround<int64_t, 27>(num); break;
+      case 28: s_res = shiftround<int64_t, 28>(num); break;
+      case 29: s_res = shiftround<int64_t, 29>(num); break;
+      case 30: s_res = shiftround<int64_t, 30>(num); break;
+      case 31: s_res = shiftround<int64_t, 31>(num); break;
+      case 32: s_res = shiftround<int64_t, 32>(num); break;
+      case 33: s_res = shiftround<int64_t, 33>(num); break;
+      case 34: s_res = shiftround<int64_t, 34>(num); break;
+      case 35: s_res = shiftround<int64_t, 35>(num); break;
+      case 36: s_res = shiftround<int64_t, 36>(num); break;
+      case 37: s_res = shiftround<int64_t, 37>(num); break;
+      case 38: s_res = shiftround<int64_t, 38>(num); break;
+      case 39: s_res = shiftround<int64_t, 39>(num); break;
+      case 40: s_res = shiftround<int64_t, 40>(num); break;
+      case 41: s_res = shiftround<int64_t, 41>(num); break;
+      case 42: s_res = shiftround<int64_t, 42>(num); break;
+      case 43: s_res = shiftround<int64_t, 43>(num); break;
+      case 44: s_res = shiftround<int64_t, 44>(num); break;
+      case 45: s_res = shiftround<int64_t, 45>(num); break;
+      case 46: s_res = shiftround<int64_t, 46>(num); break;
+      case 47: s_res = shiftround<int64_t, 47>(num); break;
+      case 48: s_res = shiftround<int64_t, 48>(num); break;
+      case 49: s_res = shiftround<int64_t, 49>(num); break;
+      case 50: s_res = shiftround<int64_t, 50>(num); break;
+      case 51: s_res = shiftround<int64_t, 51>(num); break;
+      case 52: s_res = shiftround<int64_t, 52>(num); break;
+      case 53: s_res = shiftround<int64_t, 53>(num); break;
+      case 54: s_res = shiftround<int64_t, 54>(num); break;
+      case 55: s_res = shiftround<int64_t, 55>(num); break;
+      case 56: s_res = shiftround<int64_t, 56>(num); break;
+      case 57: s_res = shiftround<int64_t, 57>(num); break;
+      case 58: s_res = shiftround<int64_t, 58>(num); break;
+      case 59: s_res = shiftround<int64_t, 59>(num); break;
+      case 60: s_res = shiftround<int64_t, 60>(num); break;
+      case 61: s_res = shiftround<int64_t, 61>(num); break;
+      case 62: s_res = shiftround<int64_t, 62>(num); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int64_t\n");
+          num = std::numeric_limits<int64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<int64_t, %i>(): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time int64_t shiftround for num on
+ * [-9223372036854775808, -9223372036850581504]
+ * [-4194304, 4194304]
+ * [9223372036850581503, 9223372036854775807]
+ * shift should range from 1 to 62.
+ */
+void test_shiftround_i64_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_i64_%i()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  int64_t num = std::numeric_limits<int64_t>::lowest();
+  while (true)
+  {
+    int64_t s_res = 0ll;
+    switch (shift)
+    {
+      case  1: s_res = shiftround_i64_1(num); break;
+      case  2: s_res = shiftround_i64_2(num); break;
+      case  3: s_res = shiftround_i64_3(num); break;
+      case  4: s_res = shiftround_i64_4(num); break;
+      case  5: s_res = shiftround_i64_5(num); break;
+      case  6: s_res = shiftround_i64_6(num); break;
+      case  7: s_res = shiftround_i64_7(num); break;
+      case  8: s_res = shiftround_i64_8(num); break;
+      case  9: s_res = shiftround_i64_9(num); break;
+      case 10: s_res = shiftround_i64_10(num); break;
+      case 11: s_res = shiftround_i64_11(num); break;
+      case 12: s_res = shiftround_i64_12(num); break;
+      case 13: s_res = shiftround_i64_13(num); break;
+      case 14: s_res = shiftround_i64_14(num); break;
+      case 15: s_res = shiftround_i64_15(num); break;
+      case 16: s_res = shiftround_i64_16(num); break;
+      case 17: s_res = shiftround_i64_17(num); break;
+      case 18: s_res = shiftround_i64_18(num); break;
+      case 19: s_res = shiftround_i64_19(num); break;
+      case 20: s_res = shiftround_i64_20(num); break;
+      case 21: s_res = shiftround_i64_21(num); break;
+      case 22: s_res = shiftround_i64_22(num); break;
+      case 23: s_res = shiftround_i64_23(num); break;
+      case 24: s_res = shiftround_i64_24(num); break;
+      case 25: s_res = shiftround_i64_25(num); break;
+      case 26: s_res = shiftround_i64_26(num); break;
+      case 27: s_res = shiftround_i64_27(num); break;
+      case 28: s_res = shiftround_i64_28(num); break;
+      case 29: s_res = shiftround_i64_29(num); break;
+      case 30: s_res = shiftround_i64_30(num); break;
+      case 31: s_res = shiftround_i64_31(num); break;
+      case 32: s_res = shiftround_i64_32(num); break;
+      case 33: s_res = shiftround_i64_33(num); break;
+      case 34: s_res = shiftround_i64_34(num); break;
+      case 35: s_res = shiftround_i64_35(num); break;
+      case 36: s_res = shiftround_i64_36(num); break;
+      case 37: s_res = shiftround_i64_37(num); break;
+      case 38: s_res = shiftround_i64_38(num); break;
+      case 39: s_res = shiftround_i64_39(num); break;
+      case 40: s_res = shiftround_i64_40(num); break;
+      case 41: s_res = shiftround_i64_41(num); break;
+      case 42: s_res = shiftround_i64_42(num); break;
+      case 43: s_res = shiftround_i64_43(num); break;
+      case 44: s_res = shiftround_i64_44(num); break;
+      case 45: s_res = shiftround_i64_45(num); break;
+      case 46: s_res = shiftround_i64_46(num); break;
+      case 47: s_res = shiftround_i64_47(num); break;
+      case 48: s_res = shiftround_i64_48(num); break;
+      case 49: s_res = shiftround_i64_49(num); break;
+      case 50: s_res = shiftround_i64_50(num); break;
+      case 51: s_res = shiftround_i64_51(num); break;
+      case 52: s_res = shiftround_i64_52(num); break;
+      case 53: s_res = shiftround_i64_53(num); break;
+      case 54: s_res = shiftround_i64_54(num); break;
+      case 55: s_res = shiftround_i64_55(num); break;
+      case 56: s_res = shiftround_i64_56(num); break;
+      case 57: s_res = shiftround_i64_57(num); break;
+      case 58: s_res = shiftround_i64_58(num); break;
+      case 59: s_res = shiftround_i64_59(num); break;
+      case 60: s_res = shiftround_i64_60(num); break;
+      case 61: s_res = shiftround_i64_61(num); break;
+      case 62: s_res = shiftround_i64_62(num); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift int64_t\n");
+          num = std::numeric_limits<int64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_i64_%i(): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
+    }
+    if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
+    if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
+    if (num == std::numeric_limits<int64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime uint64_t multshiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 0 to 63.
+ */
+void test_multshiftround_u64_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<uint64_t>(num, mul, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t ms_res = multshiftround<uint64_t>(num, mul_u64, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<uint64_t>(num, mul, %i): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime uint64_t multshiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 0 to 63.
+ */
+void test_multshiftround_u64_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_u64(num, mul, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t ms_res = multshiftround_u64(num, mul_u64, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_u64(num, mul, %i): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time uint64_t multshiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 1 to 63.
+ */
+void test_multshiftround_u64_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround<uint64_t, %i>()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t ms_res = 0ull;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround<uint64_t,  1>(num, mul_u64); break;
+      case  2: ms_res = multshiftround<uint64_t,  2>(num, mul_u64); break;
+      case  3: ms_res = multshiftround<uint64_t,  3>(num, mul_u64); break;
+      case  4: ms_res = multshiftround<uint64_t,  4>(num, mul_u64); break;
+      case  5: ms_res = multshiftround<uint64_t,  5>(num, mul_u64); break;
+      case  6: ms_res = multshiftround<uint64_t,  6>(num, mul_u64); break;
+      case  7: ms_res = multshiftround<uint64_t,  7>(num, mul_u64); break;
+      case  8: ms_res = multshiftround<uint64_t,  8>(num, mul_u64); break;
+      case  9: ms_res = multshiftround<uint64_t,  9>(num, mul_u64); break;
+      case 10: ms_res = multshiftround<uint64_t, 10>(num, mul_u64); break;
+      case 11: ms_res = multshiftround<uint64_t, 11>(num, mul_u64); break;
+      case 12: ms_res = multshiftround<uint64_t, 12>(num, mul_u64); break;
+      case 13: ms_res = multshiftround<uint64_t, 13>(num, mul_u64); break;
+      case 14: ms_res = multshiftround<uint64_t, 14>(num, mul_u64); break;
+      case 15: ms_res = multshiftround<uint64_t, 15>(num, mul_u64); break;
+      case 16: ms_res = multshiftround<uint64_t, 16>(num, mul_u64); break;
+      case 17: ms_res = multshiftround<uint64_t, 17>(num, mul_u64); break;
+      case 18: ms_res = multshiftround<uint64_t, 18>(num, mul_u64); break;
+      case 19: ms_res = multshiftround<uint64_t, 19>(num, mul_u64); break;
+      case 20: ms_res = multshiftround<uint64_t, 20>(num, mul_u64); break;
+      case 21: ms_res = multshiftround<uint64_t, 21>(num, mul_u64); break;
+      case 22: ms_res = multshiftround<uint64_t, 22>(num, mul_u64); break;
+      case 23: ms_res = multshiftround<uint64_t, 23>(num, mul_u64); break;
+      case 24: ms_res = multshiftround<uint64_t, 24>(num, mul_u64); break;
+      case 25: ms_res = multshiftround<uint64_t, 25>(num, mul_u64); break;
+      case 26: ms_res = multshiftround<uint64_t, 26>(num, mul_u64); break;
+      case 27: ms_res = multshiftround<uint64_t, 27>(num, mul_u64); break;
+      case 28: ms_res = multshiftround<uint64_t, 28>(num, mul_u64); break;
+      case 29: ms_res = multshiftround<uint64_t, 29>(num, mul_u64); break;
+      case 30: ms_res = multshiftround<uint64_t, 30>(num, mul_u64); break;
+      case 31: ms_res = multshiftround<uint64_t, 31>(num, mul_u64); break;
+      case 32: ms_res = multshiftround<uint64_t, 32>(num, mul_u64); break;
+      case 33: ms_res = multshiftround<uint64_t, 33>(num, mul_u64); break;
+      case 34: ms_res = multshiftround<uint64_t, 34>(num, mul_u64); break;
+      case 35: ms_res = multshiftround<uint64_t, 35>(num, mul_u64); break;
+      case 36: ms_res = multshiftround<uint64_t, 36>(num, mul_u64); break;
+      case 37: ms_res = multshiftround<uint64_t, 37>(num, mul_u64); break;
+      case 38: ms_res = multshiftround<uint64_t, 38>(num, mul_u64); break;
+      case 39: ms_res = multshiftround<uint64_t, 39>(num, mul_u64); break;
+      case 40: ms_res = multshiftround<uint64_t, 40>(num, mul_u64); break;
+      case 41: ms_res = multshiftround<uint64_t, 41>(num, mul_u64); break;
+      case 42: ms_res = multshiftround<uint64_t, 42>(num, mul_u64); break;
+      case 43: ms_res = multshiftround<uint64_t, 43>(num, mul_u64); break;
+      case 44: ms_res = multshiftround<uint64_t, 44>(num, mul_u64); break;
+      case 45: ms_res = multshiftround<uint64_t, 45>(num, mul_u64); break;
+      case 46: ms_res = multshiftround<uint64_t, 46>(num, mul_u64); break;
+      case 47: ms_res = multshiftround<uint64_t, 47>(num, mul_u64); break;
+      case 48: ms_res = multshiftround<uint64_t, 48>(num, mul_u64); break;
+      case 49: ms_res = multshiftround<uint64_t, 49>(num, mul_u64); break;
+      case 50: ms_res = multshiftround<uint64_t, 50>(num, mul_u64); break;
+      case 51: ms_res = multshiftround<uint64_t, 51>(num, mul_u64); break;
+      case 52: ms_res = multshiftround<uint64_t, 52>(num, mul_u64); break;
+      case 53: ms_res = multshiftround<uint64_t, 53>(num, mul_u64); break;
+      case 54: ms_res = multshiftround<uint64_t, 54>(num, mul_u64); break;
+      case 55: ms_res = multshiftround<uint64_t, 55>(num, mul_u64); break;
+      case 56: ms_res = multshiftround<uint64_t, 56>(num, mul_u64); break;
+      case 57: ms_res = multshiftround<uint64_t, 57>(num, mul_u64); break;
+      case 58: ms_res = multshiftround<uint64_t, 58>(num, mul_u64); break;
+      case 59: ms_res = multshiftround<uint64_t, 59>(num, mul_u64); break;
+      case 60: ms_res = multshiftround<uint64_t, 60>(num, mul_u64); break;
+      case 61: ms_res = multshiftround<uint64_t, 61>(num, mul_u64); break;
+      case 62: ms_res = multshiftround<uint64_t, 62>(num, mul_u64); break;
+      case 63: ms_res = multshiftround<uint64_t, 63>(num, mul_u64); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint64_t\n");
+          num = std::numeric_limits<uint64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround<uint64_t, %i>(): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time uint64_t multshiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 1 to 63.
+ */
+void test_multshiftround_u64_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing multshiftround_u64_%i()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t ms_res = 0ull;
+    switch (shift)
+    {
+      case  1: ms_res = multshiftround_u64_1(num, mul_u64); break;
+      case  2: ms_res = multshiftround_u64_2(num, mul_u64); break;
+      case  3: ms_res = multshiftround_u64_3(num, mul_u64); break;
+      case  4: ms_res = multshiftround_u64_4(num, mul_u64); break;
+      case  5: ms_res = multshiftround_u64_5(num, mul_u64); break;
+      case  6: ms_res = multshiftround_u64_6(num, mul_u64); break;
+      case  7: ms_res = multshiftround_u64_7(num, mul_u64); break;
+      case  8: ms_res = multshiftround_u64_8(num, mul_u64); break;
+      case  9: ms_res = multshiftround_u64_9(num, mul_u64); break;
+      case 10: ms_res = multshiftround_u64_10(num, mul_u64); break;
+      case 11: ms_res = multshiftround_u64_11(num, mul_u64); break;
+      case 12: ms_res = multshiftround_u64_12(num, mul_u64); break;
+      case 13: ms_res = multshiftround_u64_13(num, mul_u64); break;
+      case 14: ms_res = multshiftround_u64_14(num, mul_u64); break;
+      case 15: ms_res = multshiftround_u64_15(num, mul_u64); break;
+      case 16: ms_res = multshiftround_u64_16(num, mul_u64); break;
+      case 17: ms_res = multshiftround_u64_17(num, mul_u64); break;
+      case 18: ms_res = multshiftround_u64_18(num, mul_u64); break;
+      case 19: ms_res = multshiftround_u64_19(num, mul_u64); break;
+      case 20: ms_res = multshiftround_u64_20(num, mul_u64); break;
+      case 21: ms_res = multshiftround_u64_21(num, mul_u64); break;
+      case 22: ms_res = multshiftround_u64_22(num, mul_u64); break;
+      case 23: ms_res = multshiftround_u64_23(num, mul_u64); break;
+      case 24: ms_res = multshiftround_u64_24(num, mul_u64); break;
+      case 25: ms_res = multshiftround_u64_25(num, mul_u64); break;
+      case 26: ms_res = multshiftround_u64_26(num, mul_u64); break;
+      case 27: ms_res = multshiftround_u64_27(num, mul_u64); break;
+      case 28: ms_res = multshiftround_u64_28(num, mul_u64); break;
+      case 29: ms_res = multshiftround_u64_29(num, mul_u64); break;
+      case 30: ms_res = multshiftround_u64_30(num, mul_u64); break;
+      case 31: ms_res = multshiftround_u64_31(num, mul_u64); break;
+      case 32: ms_res = multshiftround_u64_32(num, mul_u64); break;
+      case 33: ms_res = multshiftround_u64_33(num, mul_u64); break;
+      case 34: ms_res = multshiftround_u64_34(num, mul_u64); break;
+      case 35: ms_res = multshiftround_u64_35(num, mul_u64); break;
+      case 36: ms_res = multshiftround_u64_36(num, mul_u64); break;
+      case 37: ms_res = multshiftround_u64_37(num, mul_u64); break;
+      case 38: ms_res = multshiftround_u64_38(num, mul_u64); break;
+      case 39: ms_res = multshiftround_u64_39(num, mul_u64); break;
+      case 40: ms_res = multshiftround_u64_40(num, mul_u64); break;
+      case 41: ms_res = multshiftround_u64_41(num, mul_u64); break;
+      case 42: ms_res = multshiftround_u64_42(num, mul_u64); break;
+      case 43: ms_res = multshiftround_u64_43(num, mul_u64); break;
+      case 44: ms_res = multshiftround_u64_44(num, mul_u64); break;
+      case 45: ms_res = multshiftround_u64_45(num, mul_u64); break;
+      case 46: ms_res = multshiftround_u64_46(num, mul_u64); break;
+      case 47: ms_res = multshiftround_u64_47(num, mul_u64); break;
+      case 48: ms_res = multshiftround_u64_48(num, mul_u64); break;
+      case 49: ms_res = multshiftround_u64_49(num, mul_u64); break;
+      case 50: ms_res = multshiftround_u64_50(num, mul_u64); break;
+      case 51: ms_res = multshiftround_u64_51(num, mul_u64); break;
+      case 52: ms_res = multshiftround_u64_52(num, mul_u64); break;
+      case 53: ms_res = multshiftround_u64_53(num, mul_u64); break;
+      case 54: ms_res = multshiftround_u64_54(num, mul_u64); break;
+      case 55: ms_res = multshiftround_u64_55(num, mul_u64); break;
+      case 56: ms_res = multshiftround_u64_56(num, mul_u64); break;
+      case 57: ms_res = multshiftround_u64_57(num, mul_u64); break;
+      case 58: ms_res = multshiftround_u64_58(num, mul_u64); break;
+      case 59: ms_res = multshiftround_u64_59(num, mul_u64); break;
+      case 60: ms_res = multshiftround_u64_60(num, mul_u64); break;
+      case 61: ms_res = multshiftround_u64_61(num, mul_u64); break;
+      case 62: ms_res = multshiftround_u64_62(num, mul_u64); break;
+      case 63: ms_res = multshiftround_u64_63(num, mul_u64); break;
+      default:
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint64_t\n");
+          num = std::numeric_limits<uint64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (ms_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: multshiftround_u64_%i(): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style runtime uint64_t shiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 0 to 63.
+ */
+void test_shiftround_u64_run_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<uint64_t>(num, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t s_res = shiftround<uint64_t>(num, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<uint64_t>(num, %i): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style runtime uint64_t shiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 0 to 63.
+ */
+void test_shiftround_u64_run_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_u64(num, %i)\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t s_res = shiftround_u64(num, shift);
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_u64(num, %i): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c++ style compile time uint64_t shiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 0 to 63.
+ */
+void test_shiftround_u64_comp_cpp(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround<uint64_t, %i>()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t s_res = 0ull;
+    switch (shift)
+    {
+      case  1: s_res = shiftround<uint64_t,  1>(num); break;
+      case  2: s_res = shiftround<uint64_t,  2>(num); break;
+      case  3: s_res = shiftround<uint64_t,  3>(num); break;
+      case  4: s_res = shiftround<uint64_t,  4>(num); break;
+      case  5: s_res = shiftround<uint64_t,  5>(num); break;
+      case  6: s_res = shiftround<uint64_t,  6>(num); break;
+      case  7: s_res = shiftround<uint64_t,  7>(num); break;
+      case  8: s_res = shiftround<uint64_t,  8>(num); break;
+      case  9: s_res = shiftround<uint64_t,  9>(num); break;
+      case 10: s_res = shiftround<uint64_t, 10>(num); break;
+      case 11: s_res = shiftround<uint64_t, 11>(num); break;
+      case 12: s_res = shiftround<uint64_t, 12>(num); break;
+      case 13: s_res = shiftround<uint64_t, 13>(num); break;
+      case 14: s_res = shiftround<uint64_t, 14>(num); break;
+      case 15: s_res = shiftround<uint64_t, 15>(num); break;
+      case 16: s_res = shiftround<uint64_t, 16>(num); break;
+      case 17: s_res = shiftround<uint64_t, 17>(num); break;
+      case 18: s_res = shiftround<uint64_t, 18>(num); break;
+      case 19: s_res = shiftround<uint64_t, 19>(num); break;
+      case 20: s_res = shiftround<uint64_t, 20>(num); break;
+      case 21: s_res = shiftround<uint64_t, 21>(num); break;
+      case 22: s_res = shiftround<uint64_t, 22>(num); break;
+      case 23: s_res = shiftround<uint64_t, 23>(num); break;
+      case 24: s_res = shiftround<uint64_t, 24>(num); break;
+      case 25: s_res = shiftround<uint64_t, 25>(num); break;
+      case 26: s_res = shiftround<uint64_t, 26>(num); break;
+      case 27: s_res = shiftround<uint64_t, 27>(num); break;
+      case 28: s_res = shiftround<uint64_t, 28>(num); break;
+      case 29: s_res = shiftround<uint64_t, 29>(num); break;
+      case 30: s_res = shiftround<uint64_t, 30>(num); break;
+      case 31: s_res = shiftround<uint64_t, 31>(num); break;
+      case 32: s_res = shiftround<uint64_t, 32>(num); break;
+      case 33: s_res = shiftround<uint64_t, 33>(num); break;
+      case 34: s_res = shiftround<uint64_t, 34>(num); break;
+      case 35: s_res = shiftround<uint64_t, 35>(num); break;
+      case 36: s_res = shiftround<uint64_t, 36>(num); break;
+      case 37: s_res = shiftround<uint64_t, 37>(num); break;
+      case 38: s_res = shiftround<uint64_t, 38>(num); break;
+      case 39: s_res = shiftround<uint64_t, 39>(num); break;
+      case 40: s_res = shiftround<uint64_t, 40>(num); break;
+      case 41: s_res = shiftround<uint64_t, 41>(num); break;
+      case 42: s_res = shiftround<uint64_t, 42>(num); break;
+      case 43: s_res = shiftround<uint64_t, 43>(num); break;
+      case 44: s_res = shiftround<uint64_t, 44>(num); break;
+      case 45: s_res = shiftround<uint64_t, 45>(num); break;
+      case 46: s_res = shiftround<uint64_t, 46>(num); break;
+      case 47: s_res = shiftround<uint64_t, 47>(num); break;
+      case 48: s_res = shiftround<uint64_t, 48>(num); break;
+      case 49: s_res = shiftround<uint64_t, 49>(num); break;
+      case 50: s_res = shiftround<uint64_t, 50>(num); break;
+      case 51: s_res = shiftround<uint64_t, 51>(num); break;
+      case 52: s_res = shiftround<uint64_t, 52>(num); break;
+      case 53: s_res = shiftround<uint64_t, 53>(num); break;
+      case 54: s_res = shiftround<uint64_t, 54>(num); break;
+      case 55: s_res = shiftround<uint64_t, 55>(num); break;
+      case 56: s_res = shiftround<uint64_t, 56>(num); break;
+      case 57: s_res = shiftround<uint64_t, 57>(num); break;
+      case 58: s_res = shiftround<uint64_t, 58>(num); break;
+      case 59: s_res = shiftround<uint64_t, 59>(num); break;
+      case 60: s_res = shiftround<uint64_t, 60>(num); break;
+      case 61: s_res = shiftround<uint64_t, 61>(num); break;
+      case 62: s_res = shiftround<uint64_t, 62>(num); break;
+      case 63: s_res = shiftround<uint64_t, 63>(num); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint64_t\n");
+          num = std::numeric_limits<uint64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround<uint64_t, %i>(): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
+/**
+ * Test c style compile time uint64_t shiftround for num on
+ * [0, 8388608] [18446744073701163007, 18446744073709551615].
+ * shift should range from 0 to 63.
+ */
+void test_shiftround_u64_comp_c(uint8_t shift, size_t thread_index) {
+  {
+    std::lock_guard<std::mutex> print_lock(print_mutex);
+    std::printf("testing shiftround_u64_%i()\n", shift);
+  }
+
+  cpp_bin_float_80 ldbl_twoexp(1ull << shift);
+  uint64_t num = std::numeric_limits<uint64_t>::lowest();
+  while (true)
+  {
+    uint64_t s_res = 0ull;
+    switch (shift)
+    {
+      case  1: s_res = shiftround_u64_1(num); break;
+      case  2: s_res = shiftround_u64_2(num); break;
+      case  3: s_res = shiftround_u64_3(num); break;
+      case  4: s_res = shiftround_u64_4(num); break;
+      case  5: s_res = shiftround_u64_5(num); break;
+      case  6: s_res = shiftround_u64_6(num); break;
+      case  7: s_res = shiftround_u64_7(num); break;
+      case  8: s_res = shiftround_u64_8(num); break;
+      case  9: s_res = shiftround_u64_9(num); break;
+      case 10: s_res = shiftround_u64_10(num); break;
+      case 11: s_res = shiftround_u64_11(num); break;
+      case 12: s_res = shiftround_u64_12(num); break;
+      case 13: s_res = shiftround_u64_13(num); break;
+      case 14: s_res = shiftround_u64_14(num); break;
+      case 15: s_res = shiftround_u64_15(num); break;
+      case 16: s_res = shiftround_u64_16(num); break;
+      case 17: s_res = shiftround_u64_17(num); break;
+      case 18: s_res = shiftround_u64_18(num); break;
+      case 19: s_res = shiftround_u64_19(num); break;
+      case 20: s_res = shiftround_u64_20(num); break;
+      case 21: s_res = shiftround_u64_21(num); break;
+      case 22: s_res = shiftround_u64_22(num); break;
+      case 23: s_res = shiftround_u64_23(num); break;
+      case 24: s_res = shiftround_u64_24(num); break;
+      case 25: s_res = shiftround_u64_25(num); break;
+      case 26: s_res = shiftround_u64_26(num); break;
+      case 27: s_res = shiftround_u64_27(num); break;
+      case 28: s_res = shiftround_u64_28(num); break;
+      case 29: s_res = shiftround_u64_29(num); break;
+      case 30: s_res = shiftround_u64_30(num); break;
+      case 31: s_res = shiftround_u64_31(num); break;
+      case 32: s_res = shiftround_u64_32(num); break;
+      case 33: s_res = shiftround_u64_33(num); break;
+      case 34: s_res = shiftround_u64_34(num); break;
+      case 35: s_res = shiftround_u64_35(num); break;
+      case 36: s_res = shiftround_u64_36(num); break;
+      case 37: s_res = shiftround_u64_37(num); break;
+      case 38: s_res = shiftround_u64_38(num); break;
+      case 39: s_res = shiftround_u64_39(num); break;
+      case 40: s_res = shiftround_u64_40(num); break;
+      case 41: s_res = shiftround_u64_41(num); break;
+      case 42: s_res = shiftround_u64_42(num); break;
+      case 43: s_res = shiftround_u64_43(num); break;
+      case 44: s_res = shiftround_u64_44(num); break;
+      case 45: s_res = shiftround_u64_45(num); break;
+      case 46: s_res = shiftround_u64_46(num); break;
+      case 47: s_res = shiftround_u64_47(num); break;
+      case 48: s_res = shiftround_u64_48(num); break;
+      case 49: s_res = shiftround_u64_49(num); break;
+      case 50: s_res = shiftround_u64_50(num); break;
+      case 51: s_res = shiftround_u64_51(num); break;
+      case 52: s_res = shiftround_u64_52(num); break;
+      case 53: s_res = shiftround_u64_53(num); break;
+      case 54: s_res = shiftround_u64_54(num); break;
+      case 55: s_res = shiftround_u64_55(num); break;
+      case 56: s_res = shiftround_u64_56(num); break;
+      case 57: s_res = shiftround_u64_57(num); break;
+      case 58: s_res = shiftround_u64_58(num); break;
+      case 59: s_res = shiftround_u64_59(num); break;
+      case 60: s_res = shiftround_u64_60(num); break;
+      case 61: s_res = shiftround_u64_61(num); break;
+      case 62: s_res = shiftround_u64_62(num); break;
+      case 63: s_res = shiftround_u64_63(num); break;
+      default: 
+        {
+          std::lock_guard<std::mutex> print_lock(print_mutex);
+          std::printf("ERROR: invalid shift uint64_t\n");
+          num = std::numeric_limits<uint64_t>::max();
+          break;
+        }
+    }
+
+    cpp_bin_float_80 ldbl_num(num);
+    uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
+    if (s_res != dbl_res) {
+      std::lock_guard<std::mutex> print_lock(print_mutex);
+      std::printf("ERROR: shiftround_u64_%i(): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
+    }
+    if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
+    if (num == std::numeric_limits<uint64_t>::max()) break;
+    num++;
+  }
+  thread_running[thread_index].store(false);
+}
+
 int main()
 {
   /**
-   * Test int8_t multshiftround for num on [-128, 127] and shift on [1, 6].
+   * Test int8_t multshiftround for num on [-128, 127] and shift on [0, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 0u; shift <= 6u; shift++)
   {
     std::printf("testing multshiftround<int8_t>(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -97,9 +1942,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test multshiftround_i8 for num on [-128, 127] and shift on [1, 6].
+   * Test multshiftround_i8 for num on [-128, 127] and shift on [0, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 0u; shift <= 6u; shift++)
   {
     std::printf("testing multshiftround_i8(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -118,7 +1963,7 @@ int main()
   /**
    * Test int8_t multshiftround for num on [-128, 127] and shift on [1, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 1u; shift <= 6u; shift++)
   {
     std::printf("testing multshiftround<int8_t, %i>()\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -148,7 +1993,7 @@ int main()
   /**
    * Test multshiftround_i8_Y for num on [-128, 127] and Y on [1, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 1u; shift <= 6u; shift++)
   {
     std::printf("testing multshiftround_i8_%i()\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -176,9 +2021,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test int8_t shiftround for num on [-128, 127] and shift on [1, 6].
+   * Test int8_t shiftround for num on [-128, 127] and shift on [0, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 0u; shift <= 6u; shift++)
   {
     std::printf("testing shiftround<int8_t>(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -195,9 +2040,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test shiftround_i8 for num on [-128, 127] and shift on [1, 6].
+   * Test shiftround_i8 for num on [-128, 127] and shift on [0, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 0u; shift <= 6u; shift++)
   {
     std::printf("testing shiftround_i8(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -216,7 +2061,7 @@ int main()
   /**
    * Test int8_t shiftround for num on [-128, 127] and shift on [1, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 1u; shift <= 6u; shift++)
   {
     std::printf("testing shiftround<int8_t, %i>()\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -246,7 +2091,7 @@ int main()
   /**
    * Test shiftround_i8_Y for num on [-128, 127] and Y on [1, 6].
    */
-  for (int8_t shift = 1; shift <= 6; shift++)
+  for (uint8_t shift = 1u; shift <= 6u; shift++)
   {
     std::printf("testing shiftround_i8_%i()\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -274,9 +2119,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test int16_t multshiftround for num on [-32768, 32767] and shift on [1, 14].
+   * Test int16_t multshiftround for num on [-32768, 32767] and shift on [0, 14].
    */
-  for (int8_t shift = 1; shift <= 14; shift++)
+  for (uint8_t shift = 0u; shift <= 14u; shift++)
   {
     std::printf("testing multshiftround<int16_t>(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -293,9 +2138,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test multshiftround_i16 for num on [-32768, 32767] and shift on [1, 14].
+   * Test multshiftround_i16 for num on [-32768, 32767] and shift on [0, 14].
    */
-  for (int8_t shift = 1; shift <= 14; shift++)
+  for (uint8_t shift = 0u; shift <= 14u; shift++)
   {
     std::printf("testing multshiftround_i16(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -314,7 +2159,7 @@ int main()
   /**
    * Test int16_t multshiftround for num on [-32768, 32767] and shift on [1, 14].
    */
-  for (int8_t shift = 1; shift <= 14; shift++)
+  for (uint8_t shift = 1u; shift <= 14u; shift++)
   {
     std::printf("testing multshiftround<int16_t, %i>()\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -324,20 +2169,20 @@ int main()
       int16_t ms_res;
       switch (shift)
       {
-        case  1: ms_res = multshiftround<int16_t,  1>(num, mul_i16); break;
-        case  2: ms_res = multshiftround<int16_t,  2>(num, mul_i16); break;
-        case  3: ms_res = multshiftround<int16_t,  3>(num, mul_i16); break;
-        case  4: ms_res = multshiftround<int16_t,  4>(num, mul_i16); break;
-        case  5: ms_res = multshiftround<int16_t,  5>(num, mul_i16); break;
-        case  6: ms_res = multshiftround<int16_t,  6>(num, mul_i16); break;
-        case  7: ms_res = multshiftround<int16_t,  7>(num, mul_i16); break;
-        case  8: ms_res = multshiftround<int16_t,  8>(num, mul_i16); break;
-        case  9: ms_res = multshiftround<int16_t,  9>(num, mul_i16); break;
-        case 10: ms_res = multshiftround<int16_t, 10>(num, mul_i16); break;
-        case 11: ms_res = multshiftround<int16_t, 11>(num, mul_i16); break;
-        case 12: ms_res = multshiftround<int16_t, 12>(num, mul_i16); break;
-        case 13: ms_res = multshiftround<int16_t, 13>(num, mul_i16); break;
-        case 14: ms_res = multshiftround<int16_t, 14>(num, mul_i16); break;
+        case  1u: ms_res = multshiftround<int16_t,  1>(num, mul_i16); break;
+        case  2u: ms_res = multshiftround<int16_t,  2>(num, mul_i16); break;
+        case  3u: ms_res = multshiftround<int16_t,  3>(num, mul_i16); break;
+        case  4u: ms_res = multshiftround<int16_t,  4>(num, mul_i16); break;
+        case  5u: ms_res = multshiftround<int16_t,  5>(num, mul_i16); break;
+        case  6u: ms_res = multshiftround<int16_t,  6>(num, mul_i16); break;
+        case  7u: ms_res = multshiftround<int16_t,  7>(num, mul_i16); break;
+        case  8u: ms_res = multshiftround<int16_t,  8>(num, mul_i16); break;
+        case  9u: ms_res = multshiftround<int16_t,  9>(num, mul_i16); break;
+        case 10u: ms_res = multshiftround<int16_t, 10>(num, mul_i16); break;
+        case 11u: ms_res = multshiftround<int16_t, 11>(num, mul_i16); break;
+        case 12u: ms_res = multshiftround<int16_t, 12>(num, mul_i16); break;
+        case 13u: ms_res = multshiftround<int16_t, 13>(num, mul_i16); break;
+        case 14u: ms_res = multshiftround<int16_t, 14>(num, mul_i16); break;
         default: std::printf("ERROR: invalid shift int16_t\n"); return 0; break;
       }
 
@@ -388,9 +2233,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test int16_t shiftround for num on [-32768, 32767] and shift on [1, 14].
+   * Test int16_t shiftround for num on [-32768, 32767] and shift on [0, 14].
    */
-  for (int8_t shift = 1; shift <= 14; shift++)
+  for (int8_t shift = 0; shift <= 14; shift++)
   {
     std::printf("testing shiftround<int16_t>(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -407,9 +2252,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test shiftround_i16 for num on [-32768, 32767] and shift on [1, 14].
+   * Test shiftround_i16 for num on [-32768, 32767] and shift on [0, 14].
    */
-  for (int8_t shift = 1; shift <= 14; shift++)
+  for (int8_t shift = 0; shift <= 14; shift++)
   {
     std::printf("testing shiftround_i16(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -502,777 +2347,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test int32_t multshiftround for num on [-2147483648, 2147483647] and shift on [1, 30].
+   * Test uint8_t multshiftround for num on [0, 255] and shift on [0, 7].
    */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing multshiftround<int32_t>(num, mul, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t ms_res = multshiftround<int32_t>(num, mul_i32, shift);
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<int32_t>(num, mul, %i): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test multshiftround_i32 for num on [-2147483648, 2147483647] and shift on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing multshiftround_i32(num, mul, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t ms_res = multshiftround_i32(num, mul_i32, shift);
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_i32(num, mul, %i): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int32_t multshiftround for num on [-2147483648, 2147483647] and shift on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing multshiftround<int32_t, %i>()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround<int32_t, 1>(num, mul_i32); break;
-        case  2: ms_res = multshiftround<int32_t, 2>(num, mul_i32); break;
-        case  3: ms_res = multshiftround<int32_t, 3>(num, mul_i32); break;
-        case  4: ms_res = multshiftround<int32_t, 4>(num, mul_i32); break;
-        case  5: ms_res = multshiftround<int32_t, 5>(num, mul_i32); break;
-        case  6: ms_res = multshiftround<int32_t, 6>(num, mul_i32); break;
-        case  7: ms_res = multshiftround<int32_t, 7>(num, mul_i32); break;
-        case  8: ms_res = multshiftround<int32_t, 8>(num, mul_i32); break;
-        case  9: ms_res = multshiftround<int32_t, 9>(num, mul_i32); break;
-        case 10: ms_res = multshiftround<int32_t,10>(num, mul_i32); break;
-        case 11: ms_res = multshiftround<int32_t,11>(num, mul_i32); break;
-        case 12: ms_res = multshiftround<int32_t,12>(num, mul_i32); break;
-        case 13: ms_res = multshiftround<int32_t,13>(num, mul_i32); break;
-        case 14: ms_res = multshiftround<int32_t,14>(num, mul_i32); break;
-        case 15: ms_res = multshiftround<int32_t,15>(num, mul_i32); break;
-        case 16: ms_res = multshiftround<int32_t,16>(num, mul_i32); break;
-        case 17: ms_res = multshiftround<int32_t,17>(num, mul_i32); break;
-        case 18: ms_res = multshiftround<int32_t,18>(num, mul_i32); break;
-        case 19: ms_res = multshiftround<int32_t,19>(num, mul_i32); break;
-        case 20: ms_res = multshiftround<int32_t,20>(num, mul_i32); break;
-        case 21: ms_res = multshiftround<int32_t,21>(num, mul_i32); break;
-        case 22: ms_res = multshiftround<int32_t,22>(num, mul_i32); break;
-        case 23: ms_res = multshiftround<int32_t,23>(num, mul_i32); break;
-        case 24: ms_res = multshiftround<int32_t,24>(num, mul_i32); break;
-        case 25: ms_res = multshiftround<int32_t,25>(num, mul_i32); break;
-        case 26: ms_res = multshiftround<int32_t,26>(num, mul_i32); break;
-        case 27: ms_res = multshiftround<int32_t,27>(num, mul_i32); break;
-        case 28: ms_res = multshiftround<int32_t,28>(num, mul_i32); break;
-        case 29: ms_res = multshiftround<int32_t,29>(num, mul_i32); break;
-        case 30: ms_res = multshiftround<int32_t,30>(num, mul_i32); break;
-        default: std::printf("ERROR: invalid shift int32_t\n"); return 0; break;
-      }
-
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<int32_t, %i>(): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test multshiftround_i32_Y for num on [-2147483648, 2147483647] and Y on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing multshiftround_i32_%i()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround_i32_1(num, mul_i32); break;
-        case  2: ms_res = multshiftround_i32_2(num, mul_i32); break;
-        case  3: ms_res = multshiftround_i32_3(num, mul_i32); break;
-        case  4: ms_res = multshiftround_i32_4(num, mul_i32); break;
-        case  5: ms_res = multshiftround_i32_5(num, mul_i32); break;
-        case  6: ms_res = multshiftround_i32_6(num, mul_i32); break;
-        case  7: ms_res = multshiftround_i32_7(num, mul_i32); break;
-        case  8: ms_res = multshiftround_i32_8(num, mul_i32); break;
-        case  9: ms_res = multshiftround_i32_9(num, mul_i32); break;
-        case 10: ms_res = multshiftround_i32_10(num, mul_i32); break;
-        case 11: ms_res = multshiftround_i32_11(num, mul_i32); break;
-        case 12: ms_res = multshiftround_i32_12(num, mul_i32); break;
-        case 13: ms_res = multshiftround_i32_13(num, mul_i32); break;
-        case 14: ms_res = multshiftround_i32_14(num, mul_i32); break;
-        case 15: ms_res = multshiftround_i32_15(num, mul_i32); break;
-        case 16: ms_res = multshiftround_i32_16(num, mul_i32); break;
-        case 17: ms_res = multshiftround_i32_17(num, mul_i32); break;
-        case 18: ms_res = multshiftround_i32_18(num, mul_i32); break;
-        case 19: ms_res = multshiftround_i32_19(num, mul_i32); break;
-        case 20: ms_res = multshiftround_i32_20(num, mul_i32); break;
-        case 21: ms_res = multshiftround_i32_21(num, mul_i32); break;
-        case 22: ms_res = multshiftround_i32_22(num, mul_i32); break;
-        case 23: ms_res = multshiftround_i32_23(num, mul_i32); break;
-        case 24: ms_res = multshiftround_i32_24(num, mul_i32); break;
-        case 25: ms_res = multshiftround_i32_25(num, mul_i32); break;
-        case 26: ms_res = multshiftround_i32_26(num, mul_i32); break;
-        case 27: ms_res = multshiftround_i32_27(num, mul_i32); break;
-        case 28: ms_res = multshiftround_i32_28(num, mul_i32); break;
-        case 29: ms_res = multshiftround_i32_29(num, mul_i32); break;
-        case 30: ms_res = multshiftround_i32_30(num, mul_i32); break;
-        default: std::printf("ERROR: invalid shift int32_t\n"); return 0; break;
-      }
-
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_i32_%i(): ms_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int32_t shiftround for num on [-2147483648, 2147483647] and shift on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing shiftround<int32_t>(num, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t s_res = shiftround<int32_t>(num, shift);
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<int32_t>(num, %i): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int32_t shiftround for num on [-2147483648, 2147483647] and shift on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing shiftround_i32(num, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t s_res = shiftround_i32(num, shift);
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_i32(num, %i): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int32_t shiftround for num on [-2147483648, 2147483647] and shift on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing shiftround<int32_t, %i>()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround<int32_t,  1>(num); break;
-        case  2: s_res = shiftround<int32_t,  2>(num); break;
-        case  3: s_res = shiftround<int32_t,  3>(num); break;
-        case  4: s_res = shiftround<int32_t,  4>(num); break;
-        case  5: s_res = shiftround<int32_t,  5>(num); break;
-        case  6: s_res = shiftround<int32_t,  6>(num); break;
-        case  7: s_res = shiftround<int32_t,  7>(num); break;
-        case  8: s_res = shiftround<int32_t,  8>(num); break;
-        case  9: s_res = shiftround<int32_t,  9>(num); break;
-        case 10: s_res = shiftround<int32_t, 10>(num); break;
-        case 11: s_res = shiftround<int32_t, 11>(num); break;
-        case 12: s_res = shiftround<int32_t, 12>(num); break;
-        case 13: s_res = shiftround<int32_t, 13>(num); break;
-        case 14: s_res = shiftround<int32_t, 14>(num); break;
-        case 15: s_res = shiftround<int32_t, 15>(num); break;
-        case 16: s_res = shiftround<int32_t, 16>(num); break;
-        case 17: s_res = shiftround<int32_t, 17>(num); break;
-        case 18: s_res = shiftround<int32_t, 18>(num); break;
-        case 19: s_res = shiftround<int32_t, 19>(num); break;
-        case 20: s_res = shiftround<int32_t, 20>(num); break;
-        case 21: s_res = shiftround<int32_t, 21>(num); break;
-        case 22: s_res = shiftround<int32_t, 22>(num); break;
-        case 23: s_res = shiftround<int32_t, 23>(num); break;
-        case 24: s_res = shiftround<int32_t, 24>(num); break;
-        case 25: s_res = shiftround<int32_t, 25>(num); break;
-        case 26: s_res = shiftround<int32_t, 26>(num); break;
-        case 27: s_res = shiftround<int32_t, 27>(num); break;
-        case 28: s_res = shiftround<int32_t, 28>(num); break;
-        case 29: s_res = shiftround<int32_t, 29>(num); break;
-        case 30: s_res = shiftround<int32_t, 30>(num); break;
-        default: std::printf("ERROR: invalid shift int32_t\n"); return 0; break;
-      }
-
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<int32_t, %i>(): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test shiftround_i32_Y for num on [-2147483648, 2147483647] and Y on [1, 30].
-   */
-  for (int8_t shift = 1; shift <= 30; shift++)
-  {
-    std::printf("testing shiftround_i32_%i()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    int32_t num = std::numeric_limits<int32_t>::lowest();
-    while (true)
-    {
-      int32_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround_i32_1(num); break;
-        case  2: s_res = shiftround_i32_2(num); break;
-        case  3: s_res = shiftround_i32_3(num); break;
-        case  4: s_res = shiftround_i32_4(num); break;
-        case  5: s_res = shiftround_i32_5(num); break;
-        case  6: s_res = shiftround_i32_6(num); break;
-        case  7: s_res = shiftround_i32_7(num); break;
-        case  8: s_res = shiftround_i32_8(num); break;
-        case  9: s_res = shiftround_i32_9(num); break;
-        case 10: s_res = shiftround_i32_10(num); break;
-        case 11: s_res = shiftround_i32_11(num); break;
-        case 12: s_res = shiftround_i32_12(num); break;
-        case 13: s_res = shiftround_i32_13(num); break;
-        case 14: s_res = shiftround_i32_14(num); break;
-        case 15: s_res = shiftround_i32_15(num); break;
-        case 16: s_res = shiftround_i32_16(num); break;
-        case 17: s_res = shiftround_i32_17(num); break;
-        case 18: s_res = shiftround_i32_18(num); break;
-        case 19: s_res = shiftround_i32_19(num); break;
-        case 20: s_res = shiftround_i32_20(num); break;
-        case 21: s_res = shiftround_i32_21(num); break;
-        case 22: s_res = shiftround_i32_22(num); break;
-        case 23: s_res = shiftround_i32_23(num); break;
-        case 24: s_res = shiftround_i32_24(num); break;
-        case 25: s_res = shiftround_i32_25(num); break;
-        case 26: s_res = shiftround_i32_26(num); break;
-        case 27: s_res = shiftround_i32_27(num); break;
-        case 28: s_res = shiftround_i32_28(num); break;
-        case 29: s_res = shiftround_i32_29(num); break;
-        case 30: s_res = shiftround_i32_30(num); break;
-        default: std::printf("ERROR: invalid shift int32_t\n"); return 0; break;
-      }
-
-      int32_t dbl_res = static_cast<int32_t>(std::round((static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_i32_%i(): s_res %i, dbl_res %i, dbl %.16f, num %i, mul %i\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_i32) / dbl_twoexp, num, mul_i32);
-      if (num == std::numeric_limits<int32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int64_t multshiftround for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and shift on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing multshiftround<int64_t>(num, mul, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t ms_res = multshiftround<int64_t>(num, mul_i64, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<int64_t>(num, mul, %i): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test multshiftround_i64 for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and shift on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing multshiftround_i64(num, mul, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t ms_res = multshiftround_i64(num, mul_i64, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_i64(num, mul, %i): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int64_t multshiftround for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and shift on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing multshiftround<int64_t, %i>()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround<int64_t,  1>(num, mul_i64); break;
-        case  2: ms_res = multshiftround<int64_t,  2>(num, mul_i64); break;
-        case  3: ms_res = multshiftround<int64_t,  3>(num, mul_i64); break;
-        case  4: ms_res = multshiftround<int64_t,  4>(num, mul_i64); break;
-        case  5: ms_res = multshiftround<int64_t,  5>(num, mul_i64); break;
-        case  6: ms_res = multshiftround<int64_t,  6>(num, mul_i64); break;
-        case  7: ms_res = multshiftround<int64_t,  7>(num, mul_i64); break;
-        case  8: ms_res = multshiftround<int64_t,  8>(num, mul_i64); break;
-        case  9: ms_res = multshiftround<int64_t,  9>(num, mul_i64); break;
-        case 10: ms_res = multshiftround<int64_t, 10>(num, mul_i64); break;
-        case 11: ms_res = multshiftround<int64_t, 11>(num, mul_i64); break;
-        case 12: ms_res = multshiftround<int64_t, 12>(num, mul_i64); break;
-        case 13: ms_res = multshiftround<int64_t, 13>(num, mul_i64); break;
-        case 14: ms_res = multshiftround<int64_t, 14>(num, mul_i64); break;
-        case 15: ms_res = multshiftround<int64_t, 15>(num, mul_i64); break;
-        case 16: ms_res = multshiftround<int64_t, 16>(num, mul_i64); break;
-        case 17: ms_res = multshiftround<int64_t, 17>(num, mul_i64); break;
-        case 18: ms_res = multshiftround<int64_t, 18>(num, mul_i64); break;
-        case 19: ms_res = multshiftround<int64_t, 19>(num, mul_i64); break;
-        case 20: ms_res = multshiftround<int64_t, 20>(num, mul_i64); break;
-        case 21: ms_res = multshiftround<int64_t, 21>(num, mul_i64); break;
-        case 22: ms_res = multshiftround<int64_t, 22>(num, mul_i64); break;
-        case 23: ms_res = multshiftround<int64_t, 23>(num, mul_i64); break;
-        case 24: ms_res = multshiftround<int64_t, 24>(num, mul_i64); break;
-        case 25: ms_res = multshiftround<int64_t, 25>(num, mul_i64); break;
-        case 26: ms_res = multshiftround<int64_t, 26>(num, mul_i64); break;
-        case 27: ms_res = multshiftround<int64_t, 27>(num, mul_i64); break;
-        case 28: ms_res = multshiftround<int64_t, 28>(num, mul_i64); break;
-        case 29: ms_res = multshiftround<int64_t, 29>(num, mul_i64); break;
-        case 30: ms_res = multshiftround<int64_t, 30>(num, mul_i64); break;
-        case 31: ms_res = multshiftround<int64_t, 31>(num, mul_i64); break;
-        case 32: ms_res = multshiftround<int64_t, 32>(num, mul_i64); break;
-        case 33: ms_res = multshiftround<int64_t, 33>(num, mul_i64); break;
-        case 34: ms_res = multshiftround<int64_t, 34>(num, mul_i64); break;
-        case 35: ms_res = multshiftround<int64_t, 35>(num, mul_i64); break;
-        case 36: ms_res = multshiftround<int64_t, 36>(num, mul_i64); break;
-        case 37: ms_res = multshiftround<int64_t, 37>(num, mul_i64); break;
-        case 38: ms_res = multshiftround<int64_t, 38>(num, mul_i64); break;
-        case 39: ms_res = multshiftround<int64_t, 39>(num, mul_i64); break;
-        case 40: ms_res = multshiftround<int64_t, 40>(num, mul_i64); break;
-        case 41: ms_res = multshiftround<int64_t, 41>(num, mul_i64); break;
-        case 42: ms_res = multshiftround<int64_t, 42>(num, mul_i64); break;
-        case 43: ms_res = multshiftround<int64_t, 43>(num, mul_i64); break;
-        case 44: ms_res = multshiftround<int64_t, 44>(num, mul_i64); break;
-        case 45: ms_res = multshiftround<int64_t, 45>(num, mul_i64); break;
-        case 46: ms_res = multshiftround<int64_t, 46>(num, mul_i64); break;
-        case 47: ms_res = multshiftround<int64_t, 47>(num, mul_i64); break;
-        case 48: ms_res = multshiftround<int64_t, 48>(num, mul_i64); break;
-        case 49: ms_res = multshiftround<int64_t, 49>(num, mul_i64); break;
-        case 50: ms_res = multshiftround<int64_t, 50>(num, mul_i64); break;
-        case 51: ms_res = multshiftround<int64_t, 51>(num, mul_i64); break;
-        case 52: ms_res = multshiftround<int64_t, 52>(num, mul_i64); break;
-        case 53: ms_res = multshiftround<int64_t, 53>(num, mul_i64); break;
-        case 54: ms_res = multshiftround<int64_t, 54>(num, mul_i64); break;
-        case 55: ms_res = multshiftround<int64_t, 55>(num, mul_i64); break;
-        case 56: ms_res = multshiftround<int64_t, 56>(num, mul_i64); break;
-        case 57: ms_res = multshiftround<int64_t, 57>(num, mul_i64); break;
-        case 58: ms_res = multshiftround<int64_t, 58>(num, mul_i64); break;
-        case 59: ms_res = multshiftround<int64_t, 59>(num, mul_i64); break;
-        case 60: ms_res = multshiftround<int64_t, 60>(num, mul_i64); break;
-        case 61: ms_res = multshiftround<int64_t, 61>(num, mul_i64); break;
-        case 62: ms_res = multshiftround<int64_t, 62>(num, mul_i64); break;
-        default: std::printf("ERROR: invalid shift int64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<int64_t, %i>(): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test multshiftround_i64_Y for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and Y on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing multshiftround_i64_%i()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround_i64_1(num, mul_i64); break;
-        case  2: ms_res = multshiftround_i64_2(num, mul_i64); break;
-        case  3: ms_res = multshiftround_i64_3(num, mul_i64); break;
-        case  4: ms_res = multshiftround_i64_4(num, mul_i64); break;
-        case  5: ms_res = multshiftround_i64_5(num, mul_i64); break;
-        case  6: ms_res = multshiftround_i64_6(num, mul_i64); break;
-        case  7: ms_res = multshiftround_i64_7(num, mul_i64); break;
-        case  8: ms_res = multshiftround_i64_8(num, mul_i64); break;
-        case  9: ms_res = multshiftround_i64_9(num, mul_i64); break;
-        case 10: ms_res = multshiftround_i64_10(num, mul_i64); break;
-        case 11: ms_res = multshiftround_i64_11(num, mul_i64); break;
-        case 12: ms_res = multshiftround_i64_12(num, mul_i64); break;
-        case 13: ms_res = multshiftround_i64_13(num, mul_i64); break;
-        case 14: ms_res = multshiftround_i64_14(num, mul_i64); break;
-        case 15: ms_res = multshiftround_i64_15(num, mul_i64); break;
-        case 16: ms_res = multshiftround_i64_16(num, mul_i64); break;
-        case 17: ms_res = multshiftround_i64_17(num, mul_i64); break;
-        case 18: ms_res = multshiftround_i64_18(num, mul_i64); break;
-        case 19: ms_res = multshiftround_i64_19(num, mul_i64); break;
-        case 20: ms_res = multshiftround_i64_20(num, mul_i64); break;
-        case 21: ms_res = multshiftround_i64_21(num, mul_i64); break;
-        case 22: ms_res = multshiftround_i64_22(num, mul_i64); break;
-        case 23: ms_res = multshiftround_i64_23(num, mul_i64); break;
-        case 24: ms_res = multshiftround_i64_24(num, mul_i64); break;
-        case 25: ms_res = multshiftround_i64_25(num, mul_i64); break;
-        case 26: ms_res = multshiftround_i64_26(num, mul_i64); break;
-        case 27: ms_res = multshiftround_i64_27(num, mul_i64); break;
-        case 28: ms_res = multshiftround_i64_28(num, mul_i64); break;
-        case 29: ms_res = multshiftround_i64_29(num, mul_i64); break;
-        case 30: ms_res = multshiftround_i64_30(num, mul_i64); break;
-        case 31: ms_res = multshiftround_i64_31(num, mul_i64); break;
-        case 32: ms_res = multshiftround_i64_32(num, mul_i64); break;
-        case 33: ms_res = multshiftround_i64_33(num, mul_i64); break;
-        case 34: ms_res = multshiftround_i64_34(num, mul_i64); break;
-        case 35: ms_res = multshiftround_i64_35(num, mul_i64); break;
-        case 36: ms_res = multshiftround_i64_36(num, mul_i64); break;
-        case 37: ms_res = multshiftround_i64_37(num, mul_i64); break;
-        case 38: ms_res = multshiftround_i64_38(num, mul_i64); break;
-        case 39: ms_res = multshiftround_i64_39(num, mul_i64); break;
-        case 40: ms_res = multshiftround_i64_40(num, mul_i64); break;
-        case 41: ms_res = multshiftround_i64_41(num, mul_i64); break;
-        case 42: ms_res = multshiftround_i64_42(num, mul_i64); break;
-        case 43: ms_res = multshiftround_i64_43(num, mul_i64); break;
-        case 44: ms_res = multshiftround_i64_44(num, mul_i64); break;
-        case 45: ms_res = multshiftround_i64_45(num, mul_i64); break;
-        case 46: ms_res = multshiftround_i64_46(num, mul_i64); break;
-        case 47: ms_res = multshiftround_i64_47(num, mul_i64); break;
-        case 48: ms_res = multshiftround_i64_48(num, mul_i64); break;
-        case 49: ms_res = multshiftround_i64_49(num, mul_i64); break;
-        case 50: ms_res = multshiftround_i64_50(num, mul_i64); break;
-        case 51: ms_res = multshiftround_i64_51(num, mul_i64); break;
-        case 52: ms_res = multshiftround_i64_52(num, mul_i64); break;
-        case 53: ms_res = multshiftround_i64_53(num, mul_i64); break;
-        case 54: ms_res = multshiftround_i64_54(num, mul_i64); break;
-        case 55: ms_res = multshiftround_i64_55(num, mul_i64); break;
-        case 56: ms_res = multshiftround_i64_56(num, mul_i64); break;
-        case 57: ms_res = multshiftround_i64_57(num, mul_i64); break;
-        case 58: ms_res = multshiftround_i64_58(num, mul_i64); break;
-        case 59: ms_res = multshiftround_i64_59(num, mul_i64); break;
-        case 60: ms_res = multshiftround_i64_60(num, mul_i64); break;
-        case 61: ms_res = multshiftround_i64_61(num, mul_i64); break;
-        case 62: ms_res = multshiftround_i64_62(num, mul_i64); break;
-        default: std::printf("ERROR: invalid shift int64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_i64_%i(): ms_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int64_t shiftround for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and shift on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing shiftround<int64_t>(num, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t s_res = shiftround<int64_t>(num, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<int64_t>(num, %i): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test shiftround_i64 for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and shift on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing shiftround_i64(num, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t s_res = shiftround_i64(num, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_i64(num, %i): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test int64_t shiftround for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and shift on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing shiftround<int64_t, %i>()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround<int64_t,  1>(num); break;
-        case  2: s_res = shiftround<int64_t,  2>(num); break;
-        case  3: s_res = shiftround<int64_t,  3>(num); break;
-        case  4: s_res = shiftround<int64_t,  4>(num); break;
-        case  5: s_res = shiftround<int64_t,  5>(num); break;
-        case  6: s_res = shiftround<int64_t,  6>(num); break;
-        case  7: s_res = shiftround<int64_t,  7>(num); break;
-        case  8: s_res = shiftround<int64_t,  8>(num); break;
-        case  9: s_res = shiftround<int64_t,  9>(num); break;
-        case 10: s_res = shiftround<int64_t, 10>(num); break;
-        case 11: s_res = shiftround<int64_t, 11>(num); break;
-        case 12: s_res = shiftround<int64_t, 12>(num); break;
-        case 13: s_res = shiftround<int64_t, 13>(num); break;
-        case 14: s_res = shiftround<int64_t, 14>(num); break;
-        case 15: s_res = shiftround<int64_t, 15>(num); break;
-        case 16: s_res = shiftround<int64_t, 16>(num); break;
-        case 17: s_res = shiftround<int64_t, 17>(num); break;
-        case 18: s_res = shiftround<int64_t, 18>(num); break;
-        case 19: s_res = shiftround<int64_t, 19>(num); break;
-        case 20: s_res = shiftround<int64_t, 20>(num); break;
-        case 21: s_res = shiftround<int64_t, 21>(num); break;
-        case 22: s_res = shiftround<int64_t, 22>(num); break;
-        case 23: s_res = shiftround<int64_t, 23>(num); break;
-        case 24: s_res = shiftround<int64_t, 24>(num); break;
-        case 25: s_res = shiftround<int64_t, 25>(num); break;
-        case 26: s_res = shiftround<int64_t, 26>(num); break;
-        case 27: s_res = shiftround<int64_t, 27>(num); break;
-        case 28: s_res = shiftround<int64_t, 28>(num); break;
-        case 29: s_res = shiftround<int64_t, 29>(num); break;
-        case 30: s_res = shiftround<int64_t, 30>(num); break;
-        case 31: s_res = shiftround<int64_t, 31>(num); break;
-        case 32: s_res = shiftround<int64_t, 32>(num); break;
-        case 33: s_res = shiftround<int64_t, 33>(num); break;
-        case 34: s_res = shiftround<int64_t, 34>(num); break;
-        case 35: s_res = shiftround<int64_t, 35>(num); break;
-        case 36: s_res = shiftround<int64_t, 36>(num); break;
-        case 37: s_res = shiftround<int64_t, 37>(num); break;
-        case 38: s_res = shiftround<int64_t, 38>(num); break;
-        case 39: s_res = shiftround<int64_t, 39>(num); break;
-        case 40: s_res = shiftround<int64_t, 40>(num); break;
-        case 41: s_res = shiftround<int64_t, 41>(num); break;
-        case 42: s_res = shiftround<int64_t, 42>(num); break;
-        case 43: s_res = shiftround<int64_t, 43>(num); break;
-        case 44: s_res = shiftround<int64_t, 44>(num); break;
-        case 45: s_res = shiftround<int64_t, 45>(num); break;
-        case 46: s_res = shiftround<int64_t, 46>(num); break;
-        case 47: s_res = shiftround<int64_t, 47>(num); break;
-        case 48: s_res = shiftround<int64_t, 48>(num); break;
-        case 49: s_res = shiftround<int64_t, 49>(num); break;
-        case 50: s_res = shiftround<int64_t, 50>(num); break;
-        case 51: s_res = shiftround<int64_t, 51>(num); break;
-        case 52: s_res = shiftround<int64_t, 52>(num); break;
-        case 53: s_res = shiftround<int64_t, 53>(num); break;
-        case 54: s_res = shiftround<int64_t, 54>(num); break;
-        case 55: s_res = shiftround<int64_t, 55>(num); break;
-        case 56: s_res = shiftround<int64_t, 56>(num); break;
-        case 57: s_res = shiftround<int64_t, 57>(num); break;
-        case 58: s_res = shiftround<int64_t, 58>(num); break;
-        case 59: s_res = shiftround<int64_t, 59>(num); break;
-        case 60: s_res = shiftround<int64_t, 60>(num); break;
-        case 61: s_res = shiftround<int64_t, 61>(num); break;
-        case 62: s_res = shiftround<int64_t, 62>(num); break;
-        default: std::printf("ERROR: invalid shift int64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<int64_t, %i>(): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test shiftround_i64_Y for num on the ranges
-   * [-9223372036854775808, -9223372036850581504]
-   * [-4194304, 4194304]
-   * [9223372036850581503, 9223372036854775807]
-   * and Y on [1, 62].
-   */
-  for (int8_t shift = 1; shift <= 62; shift++)
-  {
-    std::printf("testing shiftround_i64_%i()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    int64_t num = std::numeric_limits<int64_t>::lowest();
-    while (true)
-    {
-      int64_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround_i64_1(num); break;
-        case  2: s_res = shiftround_i64_2(num); break;
-        case  3: s_res = shiftround_i64_3(num); break;
-        case  4: s_res = shiftround_i64_4(num); break;
-        case  5: s_res = shiftround_i64_5(num); break;
-        case  6: s_res = shiftround_i64_6(num); break;
-        case  7: s_res = shiftround_i64_7(num); break;
-        case  8: s_res = shiftround_i64_8(num); break;
-        case  9: s_res = shiftround_i64_9(num); break;
-        case 10: s_res = shiftround_i64_10(num); break;
-        case 11: s_res = shiftround_i64_11(num); break;
-        case 12: s_res = shiftround_i64_12(num); break;
-        case 13: s_res = shiftround_i64_13(num); break;
-        case 14: s_res = shiftround_i64_14(num); break;
-        case 15: s_res = shiftround_i64_15(num); break;
-        case 16: s_res = shiftround_i64_16(num); break;
-        case 17: s_res = shiftround_i64_17(num); break;
-        case 18: s_res = shiftround_i64_18(num); break;
-        case 19: s_res = shiftround_i64_19(num); break;
-        case 20: s_res = shiftround_i64_20(num); break;
-        case 21: s_res = shiftround_i64_21(num); break;
-        case 22: s_res = shiftround_i64_22(num); break;
-        case 23: s_res = shiftround_i64_23(num); break;
-        case 24: s_res = shiftround_i64_24(num); break;
-        case 25: s_res = shiftround_i64_25(num); break;
-        case 26: s_res = shiftround_i64_26(num); break;
-        case 27: s_res = shiftround_i64_27(num); break;
-        case 28: s_res = shiftround_i64_28(num); break;
-        case 29: s_res = shiftround_i64_29(num); break;
-        case 30: s_res = shiftround_i64_30(num); break;
-        case 31: s_res = shiftround_i64_31(num); break;
-        case 32: s_res = shiftround_i64_32(num); break;
-        case 33: s_res = shiftround_i64_33(num); break;
-        case 34: s_res = shiftround_i64_34(num); break;
-        case 35: s_res = shiftround_i64_35(num); break;
-        case 36: s_res = shiftround_i64_36(num); break;
-        case 37: s_res = shiftround_i64_37(num); break;
-        case 38: s_res = shiftround_i64_38(num); break;
-        case 39: s_res = shiftround_i64_39(num); break;
-        case 40: s_res = shiftround_i64_40(num); break;
-        case 41: s_res = shiftround_i64_41(num); break;
-        case 42: s_res = shiftround_i64_42(num); break;
-        case 43: s_res = shiftround_i64_43(num); break;
-        case 44: s_res = shiftround_i64_44(num); break;
-        case 45: s_res = shiftround_i64_45(num); break;
-        case 46: s_res = shiftround_i64_46(num); break;
-        case 47: s_res = shiftround_i64_47(num); break;
-        case 48: s_res = shiftround_i64_48(num); break;
-        case 49: s_res = shiftround_i64_49(num); break;
-        case 50: s_res = shiftround_i64_50(num); break;
-        case 51: s_res = shiftround_i64_51(num); break;
-        case 52: s_res = shiftround_i64_52(num); break;
-        case 53: s_res = shiftround_i64_53(num); break;
-        case 54: s_res = shiftround_i64_54(num); break;
-        case 55: s_res = shiftround_i64_55(num); break;
-        case 56: s_res = shiftround_i64_56(num); break;
-        case 57: s_res = shiftround_i64_57(num); break;
-        case 58: s_res = shiftround_i64_58(num); break;
-        case 59: s_res = shiftround_i64_59(num); break;
-        case 60: s_res = shiftround_i64_60(num); break;
-        case 61: s_res = shiftround_i64_61(num); break;
-        case 62: s_res = shiftround_i64_62(num); break;
-        default: std::printf("ERROR: invalid shift int64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      int64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<int64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_i64_%i(): s_res %" PRIi64 ", dbl_res %" PRIi64 ", dbl %.16f, num %" PRIi64 ", mul %" PRIi64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_i64);
-      if (num == std::numeric_limits<int64_t>::lowest() + (1ll << 22)) num = -(1ll << 22) - 1ll;
-      if (num == (1ll << 22)) num = std::numeric_limits<int64_t>::max() - (1ll << 22) - 1ll;
-      if (num == std::numeric_limits<int64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test uint8_t multshiftround for num on [0, 255] and shift on [1, 7].
-   */
-  for (int8_t shift = 1; shift <= 7; shift++)
+  for (int8_t shift = 0; shift <= 7; shift++)
   {
     std::printf("testing multshiftround<uint8_t>(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1289,9 +2366,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test multshiftround_u8 for num on [0, 255] and shift on [1, 7].
+   * Test multshiftround_u8 for num on [0, 255] and shift on [0, 7].
    */
-  for (int8_t shift = 1; shift <= 7; shift++)
+  for (int8_t shift = 0; shift <= 7; shift++)
   {
     std::printf("testing multshiftround_u8(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1370,9 +2447,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test uint8_t shiftround for num on [0, 255] and shift on [1, 7].
+   * Test uint8_t shiftround for num on [0, 255] and shift on [0, 7].
    */
-  for (int8_t shift = 1; shift <= 7; shift++)
+  for (int8_t shift = 0; shift <= 7; shift++)
   {
     std::printf("testing shiftround<uint8_t>(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1389,9 +2466,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test shiftround_u8 for num on [0, 255] and shift on [1, 7].
+   * Test shiftround_u8 for num on [0, 255] and shift on [0, 7].
    */
-  for (int8_t shift = 1; shift <= 7; shift++)
+  for (int8_t shift = 0; shift <= 7; shift++)
   {
     std::printf("testing shiftround_u8(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1470,9 +2547,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test uint16_t multshiftround for num on [0, 65535] and shift on [1, 15].
+   * Test uint16_t multshiftround for num on [0, 65535] and shift on [0, 15].
    */
-  for (int8_t shift = 1; shift <= 15; shift++)
+  for (int8_t shift = 0; shift <= 15; shift++)
   {
     std::printf("testing multshiftround<uint16_t>(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1489,9 +2566,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test multshiftround_u16 for num on [0, 65535] and shift on [1, 15].
+   * Test multshiftround_u16 for num on [0, 65535] and shift on [0, 15].
    */
-  for (int8_t shift = 1; shift <= 15; shift++)
+  for (int8_t shift = 0; shift <= 15; shift++)
   {
     std::printf("testing multshiftround_u16(num, mul, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1586,9 +2663,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test uint16_t shiftround for num on [0, 65535] and shift on [1, 15].
+   * Test uint16_t shiftround for num on [0, 65535] and shift on [0, 15].
    */
-  for (int8_t shift = 1; shift <= 15; shift++)
+  for (int8_t shift = 0; shift <= 15; shift++)
   {
     std::printf("testing shiftround<uint16_t>(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1605,9 +2682,9 @@ int main()
   std::printf("\n");
 
   /**
-   * Test shiftround_u16 for num on [0, 65535] and shift on [1, 15].
+   * Test shiftround_u16 for num on [0, 65535] and shift on [0, 15].
    */
-  for (int8_t shift = 1; shift <= 15; shift++)
+  for (int8_t shift = 0; shift <= 15; shift++)
   {
     std::printf("testing shiftround_u16(num, %i)\n", shift);
     double dbl_twoexp = static_cast<double>(1ull << shift);
@@ -1702,756 +2779,183 @@ int main()
   std::printf("\n");
 
   /**
-   * Test uint32_t multshiftround for num on [0, 4294967295] and shift on [1, 31].
+   * vTests stores the list of tests to run multithreaded.
+   * The first pair element function pointer should point to one of the 
+   * test_...(uint8_t shift, size_t thread_index) functions.
+   * The second pair element uint8_t is the shift argument value to use
+   * when running the test.
    */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing multshiftround<uint32_t>(num, mul, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t ms_res = multshiftround<uint32_t>(num, mul_u32, shift);
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<uint32_t>(num, mul, %i): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
+  std::vector<std::pair<void (*)(uint8_t, size_t), uint8_t> > vTests;
 
   /**
-   * Test multshiftround_u32 for num on [0, 4294967295] and shift on [1, 31].
+   * Queue all the tests that will be run multithreaded.
    */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing multshiftround_u32(num, mul, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t ms_res = multshiftround_u32(num, mul_u32, shift);
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_u32(num, mul, %i): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
+  for (uint8_t shift = 0u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u64_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u64_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u64_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u64_comp_c, shift));
+
+  for (uint8_t shift = 0u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u64_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u64_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u64_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 63u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u64_comp_c, shift));
+
+  for (uint8_t shift = 0u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i64_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i64_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i64_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i64_comp_c, shift));
+
+  for (uint8_t shift = 0u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i64_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i64_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i64_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 62u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i64_comp_c, shift));
+
+  for (uint8_t shift = 0u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u32_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u32_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u32_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_u32_comp_c, shift));
+
+  for (uint8_t shift = 0u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u32_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u32_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u32_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 31u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_u32_comp_c, shift));
+  
+  for (uint8_t shift = 0u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i32_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i32_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i32_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_shiftround_i32_comp_c, shift));
+
+  for (uint8_t shift = 0u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i32_run_cpp, shift));
+
+  for (uint8_t shift = 0u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i32_run_c, shift));
+
+  for (uint8_t shift = 1u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i32_comp_cpp, shift));
+
+  for (uint8_t shift = 1u; shift <= 30u; shift++)
+    vTests.push_back(std::make_pair(test_multshiftround_i32_comp_c, shift));
 
   /**
-   * Test uint32_t multshiftround for num on [0, 4294967295] and shift on [1, 31].
+   * Use one thread if only one hardware thread is available. Otherwise, use
+   * one less than the number of available hardware threads.
    */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing multshiftround<uint32_t, %i>()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround<uint32_t,  1>(num, mul_u32); break;
-        case  2: ms_res = multshiftround<uint32_t,  2>(num, mul_u32); break;
-        case  3: ms_res = multshiftround<uint32_t,  3>(num, mul_u32); break;
-        case  4: ms_res = multshiftround<uint32_t,  4>(num, mul_u32); break;
-        case  5: ms_res = multshiftround<uint32_t,  5>(num, mul_u32); break;
-        case  6: ms_res = multshiftround<uint32_t,  6>(num, mul_u32); break;
-        case  7: ms_res = multshiftround<uint32_t,  7>(num, mul_u32); break;
-        case  8: ms_res = multshiftround<uint32_t,  8>(num, mul_u32); break;
-        case  9: ms_res = multshiftround<uint32_t,  9>(num, mul_u32); break;
-        case 10: ms_res = multshiftround<uint32_t, 10>(num, mul_u32); break;
-        case 11: ms_res = multshiftround<uint32_t, 11>(num, mul_u32); break;
-        case 12: ms_res = multshiftround<uint32_t, 12>(num, mul_u32); break;
-        case 13: ms_res = multshiftround<uint32_t, 13>(num, mul_u32); break;
-        case 14: ms_res = multshiftround<uint32_t, 14>(num, mul_u32); break;
-        case 15: ms_res = multshiftround<uint32_t, 15>(num, mul_u32); break;
-        case 16: ms_res = multshiftround<uint32_t, 16>(num, mul_u32); break;
-        case 17: ms_res = multshiftround<uint32_t, 17>(num, mul_u32); break;
-        case 18: ms_res = multshiftround<uint32_t, 18>(num, mul_u32); break;
-        case 19: ms_res = multshiftround<uint32_t, 19>(num, mul_u32); break;
-        case 20: ms_res = multshiftround<uint32_t, 20>(num, mul_u32); break;
-        case 21: ms_res = multshiftround<uint32_t, 21>(num, mul_u32); break;
-        case 22: ms_res = multshiftround<uint32_t, 22>(num, mul_u32); break;
-        case 23: ms_res = multshiftround<uint32_t, 23>(num, mul_u32); break;
-        case 24: ms_res = multshiftround<uint32_t, 24>(num, mul_u32); break;
-        case 25: ms_res = multshiftround<uint32_t, 25>(num, mul_u32); break;
-        case 26: ms_res = multshiftround<uint32_t, 26>(num, mul_u32); break;
-        case 27: ms_res = multshiftround<uint32_t, 27>(num, mul_u32); break;
-        case 28: ms_res = multshiftround<uint32_t, 28>(num, mul_u32); break;
-        case 29: ms_res = multshiftround<uint32_t, 29>(num, mul_u32); break;
-        case 30: ms_res = multshiftround<uint32_t, 30>(num, mul_u32); break;
-        case 31: ms_res = multshiftround<uint32_t, 31>(num, mul_u32); break;
-        default: std::printf("ERROR: invalid shift uint32_t\n"); return 0; break;
+  uint32_t nThreads = std::thread::hardware_concurrency();
+  if (nThreads <= 2u) nThreads = 1u;
+  else nThreads--;
+
+  std::printf("Starting multithreaded tests with %u threads.\n\n", nThreads);
+
+  /**
+   * Allocate and initialize the atomic bools for checking
+   * when threads are done running tests.
+   */
+  thread_running = new std::atomic<bool>[nThreads];
+  for (uint32_t jThread = 0u; jThread < nThreads; jThread++) {
+    thread_running[jThread].store(false);
+  }
+
+  /**
+   * Start all threads running with some test.
+   */
+  std::vector<std::thread> vThreads;
+  for (uint32_t jThread = 0u; jThread < nThreads && !vTests.empty(); jThread++) {
+    thread_running[jThread].store(true);
+    vThreads.push_back(std::move(std::thread(vTests.back().first, vTests.back().second, jThread)));
+    vTests.pop_back();
+  }
+
+  while (!vTests.empty()) {
+    /**
+     * Replace finished threads with new ones until there are no more
+     * tests to run.
+     */
+    for (size_t jThread = 0ull; jThread < vThreads.size() && !vTests.empty(); jThread++) {
+      if (!thread_running[jThread].load() && vThreads.at(jThread).joinable()) {
+        vThreads.at(jThread).join();
+        thread_running[jThread].store(true);
+        vThreads.at(jThread) = std::move(std::thread(vTests.back().first, vTests.back().second, jThread));
+        vTests.pop_back();
       }
-
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<uint32_t, %i>(): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
     }
+    /**
+     * Sleep so as not to spam the CPU.
+     */
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
-  std::printf("\n");
 
   /**
-   * Test multshiftround_u32_Y for num on [0, 4294967295] and Y on [1, 31].
+   * Wait until all threads are finished.
    */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing multshiftround_u32_%i()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround_u32_1(num, mul_u32); break;
-        case  2: ms_res = multshiftround_u32_2(num, mul_u32); break;
-        case  3: ms_res = multshiftround_u32_3(num, mul_u32); break;
-        case  4: ms_res = multshiftround_u32_4(num, mul_u32); break;
-        case  5: ms_res = multshiftround_u32_5(num, mul_u32); break;
-        case  6: ms_res = multshiftround_u32_6(num, mul_u32); break;
-        case  7: ms_res = multshiftround_u32_7(num, mul_u32); break;
-        case  8: ms_res = multshiftround_u32_8(num, mul_u32); break;
-        case  9: ms_res = multshiftround_u32_9(num, mul_u32); break;
-        case 10: ms_res = multshiftround_u32_10(num, mul_u32); break;
-        case 11: ms_res = multshiftround_u32_11(num, mul_u32); break;
-        case 12: ms_res = multshiftround_u32_12(num, mul_u32); break;
-        case 13: ms_res = multshiftround_u32_13(num, mul_u32); break;
-        case 14: ms_res = multshiftround_u32_14(num, mul_u32); break;
-        case 15: ms_res = multshiftround_u32_15(num, mul_u32); break;
-        case 16: ms_res = multshiftround_u32_16(num, mul_u32); break;
-        case 17: ms_res = multshiftround_u32_17(num, mul_u32); break;
-        case 18: ms_res = multshiftround_u32_18(num, mul_u32); break;
-        case 19: ms_res = multshiftround_u32_19(num, mul_u32); break;
-        case 20: ms_res = multshiftround_u32_20(num, mul_u32); break;
-        case 21: ms_res = multshiftround_u32_21(num, mul_u32); break;
-        case 22: ms_res = multshiftround_u32_22(num, mul_u32); break;
-        case 23: ms_res = multshiftround_u32_23(num, mul_u32); break;
-        case 24: ms_res = multshiftround_u32_24(num, mul_u32); break;
-        case 25: ms_res = multshiftround_u32_25(num, mul_u32); break;
-        case 26: ms_res = multshiftround_u32_26(num, mul_u32); break;
-        case 27: ms_res = multshiftround_u32_27(num, mul_u32); break;
-        case 28: ms_res = multshiftround_u32_28(num, mul_u32); break;
-        case 29: ms_res = multshiftround_u32_29(num, mul_u32); break;
-        case 30: ms_res = multshiftround_u32_30(num, mul_u32); break;
-        case 31: ms_res = multshiftround_u32_31(num, mul_u32); break;
-        default: std::printf("ERROR: invalid shift uint32_t\n"); return 0; break;
+  bool any_joinable = true;
+  while (any_joinable) {
+    any_joinable = false;
+    for (size_t jThread = 0ull; jThread < vThreads.size(); jThread++) {
+      if (vThreads.at(jThread).joinable()) {
+        any_joinable = true;
+        if (!thread_running[jThread].load())
+          vThreads.at(jThread).join();
       }
-
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_u32_%i(): ms_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, ms_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
     }
+    /**
+     * Sleep so as not to spam the CPU.
+     */
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
-  std::printf("\n");
 
-  /**
-   * Test uint32_t shiftround for num on [0, 4294967295] and shift on [1, 31].
-   */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing shiftround<uint32_t>(num, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t s_res = shiftround<uint32_t>(num, shift);
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<uint32_t>(num, %i): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
+  delete[] thread_running;
 
-  /**
-   * Test shiftround_u32 for num on [0, 4294967295] and shift on [1, 31].
-   */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing shiftround_u32(num, %i)\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t s_res = shiftround_u32(num, shift);
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_u32(num, %i): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test uint32_t shiftround for num on [0, 4294967295] and shift on [1, 31].
-   */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing shiftround<uint32_t, %i>()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround<uint32_t,  1>(num); break;
-        case  2: s_res = shiftround<uint32_t,  2>(num); break;
-        case  3: s_res = shiftround<uint32_t,  3>(num); break;
-        case  4: s_res = shiftround<uint32_t,  4>(num); break;
-        case  5: s_res = shiftround<uint32_t,  5>(num); break;
-        case  6: s_res = shiftround<uint32_t,  6>(num); break;
-        case  7: s_res = shiftround<uint32_t,  7>(num); break;
-        case  8: s_res = shiftround<uint32_t,  8>(num); break;
-        case  9: s_res = shiftround<uint32_t,  9>(num); break;
-        case 10: s_res = shiftround<uint32_t, 10>(num); break;
-        case 11: s_res = shiftround<uint32_t, 11>(num); break;
-        case 12: s_res = shiftround<uint32_t, 12>(num); break;
-        case 13: s_res = shiftround<uint32_t, 13>(num); break;
-        case 14: s_res = shiftround<uint32_t, 14>(num); break;
-        case 15: s_res = shiftround<uint32_t, 15>(num); break;
-        case 16: s_res = shiftround<uint32_t, 16>(num); break;
-        case 17: s_res = shiftround<uint32_t, 17>(num); break;
-        case 18: s_res = shiftround<uint32_t, 18>(num); break;
-        case 19: s_res = shiftround<uint32_t, 19>(num); break;
-        case 20: s_res = shiftround<uint32_t, 20>(num); break;
-        case 21: s_res = shiftround<uint32_t, 21>(num); break;
-        case 22: s_res = shiftround<uint32_t, 22>(num); break;
-        case 23: s_res = shiftround<uint32_t, 23>(num); break;
-        case 24: s_res = shiftround<uint32_t, 24>(num); break;
-        case 25: s_res = shiftround<uint32_t, 25>(num); break;
-        case 26: s_res = shiftround<uint32_t, 26>(num); break;
-        case 27: s_res = shiftround<uint32_t, 27>(num); break;
-        case 28: s_res = shiftround<uint32_t, 28>(num); break;
-        case 29: s_res = shiftround<uint32_t, 29>(num); break;
-        case 30: s_res = shiftround<uint32_t, 30>(num); break;
-        case 31: s_res = shiftround<uint32_t, 31>(num); break;
-        default: std::printf("ERROR: invalid shift uint32_t\n"); return 0; break;
-      }
-
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<uint32_t, %i>(): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test shiftround_u32_Y for num on [0, 4294967295] and Y on [1, 31].
-   */
-  for (int8_t shift = 1; shift <= 31; shift++)
-  {
-    std::printf("testing shiftround_u32_%i()\n", shift);
-    double dbl_twoexp = static_cast<double>(1ull << shift);
-    uint32_t num = std::numeric_limits<uint32_t>::lowest();
-    while (true)
-    {
-      uint32_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround_u32_1(num); break;
-        case  2: s_res = shiftround_u32_2(num); break;
-        case  3: s_res = shiftround_u32_3(num); break;
-        case  4: s_res = shiftround_u32_4(num); break;
-        case  5: s_res = shiftround_u32_5(num); break;
-        case  6: s_res = shiftround_u32_6(num); break;
-        case  7: s_res = shiftround_u32_7(num); break;
-        case  8: s_res = shiftround_u32_8(num); break;
-        case  9: s_res = shiftround_u32_9(num); break;
-        case 10: s_res = shiftround_u32_10(num); break;
-        case 11: s_res = shiftround_u32_11(num); break;
-        case 12: s_res = shiftround_u32_12(num); break;
-        case 13: s_res = shiftround_u32_13(num); break;
-        case 14: s_res = shiftround_u32_14(num); break;
-        case 15: s_res = shiftround_u32_15(num); break;
-        case 16: s_res = shiftround_u32_16(num); break;
-        case 17: s_res = shiftround_u32_17(num); break;
-        case 18: s_res = shiftround_u32_18(num); break;
-        case 19: s_res = shiftround_u32_19(num); break;
-        case 20: s_res = shiftround_u32_20(num); break;
-        case 21: s_res = shiftround_u32_21(num); break;
-        case 22: s_res = shiftround_u32_22(num); break;
-        case 23: s_res = shiftround_u32_23(num); break;
-        case 24: s_res = shiftround_u32_24(num); break;
-        case 25: s_res = shiftround_u32_25(num); break;
-        case 26: s_res = shiftround_u32_26(num); break;
-        case 27: s_res = shiftround_u32_27(num); break;
-        case 28: s_res = shiftround_u32_28(num); break;
-        case 29: s_res = shiftround_u32_29(num); break;
-        case 30: s_res = shiftround_u32_30(num); break;
-        case 31: s_res = shiftround_u32_31(num); break;
-        default: std::printf("ERROR: invalid shift uint32_t\n"); return 0; break;
-      }
-
-      uint32_t dbl_res = static_cast<uint32_t>(std::round((static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp));
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_u32_%i(): s_res %u, dbl_res %u, dbl %.16f, num %u, mul %u\n", shift, s_res, dbl_res, (static_cast<double>(num) * dbl_mul_u32) / dbl_twoexp, num, mul_u32);
-      if (num == std::numeric_limits<uint32_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test uint64_t multshiftround for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and shift on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing multshiftround<uint64_t>(num, mul, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t ms_res = multshiftround<uint64_t>(num, mul_u64, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<uint64_t>(num, mul, %i): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test multshiftround_u64 for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and shift on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing multshiftround_u64(num, mul, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t ms_res = multshiftround_u64(num, mul_u64, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_u64(num, mul, %i): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test uint64_t multshiftround for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and shift on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing multshiftround<uint64_t, %i>()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround<uint64_t,  1>(num, mul_u64); break;
-        case  2: ms_res = multshiftround<uint64_t,  2>(num, mul_u64); break;
-        case  3: ms_res = multshiftround<uint64_t,  3>(num, mul_u64); break;
-        case  4: ms_res = multshiftround<uint64_t,  4>(num, mul_u64); break;
-        case  5: ms_res = multshiftround<uint64_t,  5>(num, mul_u64); break;
-        case  6: ms_res = multshiftround<uint64_t,  6>(num, mul_u64); break;
-        case  7: ms_res = multshiftround<uint64_t,  7>(num, mul_u64); break;
-        case  8: ms_res = multshiftround<uint64_t,  8>(num, mul_u64); break;
-        case  9: ms_res = multshiftround<uint64_t,  9>(num, mul_u64); break;
-        case 10: ms_res = multshiftround<uint64_t, 10>(num, mul_u64); break;
-        case 11: ms_res = multshiftround<uint64_t, 11>(num, mul_u64); break;
-        case 12: ms_res = multshiftround<uint64_t, 12>(num, mul_u64); break;
-        case 13: ms_res = multshiftround<uint64_t, 13>(num, mul_u64); break;
-        case 14: ms_res = multshiftround<uint64_t, 14>(num, mul_u64); break;
-        case 15: ms_res = multshiftround<uint64_t, 15>(num, mul_u64); break;
-        case 16: ms_res = multshiftround<uint64_t, 16>(num, mul_u64); break;
-        case 17: ms_res = multshiftround<uint64_t, 17>(num, mul_u64); break;
-        case 18: ms_res = multshiftround<uint64_t, 18>(num, mul_u64); break;
-        case 19: ms_res = multshiftround<uint64_t, 19>(num, mul_u64); break;
-        case 20: ms_res = multshiftround<uint64_t, 20>(num, mul_u64); break;
-        case 21: ms_res = multshiftround<uint64_t, 21>(num, mul_u64); break;
-        case 22: ms_res = multshiftround<uint64_t, 22>(num, mul_u64); break;
-        case 23: ms_res = multshiftround<uint64_t, 23>(num, mul_u64); break;
-        case 24: ms_res = multshiftround<uint64_t, 24>(num, mul_u64); break;
-        case 25: ms_res = multshiftround<uint64_t, 25>(num, mul_u64); break;
-        case 26: ms_res = multshiftround<uint64_t, 26>(num, mul_u64); break;
-        case 27: ms_res = multshiftround<uint64_t, 27>(num, mul_u64); break;
-        case 28: ms_res = multshiftround<uint64_t, 28>(num, mul_u64); break;
-        case 29: ms_res = multshiftround<uint64_t, 29>(num, mul_u64); break;
-        case 30: ms_res = multshiftround<uint64_t, 30>(num, mul_u64); break;
-        case 31: ms_res = multshiftround<uint64_t, 31>(num, mul_u64); break;
-        case 32: ms_res = multshiftround<uint64_t, 32>(num, mul_u64); break;
-        case 33: ms_res = multshiftround<uint64_t, 33>(num, mul_u64); break;
-        case 34: ms_res = multshiftround<uint64_t, 34>(num, mul_u64); break;
-        case 35: ms_res = multshiftround<uint64_t, 35>(num, mul_u64); break;
-        case 36: ms_res = multshiftround<uint64_t, 36>(num, mul_u64); break;
-        case 37: ms_res = multshiftround<uint64_t, 37>(num, mul_u64); break;
-        case 38: ms_res = multshiftround<uint64_t, 38>(num, mul_u64); break;
-        case 39: ms_res = multshiftround<uint64_t, 39>(num, mul_u64); break;
-        case 40: ms_res = multshiftround<uint64_t, 40>(num, mul_u64); break;
-        case 41: ms_res = multshiftround<uint64_t, 41>(num, mul_u64); break;
-        case 42: ms_res = multshiftround<uint64_t, 42>(num, mul_u64); break;
-        case 43: ms_res = multshiftround<uint64_t, 43>(num, mul_u64); break;
-        case 44: ms_res = multshiftround<uint64_t, 44>(num, mul_u64); break;
-        case 45: ms_res = multshiftround<uint64_t, 45>(num, mul_u64); break;
-        case 46: ms_res = multshiftround<uint64_t, 46>(num, mul_u64); break;
-        case 47: ms_res = multshiftround<uint64_t, 47>(num, mul_u64); break;
-        case 48: ms_res = multshiftround<uint64_t, 48>(num, mul_u64); break;
-        case 49: ms_res = multshiftround<uint64_t, 49>(num, mul_u64); break;
-        case 50: ms_res = multshiftround<uint64_t, 50>(num, mul_u64); break;
-        case 51: ms_res = multshiftround<uint64_t, 51>(num, mul_u64); break;
-        case 52: ms_res = multshiftround<uint64_t, 52>(num, mul_u64); break;
-        case 53: ms_res = multshiftround<uint64_t, 53>(num, mul_u64); break;
-        case 54: ms_res = multshiftround<uint64_t, 54>(num, mul_u64); break;
-        case 55: ms_res = multshiftround<uint64_t, 55>(num, mul_u64); break;
-        case 56: ms_res = multshiftround<uint64_t, 56>(num, mul_u64); break;
-        case 57: ms_res = multshiftround<uint64_t, 57>(num, mul_u64); break;
-        case 58: ms_res = multshiftround<uint64_t, 58>(num, mul_u64); break;
-        case 59: ms_res = multshiftround<uint64_t, 59>(num, mul_u64); break;
-        case 60: ms_res = multshiftround<uint64_t, 60>(num, mul_u64); break;
-        case 61: ms_res = multshiftround<uint64_t, 61>(num, mul_u64); break;
-        case 62: ms_res = multshiftround<uint64_t, 62>(num, mul_u64); break;
-        case 63: ms_res = multshiftround<uint64_t, 63>(num, mul_u64); break;
-        default: std::printf("ERROR: invalid shift uint64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround<uint64_t, %i>(): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test multshiftround_u64_Y for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and Y on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing multshiftround_u64_%i()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t ms_res;
-      switch (shift)
-      {
-        case  1: ms_res = multshiftround_u64_1(num, mul_u64); break;
-        case  2: ms_res = multshiftround_u64_2(num, mul_u64); break;
-        case  3: ms_res = multshiftround_u64_3(num, mul_u64); break;
-        case  4: ms_res = multshiftround_u64_4(num, mul_u64); break;
-        case  5: ms_res = multshiftround_u64_5(num, mul_u64); break;
-        case  6: ms_res = multshiftround_u64_6(num, mul_u64); break;
-        case  7: ms_res = multshiftround_u64_7(num, mul_u64); break;
-        case  8: ms_res = multshiftround_u64_8(num, mul_u64); break;
-        case  9: ms_res = multshiftround_u64_9(num, mul_u64); break;
-        case 10: ms_res = multshiftround_u64_10(num, mul_u64); break;
-        case 11: ms_res = multshiftround_u64_11(num, mul_u64); break;
-        case 12: ms_res = multshiftround_u64_12(num, mul_u64); break;
-        case 13: ms_res = multshiftround_u64_13(num, mul_u64); break;
-        case 14: ms_res = multshiftround_u64_14(num, mul_u64); break;
-        case 15: ms_res = multshiftround_u64_15(num, mul_u64); break;
-        case 16: ms_res = multshiftround_u64_16(num, mul_u64); break;
-        case 17: ms_res = multshiftround_u64_17(num, mul_u64); break;
-        case 18: ms_res = multshiftround_u64_18(num, mul_u64); break;
-        case 19: ms_res = multshiftround_u64_19(num, mul_u64); break;
-        case 20: ms_res = multshiftround_u64_20(num, mul_u64); break;
-        case 21: ms_res = multshiftround_u64_21(num, mul_u64); break;
-        case 22: ms_res = multshiftround_u64_22(num, mul_u64); break;
-        case 23: ms_res = multshiftround_u64_23(num, mul_u64); break;
-        case 24: ms_res = multshiftround_u64_24(num, mul_u64); break;
-        case 25: ms_res = multshiftround_u64_25(num, mul_u64); break;
-        case 26: ms_res = multshiftround_u64_26(num, mul_u64); break;
-        case 27: ms_res = multshiftround_u64_27(num, mul_u64); break;
-        case 28: ms_res = multshiftround_u64_28(num, mul_u64); break;
-        case 29: ms_res = multshiftround_u64_29(num, mul_u64); break;
-        case 30: ms_res = multshiftround_u64_30(num, mul_u64); break;
-        case 31: ms_res = multshiftround_u64_31(num, mul_u64); break;
-        case 32: ms_res = multshiftround_u64_32(num, mul_u64); break;
-        case 33: ms_res = multshiftround_u64_33(num, mul_u64); break;
-        case 34: ms_res = multshiftround_u64_34(num, mul_u64); break;
-        case 35: ms_res = multshiftround_u64_35(num, mul_u64); break;
-        case 36: ms_res = multshiftround_u64_36(num, mul_u64); break;
-        case 37: ms_res = multshiftround_u64_37(num, mul_u64); break;
-        case 38: ms_res = multshiftround_u64_38(num, mul_u64); break;
-        case 39: ms_res = multshiftround_u64_39(num, mul_u64); break;
-        case 40: ms_res = multshiftround_u64_40(num, mul_u64); break;
-        case 41: ms_res = multshiftround_u64_41(num, mul_u64); break;
-        case 42: ms_res = multshiftround_u64_42(num, mul_u64); break;
-        case 43: ms_res = multshiftround_u64_43(num, mul_u64); break;
-        case 44: ms_res = multshiftround_u64_44(num, mul_u64); break;
-        case 45: ms_res = multshiftround_u64_45(num, mul_u64); break;
-        case 46: ms_res = multshiftround_u64_46(num, mul_u64); break;
-        case 47: ms_res = multshiftround_u64_47(num, mul_u64); break;
-        case 48: ms_res = multshiftround_u64_48(num, mul_u64); break;
-        case 49: ms_res = multshiftround_u64_49(num, mul_u64); break;
-        case 50: ms_res = multshiftround_u64_50(num, mul_u64); break;
-        case 51: ms_res = multshiftround_u64_51(num, mul_u64); break;
-        case 52: ms_res = multshiftround_u64_52(num, mul_u64); break;
-        case 53: ms_res = multshiftround_u64_53(num, mul_u64); break;
-        case 54: ms_res = multshiftround_u64_54(num, mul_u64); break;
-        case 55: ms_res = multshiftround_u64_55(num, mul_u64); break;
-        case 56: ms_res = multshiftround_u64_56(num, mul_u64); break;
-        case 57: ms_res = multshiftround_u64_57(num, mul_u64); break;
-        case 58: ms_res = multshiftround_u64_58(num, mul_u64); break;
-        case 59: ms_res = multshiftround_u64_59(num, mul_u64); break;
-        case 60: ms_res = multshiftround_u64_60(num, mul_u64); break;
-        case 61: ms_res = multshiftround_u64_61(num, mul_u64); break;
-        case 62: ms_res = multshiftround_u64_62(num, mul_u64); break;
-        case 63: ms_res = multshiftround_u64_63(num, mul_u64); break;
-        default: std::printf("ERROR: invalid shift uint64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (ms_res != dbl_res) std::printf("ERROR: multshiftround_u64_%i(): ms_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, ms_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test uint64_t shiftround for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and shift on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing shiftround<uint64_t>(num, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t s_res = shiftround<uint64_t>(num, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<uint64_t>(num, %i): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test shiftround_u64 for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and shift on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing shiftround_u64(num, %i)\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t s_res = shiftround_u64(num, shift);
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_u64(num, %i): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test uint64_t shiftround for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and shift on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing shiftround<uint64_t, %i>()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround<uint64_t,  1>(num); break;
-        case  2: s_res = shiftround<uint64_t,  2>(num); break;
-        case  3: s_res = shiftround<uint64_t,  3>(num); break;
-        case  4: s_res = shiftround<uint64_t,  4>(num); break;
-        case  5: s_res = shiftround<uint64_t,  5>(num); break;
-        case  6: s_res = shiftround<uint64_t,  6>(num); break;
-        case  7: s_res = shiftround<uint64_t,  7>(num); break;
-        case  8: s_res = shiftround<uint64_t,  8>(num); break;
-        case  9: s_res = shiftround<uint64_t,  9>(num); break;
-        case 10: s_res = shiftround<uint64_t, 10>(num); break;
-        case 11: s_res = shiftround<uint64_t, 11>(num); break;
-        case 12: s_res = shiftround<uint64_t, 12>(num); break;
-        case 13: s_res = shiftround<uint64_t, 13>(num); break;
-        case 14: s_res = shiftround<uint64_t, 14>(num); break;
-        case 15: s_res = shiftround<uint64_t, 15>(num); break;
-        case 16: s_res = shiftround<uint64_t, 16>(num); break;
-        case 17: s_res = shiftround<uint64_t, 17>(num); break;
-        case 18: s_res = shiftround<uint64_t, 18>(num); break;
-        case 19: s_res = shiftround<uint64_t, 19>(num); break;
-        case 20: s_res = shiftround<uint64_t, 20>(num); break;
-        case 21: s_res = shiftround<uint64_t, 21>(num); break;
-        case 22: s_res = shiftround<uint64_t, 22>(num); break;
-        case 23: s_res = shiftround<uint64_t, 23>(num); break;
-        case 24: s_res = shiftround<uint64_t, 24>(num); break;
-        case 25: s_res = shiftround<uint64_t, 25>(num); break;
-        case 26: s_res = shiftround<uint64_t, 26>(num); break;
-        case 27: s_res = shiftround<uint64_t, 27>(num); break;
-        case 28: s_res = shiftround<uint64_t, 28>(num); break;
-        case 29: s_res = shiftround<uint64_t, 29>(num); break;
-        case 30: s_res = shiftround<uint64_t, 30>(num); break;
-        case 31: s_res = shiftround<uint64_t, 31>(num); break;
-        case 32: s_res = shiftround<uint64_t, 32>(num); break;
-        case 33: s_res = shiftround<uint64_t, 33>(num); break;
-        case 34: s_res = shiftround<uint64_t, 34>(num); break;
-        case 35: s_res = shiftround<uint64_t, 35>(num); break;
-        case 36: s_res = shiftround<uint64_t, 36>(num); break;
-        case 37: s_res = shiftround<uint64_t, 37>(num); break;
-        case 38: s_res = shiftround<uint64_t, 38>(num); break;
-        case 39: s_res = shiftround<uint64_t, 39>(num); break;
-        case 40: s_res = shiftround<uint64_t, 40>(num); break;
-        case 41: s_res = shiftround<uint64_t, 41>(num); break;
-        case 42: s_res = shiftround<uint64_t, 42>(num); break;
-        case 43: s_res = shiftround<uint64_t, 43>(num); break;
-        case 44: s_res = shiftround<uint64_t, 44>(num); break;
-        case 45: s_res = shiftround<uint64_t, 45>(num); break;
-        case 46: s_res = shiftround<uint64_t, 46>(num); break;
-        case 47: s_res = shiftround<uint64_t, 47>(num); break;
-        case 48: s_res = shiftround<uint64_t, 48>(num); break;
-        case 49: s_res = shiftround<uint64_t, 49>(num); break;
-        case 50: s_res = shiftround<uint64_t, 50>(num); break;
-        case 51: s_res = shiftround<uint64_t, 51>(num); break;
-        case 52: s_res = shiftround<uint64_t, 52>(num); break;
-        case 53: s_res = shiftround<uint64_t, 53>(num); break;
-        case 54: s_res = shiftround<uint64_t, 54>(num); break;
-        case 55: s_res = shiftround<uint64_t, 55>(num); break;
-        case 56: s_res = shiftround<uint64_t, 56>(num); break;
-        case 57: s_res = shiftround<uint64_t, 57>(num); break;
-        case 58: s_res = shiftround<uint64_t, 58>(num); break;
-        case 59: s_res = shiftround<uint64_t, 59>(num); break;
-        case 60: s_res = shiftround<uint64_t, 60>(num); break;
-        case 61: s_res = shiftround<uint64_t, 61>(num); break;
-        case 62: s_res = shiftround<uint64_t, 62>(num); break;
-        case 63: s_res = shiftround<uint64_t, 63>(num); break;
-        default: std::printf("ERROR: invalid shift uint64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround<uint64_t, %i>(): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
-
-  /**
-   * Test shiftround_u64_Y for num on the ranges
-   * [0, 8388608] [18446744073701163007, 18446744073709551615]
-   * and Y on [1, 63].
-   */
-  for (int8_t shift = 1; shift <= 63; shift++)
-  {
-    std::printf("testing shiftround_u64_%i()\n", shift);
-    cpp_bin_float_80 ldbl_twoexp(1ull << shift);
-    uint64_t num = std::numeric_limits<uint64_t>::lowest();
-    while (true)
-    {
-      uint64_t s_res;
-      switch (shift)
-      {
-        case  1: s_res = shiftround_u64_1(num); break;
-        case  2: s_res = shiftround_u64_2(num); break;
-        case  3: s_res = shiftround_u64_3(num); break;
-        case  4: s_res = shiftround_u64_4(num); break;
-        case  5: s_res = shiftround_u64_5(num); break;
-        case  6: s_res = shiftround_u64_6(num); break;
-        case  7: s_res = shiftround_u64_7(num); break;
-        case  8: s_res = shiftround_u64_8(num); break;
-        case  9: s_res = shiftround_u64_9(num); break;
-        case 10: s_res = shiftround_u64_10(num); break;
-        case 11: s_res = shiftround_u64_11(num); break;
-        case 12: s_res = shiftround_u64_12(num); break;
-        case 13: s_res = shiftround_u64_13(num); break;
-        case 14: s_res = shiftround_u64_14(num); break;
-        case 15: s_res = shiftround_u64_15(num); break;
-        case 16: s_res = shiftround_u64_16(num); break;
-        case 17: s_res = shiftround_u64_17(num); break;
-        case 18: s_res = shiftround_u64_18(num); break;
-        case 19: s_res = shiftround_u64_19(num); break;
-        case 20: s_res = shiftround_u64_20(num); break;
-        case 21: s_res = shiftround_u64_21(num); break;
-        case 22: s_res = shiftround_u64_22(num); break;
-        case 23: s_res = shiftround_u64_23(num); break;
-        case 24: s_res = shiftround_u64_24(num); break;
-        case 25: s_res = shiftround_u64_25(num); break;
-        case 26: s_res = shiftround_u64_26(num); break;
-        case 27: s_res = shiftround_u64_27(num); break;
-        case 28: s_res = shiftround_u64_28(num); break;
-        case 29: s_res = shiftround_u64_29(num); break;
-        case 30: s_res = shiftround_u64_30(num); break;
-        case 31: s_res = shiftround_u64_31(num); break;
-        case 32: s_res = shiftround_u64_32(num); break;
-        case 33: s_res = shiftround_u64_33(num); break;
-        case 34: s_res = shiftround_u64_34(num); break;
-        case 35: s_res = shiftround_u64_35(num); break;
-        case 36: s_res = shiftround_u64_36(num); break;
-        case 37: s_res = shiftround_u64_37(num); break;
-        case 38: s_res = shiftround_u64_38(num); break;
-        case 39: s_res = shiftround_u64_39(num); break;
-        case 40: s_res = shiftround_u64_40(num); break;
-        case 41: s_res = shiftround_u64_41(num); break;
-        case 42: s_res = shiftround_u64_42(num); break;
-        case 43: s_res = shiftround_u64_43(num); break;
-        case 44: s_res = shiftround_u64_44(num); break;
-        case 45: s_res = shiftround_u64_45(num); break;
-        case 46: s_res = shiftround_u64_46(num); break;
-        case 47: s_res = shiftround_u64_47(num); break;
-        case 48: s_res = shiftround_u64_48(num); break;
-        case 49: s_res = shiftround_u64_49(num); break;
-        case 50: s_res = shiftround_u64_50(num); break;
-        case 51: s_res = shiftround_u64_51(num); break;
-        case 52: s_res = shiftround_u64_52(num); break;
-        case 53: s_res = shiftround_u64_53(num); break;
-        case 54: s_res = shiftround_u64_54(num); break;
-        case 55: s_res = shiftround_u64_55(num); break;
-        case 56: s_res = shiftround_u64_56(num); break;
-        case 57: s_res = shiftround_u64_57(num); break;
-        case 58: s_res = shiftround_u64_58(num); break;
-        case 59: s_res = shiftround_u64_59(num); break;
-        case 60: s_res = shiftround_u64_60(num); break;
-        case 61: s_res = shiftround_u64_61(num); break;
-        case 62: s_res = shiftround_u64_62(num); break;
-        case 63: s_res = shiftround_u64_63(num); break;
-        default: std::printf("ERROR: invalid shift uint64_t\n"); return 0; break;
-      }
-
-      cpp_bin_float_80 ldbl_num(num);
-      uint64_t dbl_res = boost::math::round((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<uint64_t>();
-      if (s_res != dbl_res) std::printf("ERROR: shiftround_u64_%i(): s_res %" PRIu64 ", dbl_res %" PRIu64 ", dbl %.16f, num %" PRIu64 ", mul %" PRIu64 "\n", shift, s_res, dbl_res, ((ldbl_num * ldbl_mul_i64) / ldbl_twoexp).convert_to<double>(), num, mul_u64);
-      if (num == (1ull << 23)) num = std::numeric_limits<uint64_t>::max() - (1ull << 23) - 1ull;
-      if (num == std::numeric_limits<uint64_t>::max()) break;
-      num++;
-    }
-  }
-  std::printf("\n");
+  std::printf("\nFinished running multithreaded code.\n\n");
 
   /**
    * Test the multiplication operation in all multshiftround routines.

@@ -38,7 +38,7 @@ template <typename type> static bool always_false_shiftround_comp(void) { return
  * This shiftround primary template is a catch-all for invalid and/or presently
  * unimplemented template arguments.
  */
-template <typename type, int8_t shift> type shiftround(const type num) {
+template <typename type, uint8_t shift> type shiftround(const type num) {
   static_assert(always_false_shiftround_comp<type>(), "type shiftround<type,shift>(const type num); is not defined for the specified type and/or shift value.");
 }
 
