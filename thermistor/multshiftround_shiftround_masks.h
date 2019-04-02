@@ -1,44 +1,33 @@
-For files in the integer/boost directory, see integer/boost_license_report.html,
-integer/LICENSE_1_0.txt, and the files themselves. The boost project is presently
-at https://www.boost.org/.
+/**
+ * multshiftround_shiftround_masks.h
+ * The _run versions of multshiftround and shiftround evaluate the shift
+ * argument at runtime. Consequently, the masks used for rounding are not
+ * hardcoded in the functions themselves and are instead declared in this file.
+ *
+ * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
+ * shiftround_run.hpp all use the masks_Xbit arrays declared below.
+ *
+ * Written in 2018 by Ben Tesch.
+ *
+ * To the extent possible under law, the author has dedicated all copyright
+ * and related and neighboring rights to this software to the public domain
+ * worldwide.This software is distributed without any warranty.
+ * The text of the CC0 Public Domain Dedication should be reproduced at the
+ * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
+ */
+#ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_
+#define MULTSHIFTROUND_SHIFTROUND_MASKS_H_
 
-Files in the thermistor/Eigen directory are distribued under the Mozilla Public License
-Version 2.0, about which see http://mozilla.org/MPL/2.0/. The Eigen project is presently
-at http://eigen.tuxfamily.org/.
+#include "inttypes.h"
 
-All files produced by the author of this repository, including
-detect_product_overflow.c
-detect_product_overflow.h
-divround.c
-divround.h 
-divround.hpp
-divround_test.cpp 
-multshiftround_comp.c 
-multshiftround_comp.h 
-multshiftround_comp.hpp 
-multshiftround_run.c 
-multshiftround_run.h 
-multshiftround_run.hpp 
-multshiftround_shiftround_masks.c 
-multshiftround_shiftround_masks.h
-multshiftround_shiftround_test.cpp 
-optimal_base2_rational.cpp 
-saturate_value.c 
-saturate_value.h 
-saturate_value.hpp 
-saturate_value_test.cpp 
-shiftround_comp.c 
-shiftround_comp.h 
-shiftround_comp.hpp 
-shiftround_run.c 
-shiftround_run.h 
-shiftround_run.hpp
-test_debug_code.cpp
-thermistor_interpolator.cpp
-thermistor_tolerance.cpp
-are published under the CC0 1.0 Universal Public Domain Dedication,
-which is reproduced below.
+extern const uint8_t masks_8bit[7];
+extern const uint16_t masks_16bit[15];
+extern const uint32_t masks_32bit[31];
+extern const uint64_t masks_64bit[63];
 
+#endif /* #ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_ */
+
+/*
 Creative Commons Legal Code
 
 CC0 1.0 Universal
@@ -160,3 +149,4 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
+*/

@@ -1,44 +1,55 @@
-For files in the integer/boost directory, see integer/boost_license_report.html,
-integer/LICENSE_1_0.txt, and the files themselves. The boost project is presently
-at https://www.boost.org/.
+/**
+ * multshiftround_shiftround_masks.c
+ * The _run versions of multshiftround and shiftround evaluate the shift
+ * argument at runtime. Consequently, the masks used for rounding are not
+ * hardcoded in the functions themselves and are instead defined in this file.
+ *
+ * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
+ * shiftround_run.hpp all use the masks_Xbit arrays defined below.
+ *
+ * Written in 2018 by Ben Tesch.
+ *
+ * To the extent possible under law, the author has dedicated all copyright
+ * and related and neighboring rights to this software to the public domain
+ * worldwide.This software is distributed without any warranty.
+ * The text of the CC0 Public Domain Dedication should be reproduced at the
+ * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
+ */
 
-Files in the thermistor/Eigen directory are distribued under the Mozilla Public License
-Version 2.0, about which see http://mozilla.org/MPL/2.0/. The Eigen project is presently
-at http://eigen.tuxfamily.org/.
+#include "multshiftround_shiftround_masks.h"
 
-All files produced by the author of this repository, including
-detect_product_overflow.c
-detect_product_overflow.h
-divround.c
-divround.h 
-divround.hpp
-divround_test.cpp 
-multshiftround_comp.c 
-multshiftround_comp.h 
-multshiftround_comp.hpp 
-multshiftround_run.c 
-multshiftround_run.h 
-multshiftround_run.hpp 
-multshiftround_shiftround_masks.c 
-multshiftround_shiftround_masks.h
-multshiftround_shiftround_test.cpp 
-optimal_base2_rational.cpp 
-saturate_value.c 
-saturate_value.h 
-saturate_value.hpp 
-saturate_value_test.cpp 
-shiftround_comp.c 
-shiftround_comp.h 
-shiftround_comp.hpp 
-shiftround_run.c 
-shiftround_run.h 
-shiftround_run.hpp
-test_debug_code.cpp
-thermistor_interpolator.cpp
-thermistor_tolerance.cpp
-are published under the CC0 1.0 Universal Public Domain Dedication,
-which is reproduced below.
+const uint8_t masks_8bit[7] = { 0x01u, 0x03u, 0x07u, 0x0Fu, 0x1Fu, 0x3Fu, 0x7Fu };
 
+const uint16_t masks_16bit[15] = { 0x0001u, 0x0003u, 0x0007u, 0x000Fu, 0x001Fu,
+  0x003Fu, 0x007Fu, 0x00FFu, 0x01FFu, 0x03FFu, 0x07FFu, 0x0FFFu, 0x1FFFu, 0x3FFFu,
+  0x7FFFu };
+
+const uint32_t masks_32bit[31] = { 0x00000001u, 0x00000003u, 0x00000007u,
+  0x0000000Fu, 0x0000001Fu, 0x0000003Fu, 0x0000007Fu, 0x000000FFu, 0x000001FFu,
+  0x000003FFu, 0x000007FFu, 0x00000FFFu, 0x00001FFFu, 0x00003FFFu, 0x00007FFFu,
+  0x0000FFFFu, 0x0001FFFFu, 0x0003FFFFu, 0x0007FFFFu, 0x000FFFFFu, 0x001FFFFFu,
+  0x003FFFFFu, 0x007FFFFFu, 0x00FFFFFFu, 0x01FFFFFFu, 0x03FFFFFFu, 0x07FFFFFFu,
+  0x0FFFFFFFu, 0x1FFFFFFFu, 0x3FFFFFFFu, 0x7FFFFFFFu };
+
+const uint64_t masks_64bit[63] = { 0x0000000000000001ull, 0x0000000000000003ull,
+  0x0000000000000007ull, 0x000000000000000Full, 0x000000000000001Full, 0x000000000000003Full,
+  0x000000000000007Full, 0x00000000000000FFull, 0x00000000000001FFull, 0x00000000000003FFull,
+  0x00000000000007FFull, 0x0000000000000FFFull, 0x0000000000001FFFull, 0x0000000000003FFFull,
+  0x0000000000007FFFull, 0x000000000000FFFFull, 0x000000000001FFFFull, 0x000000000003FFFFull,
+  0x000000000007FFFFull, 0x00000000000FFFFFull, 0x00000000001FFFFFull, 0x00000000003FFFFFull,
+  0x00000000007FFFFFull, 0x0000000000FFFFFFull, 0x0000000001FFFFFFull, 0x0000000003FFFFFFull,
+  0x0000000007FFFFFFull, 0x000000000FFFFFFFull, 0x000000001FFFFFFFull, 0x000000003FFFFFFFull,
+  0x000000007FFFFFFFull, 0x00000000FFFFFFFFull, 0x00000001FFFFFFFFull, 0x00000003FFFFFFFFull,
+  0x00000007FFFFFFFFull, 0x0000000FFFFFFFFFull, 0x0000001FFFFFFFFFull, 0x0000003FFFFFFFFFull,
+  0x0000007FFFFFFFFFull, 0x000000FFFFFFFFFFull, 0x000001FFFFFFFFFFull, 0x000003FFFFFFFFFFull,
+  0x000007FFFFFFFFFFull, 0x00000FFFFFFFFFFFull, 0x00001FFFFFFFFFFFull, 0x00003FFFFFFFFFFFull,
+  0x00007FFFFFFFFFFFull, 0x0000FFFFFFFFFFFFull, 0x0001FFFFFFFFFFFFull, 0x0003FFFFFFFFFFFFull,
+  0x0007FFFFFFFFFFFFull, 0x000FFFFFFFFFFFFFull, 0x001FFFFFFFFFFFFFull, 0x003FFFFFFFFFFFFFull,
+  0x007FFFFFFFFFFFFFull, 0x00FFFFFFFFFFFFFFull, 0x01FFFFFFFFFFFFFFull, 0x03FFFFFFFFFFFFFFull,
+  0x07FFFFFFFFFFFFFFull, 0x0FFFFFFFFFFFFFFFull, 0x1FFFFFFFFFFFFFFFull, 0x3FFFFFFFFFFFFFFFull,
+  0x7FFFFFFFFFFFFFFFull };
+
+/*
 Creative Commons Legal Code
 
 CC0 1.0 Universal
@@ -160,3 +171,4 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
+*/

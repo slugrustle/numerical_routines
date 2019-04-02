@@ -87,6 +87,7 @@ void test_divround_i16_c(int16_t dividend_start, int16_t dividend_end) {
         int16_t remainder = dividend_i16 - (quotient * divisor);
         int16_t div_half = divisor >> 1;
         if ((divisor & static_cast<uint16_t>(0x8001)) == static_cast<int16_t>(1)) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%i / %i) = %i, but divround_i16 returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int16_t>::max()) break;
@@ -123,6 +124,7 @@ void test_divround_i16_cpp(int16_t dividend_start, int16_t dividend_end) {
         int16_t remainder = dividend_i16 - (quotient * divisor);
         int16_t div_half = divisor >> 1;
         if ((divisor & static_cast<uint16_t>(0x8001)) == static_cast<int16_t>(1)) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%i / %i) = %i, but divround<int16_t> returns %i\n  remainder = %i, div_half = %i\n\n", dividend_i16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int16_t>::max()) break;
@@ -155,6 +157,7 @@ void test_divround_u16_c(uint16_t dividend_start, uint16_t dividend_end) {
         uint16_t remainder = dividend_u16 - (quotient * divisor);
         uint16_t div_half = divisor >> 1;
         if (divisor & static_cast<uint16_t>(0x0001)) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%u / %u) = %u, but divround_u16 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<uint16_t>::max()) break;
@@ -187,6 +190,7 @@ void test_divround_u16_cpp(uint16_t dividend_start, uint16_t dividend_end) {
         uint16_t remainder = dividend_u16 - (quotient * divisor);
         uint16_t div_half = divisor >> 1;
         if (divisor & static_cast<uint16_t>(0x0001)) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%u / %u) = %u, but divround<uint16_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u16, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<uint16_t>::max()) break;
@@ -305,6 +309,7 @@ void test_divround_u32_c(uint32_t dividend_start, uint32_t dividend_end) {
         uint32_t remainder = dividend_u32 - (quotient * divisor);
         uint32_t div_half = divisor >> 1;
         if (divisor & 0x00000001u) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%u / %u) = %u, but divround_u32 returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u32, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1u << 17)) divisor = std::numeric_limits<uint32_t>::max() - (1u << 17);
@@ -340,6 +345,7 @@ void test_divround_u32_cpp(uint32_t dividend_start, uint32_t dividend_end) {
         uint32_t remainder = dividend_u32 - (quotient * divisor);
         uint32_t div_half = divisor >> 1;
         if (divisor & 0x00000001u) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%u / %u) = %u, but divround<uint32_t> returns %u\n  remainder = %u, div_half = %u\n\n", dividend_u32, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1u << 17)) divisor = std::numeric_limits<uint32_t>::max() - (1u << 17);
@@ -380,6 +386,7 @@ void test_divround_i64_c(int64_t dividend_start, int64_t dividend_end) {
         int64_t remainder = dividend_i64 - (quotient * divisor);
         int64_t div_half = divisor >> 1;
         if ((divisor & 0x8000000000000001ull) == 1ll) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%" PRIi64 " / %" PRIi64 ") = %" PRIi64 ", but divround_i64 returns %" PRIi64 "\n  remainder = %" PRIi64 ", div_half = %" PRIi64 "\n\n", dividend_i64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int64_t>::lowest() + (1 << 16)) divisor = -(1 << 16);
@@ -421,6 +428,7 @@ void test_divround_i64_cpp(int64_t dividend_start, int64_t dividend_end) {
         int64_t remainder = dividend_i64 - (quotient * divisor);
         int64_t div_half = divisor >> 1;
         if ((divisor & 0x8000000000000001ull) == 1ll) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%" PRIi64 " / %" PRIi64 ") = %" PRIi64 ", but divround<int64_t> returns %" PRIi64 "\n  remainder = %" PRIi64 ", div_half = %" PRIi64 "\n\n", dividend_i64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == std::numeric_limits<int64_t>::lowest() + (1 << 16)) divisor = -(1 << 16);
@@ -457,6 +465,7 @@ void test_divround_u64_c(uint64_t dividend_start, uint64_t dividend_end) {
         uint64_t remainder = dividend_u64 - (quotient * divisor);
         uint64_t div_half = divisor >> 1;
         if (divisor & 0x0000000000000001ull) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%" PRIu64 " / %" PRIu64 ") = %" PRIu64 ", but divround_u64 returns %" PRIu64 "\n  remainder = %" PRIu64 ", div_half = %" PRIu64 "\n\n", dividend_u64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1ull << 17)) divisor = std::numeric_limits<uint64_t>::max() - (1ull << 17);
@@ -492,6 +501,7 @@ void test_divround_u64_cpp(uint64_t dividend_start, uint64_t dividend_end) {
         uint64_t remainder = dividend_u64 - (quotient * divisor);
         uint64_t div_half = divisor >> 1;
         if (divisor & 0x0000000000000001ull) div_half++;
+        std::lock_guard<std::mutex> print_lock(print_mutex);
         std::printf("\nERROR: ROUND(%" PRIu64 " / %" PRIu64 ") = %" PRIu64 ", but divround<uint64_t> returns %" PRIu64 "\n  remainder = %" PRIu64 ", div_half = %" PRIu64 "\n\n", dividend_u64, divisor, dbl_dr, dr, remainder, div_half);
       }
       if (divisor == (1ull << 17)) divisor = std::numeric_limits<uint64_t>::max() - (1ull << 17);
@@ -625,10 +635,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i16_c, static_cast<int16_t>(thread_dividend_start), static_cast<int16_t>(thread_dividend_end)));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -651,10 +657,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i16_cpp, static_cast<int16_t>(thread_dividend_start), static_cast<int16_t>(thread_dividend_end)));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -677,10 +679,6 @@ int main() {
       uint32_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u16_c, static_cast<uint16_t>(thread_dividend_start), static_cast<uint16_t>(thread_dividend_end)));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %u, end = %u\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -703,10 +701,6 @@ int main() {
       uint32_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u16_cpp, static_cast<uint16_t>(thread_dividend_start), static_cast<uint16_t>(thread_dividend_end)));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %u, end = %u\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -729,10 +723,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i32_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -754,10 +744,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i32_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -779,10 +765,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i32_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -805,10 +787,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i32_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -830,10 +808,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i32_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -855,10 +829,6 @@ int main() {
       int32_t thread_dividend_end = thread_dividend_start + static_cast<int32_t>(nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i32_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %i, end = %i\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1;
     }
   }
@@ -881,10 +851,6 @@ int main() {
       uint32_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u32_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %u, end = %u\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1u;
     }
   }
@@ -906,10 +872,6 @@ int main() {
       uint32_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u32_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %u, end = %u\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1u;
     }
   }
@@ -932,10 +894,6 @@ int main() {
       uint32_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u32_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %u, end = %u\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1u;
     }
   }
@@ -957,10 +915,6 @@ int main() {
       uint32_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1u);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u32_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %u, end = %u\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1u;
     }
   }
@@ -983,10 +937,6 @@ int main() {
       int64_t thread_dividend_end = thread_dividend_start + static_cast<int64_t>(nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i64_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIi64 ", end = %" PRIi64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ll;
     }
   }
@@ -1008,10 +958,6 @@ int main() {
       int64_t thread_dividend_end = thread_dividend_start + static_cast<int64_t>(nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i64_c, thread_dividend_start,thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIi64 ", end = %" PRIi64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ll;
     }
   }
@@ -1033,10 +979,6 @@ int main() {
       int64_t thread_dividend_end = thread_dividend_start + static_cast<int64_t>(nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i64_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIi64 ", end = %" PRIi64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ll;
     }
   }
@@ -1059,10 +1001,6 @@ int main() {
       int64_t thread_dividend_end = thread_dividend_start + static_cast<int64_t>(nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i64_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIi64 ", end = %" PRIi64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ll;
     }
   }
@@ -1084,10 +1022,6 @@ int main() {
       int64_t thread_dividend_end = thread_dividend_start + static_cast<int64_t>(nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i64_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIi64 ", end = %" PRIi64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ll;
     }
   }
@@ -1109,10 +1043,6 @@ int main() {
       int64_t thread_dividend_end = thread_dividend_start + static_cast<int64_t>(nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_i64_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIi64 ", end = %" PRIi64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ll;
     }
   }
@@ -1135,10 +1065,6 @@ int main() {
       uint64_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u64_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIu64 ", end = %" PRIu64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ull;
     }
   }
@@ -1160,10 +1086,6 @@ int main() {
       uint64_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u64_c, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIu64 ", end = %" PRIu64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ull;
     }
   }
@@ -1186,10 +1108,6 @@ int main() {
       uint64_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u64_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIu64 ", end = %" PRIu64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ull;
     }
   }
@@ -1211,10 +1129,6 @@ int main() {
       uint64_t thread_dividend_end = thread_dividend_start + (nDividends_per_thread-1ull);
       if (jThread < nDividends_remaining) thread_dividend_end++;
       vThreads.at(jThread) = std::move(std::thread(test_divround_u64_cpp, thread_dividend_start, thread_dividend_end));
-      {
-        std::lock_guard<std::mutex> print_lock(print_mutex);
-        std::printf("Thread %u: start = %" PRIu64 ", end = %" PRIu64 "\n", jThread, thread_dividend_start, thread_dividend_end);
-      }
       thread_dividend_start = thread_dividend_end+1ull;
     }
   }
