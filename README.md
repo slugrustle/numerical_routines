@@ -6,7 +6,7 @@ There are two numerical solvers related to Negative Temperature Coefficient (NTC
 
 ## Getting Started
 
-Take a look in the integer/ and The thermistor/ directories.
+Take a look in the integer/ and thermistor/ directories.
 
 ## Contributing
 
