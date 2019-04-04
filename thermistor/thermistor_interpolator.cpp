@@ -12,7 +12,7 @@
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide.This software is distributed without any warranty.
+ * worldwide. This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
@@ -141,33 +141,13 @@ typedef struct
 } interp_segment_t;
 
 /**
- * interp_table_t is the top level of a table of interpolation
- *                segments that define some curve.
- *
- * num_segments: number of linear interpolation segments
- *               in this table.
- *
- * end_count: largest ADC count value for which the last
- *            interpolation segment is valid.
- *
- * p_segments: pointer to an array of num_segments interpolation
- *             segments.
- */
-typedef struct
-{
-  uint16_t num_segments;
-  uint16_t end_count;
-  interp_segment_t *p_segments;
-} interp_table_t;
-
-/**
  * Holds fit statistics for a single interpolation segment.
  * Only used for informational purposes.
  */
 typedef struct
 {
   uint16_t num_points;
-  double mean_residual;
+  double mean_error;
   double max_error;
 } segment_stats_t;
 
@@ -705,8 +685,8 @@ int main (int argc, char **argv)
     kept_segment.start_temp = fixed_point_C(Tntc_from_ADCread(kept_segment.start_count));
     kept_segment.slope_multiplier = 0;
     kept_segment.slope_shift = 0u;
-    double kept_mean_res = std::fabs(kept_segment.start_temp / 128.0 - Tntc_from_ADCread(kept_segment.start_count));
-    double kept_max_err = kept_mean_res;
+    double kept_mean_err = std::fabs(kept_segment.start_temp / 128.0 - Tntc_from_ADCread(kept_segment.start_count));
+    double kept_max_err = kept_mean_err;
     uint16_t nPoints;
 
     for (nPoints = 2u; next_start_count + nPoints - 1u <= table_end_count; nPoints++)
@@ -770,7 +750,7 @@ int main (int argc, char **argv)
       test_segment.slope_shift = 0u;
       test_segment.slope_multiplier = 0;
 
-      for (/* nothing */; test_segment.slope_shift < 30; test_segment.slope_shift++)
+      for (/* nothing */; test_segment.slope_shift < 30u; test_segment.slope_shift++)
       {
         double two_exp = double(1ull << test_segment.slope_shift);
         test_segment.slope_multiplier = static_cast<int32_t>(std::round(frac_slope * two_exp));
@@ -801,19 +781,19 @@ int main (int argc, char **argv)
        * Calculate the maximum interpolation error for this segment.
        */
       bool keepSegment = true;
-      double mean_residual = 0.0;
+      double mean_error = 0.0;
       double max_error = 0.0;
 
       for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
       {
         int16_t this_temp = test_segment.start_temp + multshiftround<int32_t>(jPoint, test_segment.slope_multiplier, test_segment.slope_shift);
         double this_abs_error = std::fabs(dataVector(jPoint) / 128.0 - static_cast<double>(this_temp) / 128.0);
-        mean_residual += this_abs_error;
+        mean_error += this_abs_error;
         max_error = std::max(max_error, this_abs_error);
         if (this_abs_error > max_interp_error_C) keepSegment = false;
       }
 
-      mean_residual /= static_cast<double>(nPoints);
+      mean_error /= static_cast<double>(nPoints);
 
       /**
        * Store segment statistics.
@@ -821,7 +801,7 @@ int main (int argc, char **argv)
       if (keepSegment) 
       {
         kept_segment = test_segment;
-        kept_mean_res = mean_residual;
+        kept_mean_err = mean_error;
         kept_max_err = max_error;
       }
       else break;
@@ -838,7 +818,7 @@ int main (int argc, char **argv)
      * Store the segment.
      */
     vInterp_segments.push_back(kept_segment);
-    vSegment_stats.push_back({nPoints, kept_mean_res, kept_max_err});
+    vSegment_stats.push_back({nPoints, kept_mean_err, kept_max_err});
     if (kept_segment.start_count + nPoints - 1u == table_end_count) break;
     next_start_count = kept_segment.start_count + nPoints;
   }
@@ -851,10 +831,10 @@ int main (int argc, char **argv)
   {
     interp_segment_t this_segment = vInterp_segments.at(jSegment);
     std::printf(u8"segment %3" PRIu64 ":  start ADC count = %5u,  offset = % 7i = % 12.6f \u00B0C,  slope = % 6i / 2^(% 3i) = % 12.6f (1/128)\u00B0C / ADC count.\n",
-      jSegment, this_segment.start_count, this_segment.start_temp,
-      static_cast<double>(this_segment.start_temp) / 128.0,
-      this_segment.slope_multiplier, this_segment.slope_shift,
-      static_cast<double>(this_segment.slope_multiplier) / static_cast<double>(1ull << this_segment.slope_shift));
+                jSegment, this_segment.start_count, this_segment.start_temp,
+                static_cast<double>(this_segment.start_temp) / 128.0,
+                this_segment.slope_multiplier, this_segment.slope_shift,
+                static_cast<double>(this_segment.slope_multiplier) / static_cast<double>(1ull << this_segment.slope_shift));
   }
   std::printf("\n");
 
@@ -866,7 +846,7 @@ int main (int argc, char **argv)
   {
     segment_stats_t these_stats = vSegment_stats.at(jSegment);
     std::printf(u8"segment %3" PRIu64 " stats:  # points = %4u,  mean error = % 9.6f \u00B0C,  max error = % 9.6f \u00B0C\n",
-                jSegment, these_stats.num_points, these_stats.mean_residual, these_stats.max_error);
+                jSegment, these_stats.num_points, these_stats.mean_error, these_stats.max_error);
   }
   std::printf("\n");
 
@@ -874,7 +854,7 @@ int main (int argc, char **argv)
    * Print the struct definitions. I consider these
    * to be an important part of the table code.
    */
-  std::printf("/**\n");
+  std::printf("/" "**\n");
   std::printf(" * interp_segment_t defines a single linear interpolation\n");
   std::printf(" *                  segment.\n");
   std::printf(" *\n");
@@ -894,7 +874,7 @@ int main (int argc, char **argv)
   std::printf(" * Each segment ends one count before the start of the\n");
   std::printf(" * next segment. end_count in interp_table_t gives the last\n");
   std::printf(" * valid ADC count for the final segment.\n");
-  std::printf(" */\n");
+  std::printf(" *" "/\n");
   std::printf("typedef struct\n");
   std::printf("{\n");
   std::printf("  uint16_t start_count;\n");
@@ -903,48 +883,92 @@ int main (int argc, char **argv)
   std::printf("  uint8_t slope_shift;\n");
   std::printf("} interp_segment_t;\n\n");
 
-  std::printf("/**\n");
-  std::printf(" * interp_table_t is the top level of a table of interpolation\n");
-  std::printf(" *                segments that define some curve.\n");
+  std::printf("/" "**\n");
+  std::printf(" * Converts a raw ADC reading of the thermistor circuit\n");
+  std::printf(" * into a temperature in 1/128ths of a degree Celsius.\n");
   std::printf(" *\n");
-  std::printf(" * num_segments: number of linear interpolation segments\n");
-  std::printf(" *               in this table.\n");
-  std::printf(" *\n");
-  std::printf(" * end_count: largest ADC count value for which the last\n");
-  std::printf(" *            interpolation segment is valid.\n");
-  std::printf(" *\n");
-  std::printf(" * p_segments: pointer to an array of num_segments interpolation\n");
-  std::printf(" *             segments.\n");
-  std::printf(" */\n");
-  std::printf("typedef struct\n");
+  std::printf(" * This code was autogenerated with the following parameters:\n");
+  std::printf(" * NTC Thermistor: %.1f Ohms nominal @ %.1f deg. C.\n", Rntc_nom_Ohms, NTC_nom_temp_C);
+  std::printf(" *                 Beta = %.0f K\n", beta_K);
+  std::printf(" * Pullup resistor: %.1f Ohms nominal.\n", Rpullup_nom_Ohms);
+  std::printf(" *   - The pullup resistor connects between the NTC and the\n");
+  std::printf(" *     positive voltage supply.\n");
+  std::printf(" * Isolation resistor: %.1f Ohms nominal\n", Riso_nom_Ohms);
+  std::printf(" *   - The isolation resistor connects between the NTC and GND.\n");
+  std::printf(" * Full ADC count range: 0-%u\n", ADC_counts - 1u);
+  std::printf(" * Max interpolation error: %.8f deg. C\n", max_interp_error_C);
+  std::printf(" * Table range: %.8f to %.8f deg. C\n", real_min_table_temp, real_max_table_temp);
+  std::printf(" * ADCcount inputs >= %u result in the minimum table temperature.\n", table_end_count);
+  std::printf(" * ADCcount inputs <= %u result in the maximum table temperature.\n", vInterp_segments.at(0).start_count);
+  std::printf(" *" "/\n");
+  std::printf("int16_t read_thermistor(const uint16_t ADCcount)\n");
   std::printf("{\n");
-  std::printf("  uint16_t num_segments;\n");
-  std::printf("  uint16_t end_count;\n");
-  std::printf("  interp_segment_t *p_segments;\n");
-  std::printf("} interp_table_t;\n\n");
-
-  /**
-   * Print the array of interpolating segments.
-   */
-  std::printf("interp_segment_t thermistor_interp_segment_array[%" PRIu64 "] = {\n", vInterp_segments.size());
+  std::printf("  static const uint16_t num_segments = %" PRIu64 "u;\n", vInterp_segments.size());
+  std::printf("  static const interp_segment_t interp_segments[num_segments] = {\n");
   for (size_t jSegment = 0ull; jSegment + 1ull < vInterp_segments.size(); jSegment++)
   {
     interp_segment_t this_segment = vInterp_segments.at(jSegment);
-    std::printf("  {%5u, % 6i, % 6i, %2u},\n", this_segment.start_count, this_segment.start_temp, this_segment.slope_multiplier, this_segment.slope_shift);
+    std::printf("    {%5u, % 6i, % 6i, %2u},\n", this_segment.start_count, this_segment.start_temp, this_segment.slope_multiplier, this_segment.slope_shift);
   }
   
   if (vInterp_segments.size() > 0ull)
   {
     interp_segment_t this_segment = vInterp_segments.back();
-    std::printf("  {%5u, % 6i, % 6i, %2u}\n", this_segment.start_count, this_segment.start_temp, this_segment.slope_multiplier, this_segment.slope_shift);
+    std::printf("    {%5u, % 6i, % 6i, %2u}\n", this_segment.start_count, this_segment.start_temp, this_segment.slope_multiplier, this_segment.slope_shift);
   }
 
-  std::printf("};\n\n");
-
-  /**
-   * Print the interpolation table struct.
-   */
-  std::printf("interp_table_t thermistor_table = {%" PRIu64 ", %u, thermistor_interp_segment_array};\n\n", vInterp_segments.size(), table_end_count);
+  std::printf("  };\n");
+  std::printf("  static const uint16_t last_segment_end_count = %u;\n", table_end_count);
+  std::printf("\n");
+  std::printf("  /" "**\n");
+  std::printf("   * Check input ADCcount against table min & max ADC counts.\n");
+  std::printf("   *" "/\n");
+  std::printf("  if (ADCcount <= interp_segments[0].start_count)\n");
+  std::printf("  {\n");
+  std::printf("    return interp_segments[0].start_temp;\n");
+  std::printf("  }\n");
+  std::printf("\n");
+  std::printf("  uint16_t seg_index = 0u;\n");
+  std::printf("\n");
+  std::printf("  if (ADCcount >= last_segment_end_count)\n");
+  std::printf("  {\n");
+  std::printf("    seg_index = num_segments - 1u;\n");
+  std::printf("    return interp_segments[seg_index].start_temp +\n");
+  std::printf("           multshiftround<int32_t>(last_segment_end_count - interp_segments[seg_index].start_count,\n");
+  std::printf("                                   interp_segments[seg_index].slope_multiplier,\n");
+  std::printf("                                   interp_segments[seg_index].slope_shift);\n");
+  std::printf("  }\n");
+  std::printf("\n");
+  std::printf("  /" "**\n");
+  std::printf("   * Find the interpolation segment that contains ADCcount\n");
+  std::printf("   * via binary search.\n");
+  std::printf("   *" "/\n");
+  std::printf("  uint16_t lower_bound = 0u;\n");
+  std::printf("  uint16_t upper_bound = num_segments - 1u;\n");
+  std::printf("  seg_index = (lower_bound + upper_bound) >> 1;\n");
+  std::printf("\n");
+  std::printf("  while (true)\n");
+  std::printf("  {\n");
+  std::printf("    if (ADCcount < interp_segments[seg_index].start_count)\n");
+  std::printf("    {\n");
+  std::printf("      upper_bound = seg_index - 1u;\n");
+  std::printf("      seg_index = (lower_bound + upper_bound) >> 1;\n");
+  std::printf("    }\n");
+  std::printf("    else if (seg_index + 1u < num_segments &&\n");
+  std::printf("             ADCcount >= interp_segments[seg_index + 1u].start_count)\n");
+  std::printf("    {\n");
+  std::printf("      lower_bound = seg_index + 1u;\n");
+  std::printf("      seg_index = (lower_bound + upper_bound) >> 1;\n");
+  std::printf("    }\n");
+  std::printf("    else\n");
+  std::printf("    {\n");
+  std::printf("      return interp_segments[seg_index].start_temp +\n");
+  std::printf("             multshiftround<int32_t>(ADCcount - interp_segments[seg_index].start_count,\n");
+  std::printf("                                     interp_segments[seg_index].slope_multiplier,\n");
+  std::printf("                                     interp_segments[seg_index].slope_shift);\n");
+  std::printf("    }\n");
+  std::printf("  }\n");
+  std::printf("}\n\n");
 
   return 0;
 }
