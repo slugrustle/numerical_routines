@@ -1,12 +1,19 @@
 /**
- * detect_product_overflow.h
- * detect_product_overflow_u64 and detect_product_overflow_i64 detect
- * overflow in the multiplication of two uint64_t or int64_t numbers,
- * respectively. These functions are called in the debug code for c style
- * and c++ style, _run type and _comp type, 64-bit multshiftround routines.
+ * run_masks_type.h
+ * Allows the user to choose between computed or array lookup rounding
+ * masks in shiftround_run.hpp, shiftround_run.c, multshiftround_run.hpp,
+ * and multshiftround_run.c.
  * 
- * detect_product_overflow_u64 and detect_product_overflow_i64 do not
- * rely on potentially non-portable 128-bit types.
+ * ARRAY_MASKS is set by default, but not for any particular reason.
+ * 
+ * Array type masks are most useful where the target processor lacks a
+ * barrel shifter and where speed is more important than the storage
+ * space for the masks found in multshiftround_shiftround_masks.c.
+ * 
+ * Computed masks are most useful where space is constrained or where the
+ * evaluation of the computed masks is faster than an array lookup.
+ * 
+ * As always, test performance if it's important.
  * 
  * Written in 2019 by Ben Tesch.
  *
@@ -16,25 +23,17 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef DETECT_PRODUCT_OVERFLOW_H_
-#define DETECT_PRODUCT_OVERFLOW_H_
 
-#include "inttypes.h"
-#include "stdbool.h"
+#ifndef RUN_MASKS_TYPE_H_
+#define RUN_MASKS_TYPE_H_
 
-/**
- * Returns true if the product a * b would overflow the range
- * of a uin64_t and false otherwise.
- */
-bool detect_product_overflow_u64(const uint64_t a, const uint64_t b);
+#if !defined(ARRAY_MASKS) && !defined(COMPUTED_MASKS)
+  #define ARRAY_MASKS
+#elif defined(ARRAY_MASKS) && defined(COMPUTED_MASKS)
+  #error "Either ARRAY_MASKS or COMPUTED_MASKS may be defined, but not both."
+#endif
 
-/**
- * Returns true if the product a * b would overflow or
- * underflow the range of an in64_t and false otherwise.
- */
-bool detect_product_overflow_i64(const int64_t a, const int64_t b);
-
-#endif /* #ifndef DETECT_PRODUCT_OVERFLOW_H_ */
+#endif /* #ifndef RUN_MASKS_TYPE_H_ */
 
 /*
 Creative Commons Legal Code

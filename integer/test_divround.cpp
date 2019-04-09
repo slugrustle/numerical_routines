@@ -1,5 +1,5 @@
 /**
- * divround_test.cpp
+ * test_divround.cpp
  * Tests the following functions for all valid inputs:
  * divround_i8, divround<int8_t>, divround_u8, divround<uint8_t>,
  * divround_i16, divround<int16_t>, divround_u16, and divround<uint16_t>.

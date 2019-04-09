@@ -17,7 +17,7 @@
  * and related and neighboring rights to this software to the public domain
  * worldwide.This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
- * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
+ * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 #ifndef SATURATE_VALUE_H_
 #define SATURATE_VALUE_H_

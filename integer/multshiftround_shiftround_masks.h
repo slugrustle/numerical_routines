@@ -13,17 +13,17 @@
  * and related and neighboring rights to this software to the public domain
  * worldwide.This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
- * end of this file.If not, see http ://creativecommons.org/publicdomain/zero/1.0/
+ * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 #ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_
 #define MULTSHIFTROUND_SHIFTROUND_MASKS_H_
 
 #include "inttypes.h"
 
-extern const uint8_t masks_8bit[7];
-extern const uint16_t masks_16bit[15];
-extern const uint32_t masks_32bit[31];
-extern const uint64_t masks_64bit[63];
+extern const uint8_t masks_8bit[8];
+extern const uint16_t masks_16bit[16];
+extern const uint32_t masks_32bit[32];
+extern const uint64_t masks_64bit[64];
 
 #endif /* #ifndef MULTSHIFTROUND_SHIFTROUND_MASKS_H_ */
 

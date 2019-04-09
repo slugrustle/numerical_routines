@@ -78,7 +78,7 @@ int8_t multshiftround_i8_2(const int8_t num, const int8_t mul) {
   #endif
 
   int8_t prod = num * mul;
-  if (((prod & (int8_t)0x03) >= (int8_t)0x02) & ((prod & (uint8_t)0x83) != (uint8_t)0x82)) return (prod >> 2) + (int8_t)1;
+  if ((prod & (int8_t)0x02) && ((prod & (uint8_t)0x83) != (uint8_t)0x82)) return (prod >> 2) + (int8_t)1;
   return prod >> 2;
 }
 
@@ -94,7 +94,7 @@ int8_t multshiftround_i8_3(const int8_t num, const int8_t mul) {
   #endif
 
   int8_t prod = num * mul;
-  if (((prod & (int8_t)0x07) >= (int8_t)0x04) & ((prod & (uint8_t)0x87) != (uint8_t)0x84)) return (prod >> 3) + (int8_t)1;
+  if ((prod & (int8_t)0x04) && ((prod & (uint8_t)0x87) != (uint8_t)0x84)) return (prod >> 3) + (int8_t)1;
   return prod >> 3;
 }
 
@@ -110,7 +110,7 @@ int8_t multshiftround_i8_4(const int8_t num, const int8_t mul) {
   #endif
 
   int8_t prod = num * mul;
-  if (((prod & (int8_t)0x0F) >= (int8_t)0x08) & ((prod & (uint8_t)0x8F) != (uint8_t)0x88)) return (prod >> 4) + (int8_t)1;
+  if ((prod & (int8_t)0x08) && ((prod & (uint8_t)0x8F) != (uint8_t)0x88)) return (prod >> 4) + (int8_t)1;
   return prod >> 4;
 }
 
@@ -126,7 +126,7 @@ int8_t multshiftround_i8_5(const int8_t num, const int8_t mul) {
   #endif
 
   int8_t prod = num * mul;
-  if (((prod & (int8_t)0x1F) >= (int8_t)0x10) & ((prod & (uint8_t)0x9F) != (uint8_t)0x90)) return (prod >> 5) + (int8_t)1;
+  if ((prod & (int8_t)0x10) && ((prod & (uint8_t)0x9F) != (uint8_t)0x90)) return (prod >> 5) + (int8_t)1;
   return prod >> 5;
 }
 
@@ -142,7 +142,7 @@ int8_t multshiftround_i8_6(const int8_t num, const int8_t mul) {
   #endif
 
   int8_t prod = num * mul;
-  if (((prod & (int8_t)0x3F) >= (int8_t)0x20) & ((prod & (uint8_t)0xBF) != (uint8_t)0xA0)) return (prod >> 6) + (int8_t)1;
+  if ((prod & (int8_t)0x20) && ((prod & (uint8_t)0xBF) != (uint8_t)0xA0)) return (prod >> 6) + (int8_t)1;
   return prod >> 6;
 }
 
@@ -178,7 +178,7 @@ int16_t multshiftround_i16_2(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x0003) >= (int16_t)0x0002) & ((prod & (uint16_t)0x8003) != (uint16_t)0x8002)) return (prod >> 2) + (int16_t)1;
+  if ((prod & (int16_t)0x0002) && ((prod & (uint16_t)0x8003) != (uint16_t)0x8002)) return (prod >> 2) + (int16_t)1;
   return prod >> 2;
 }
 
@@ -194,7 +194,7 @@ int16_t multshiftround_i16_3(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x0007) >= (int16_t)0x0004) & ((prod & (uint16_t)0x8007) != (uint16_t)0x8004)) return (prod >> 3) + (int16_t)1;
+  if ((prod & (int16_t)0x0004) && ((prod & (uint16_t)0x8007) != (uint16_t)0x8004)) return (prod >> 3) + (int16_t)1;
   return prod >> 3;
 }
 
@@ -210,7 +210,7 @@ int16_t multshiftround_i16_4(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x000F) >= (int16_t)0x0008) & ((prod & (uint16_t)0x800F) != (uint16_t)0x8008)) return (prod >> 4) + (int16_t)1;
+  if ((prod & (int16_t)0x0008) && ((prod & (uint16_t)0x800F) != (uint16_t)0x8008)) return (prod >> 4) + (int16_t)1;
   return prod >> 4;
 }
 
@@ -226,7 +226,7 @@ int16_t multshiftround_i16_5(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x001F) >= (int16_t)0x0010) & ((prod & (uint16_t)0x801F) != (uint16_t)0x8010)) return (prod >> 5) + (int16_t)1;
+  if ((prod & (int16_t)0x0010) && ((prod & (uint16_t)0x801F) != (uint16_t)0x8010)) return (prod >> 5) + (int16_t)1;
   return prod >> 5;
 }
 
@@ -242,7 +242,7 @@ int16_t multshiftround_i16_6(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x003F) >= (int16_t)0x0020) & ((prod & (uint16_t)0x803F) != (uint16_t)0x8020)) return (prod >> 6) + (int16_t)1;
+  if ((prod & (int16_t)0x0020) && ((prod & (uint16_t)0x803F) != (uint16_t)0x8020)) return (prod >> 6) + (int16_t)1;
   return prod >> 6;
 }
 
@@ -258,7 +258,7 @@ int16_t multshiftround_i16_7(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x007F) >= (int16_t)0x0040) & ((prod & (uint16_t)0x807F) != (uint16_t)0x8040)) return (prod >> 7) + (int16_t)1;
+  if ((prod & (int16_t)0x0040) && ((prod & (uint16_t)0x807F) != (uint16_t)0x8040)) return (prod >> 7) + (int16_t)1;
   return prod >> 7;
 }
 
@@ -274,7 +274,7 @@ int16_t multshiftround_i16_8(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x00FF) >= (int16_t)0x0080) & ((prod & (uint16_t)0x80FF) != (uint16_t)0x8080)) return (prod >> 8) + (int16_t)1;
+  if ((prod & (int16_t)0x0080) && ((prod & (uint16_t)0x80FF) != (uint16_t)0x8080)) return (prod >> 8) + (int16_t)1;
   return prod >> 8;
 }
 
@@ -290,7 +290,7 @@ int16_t multshiftround_i16_9(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x01FF) >= (int16_t)0x0100) & ((prod & (uint16_t)0x81FF) != (uint16_t)0x8100)) return (prod >> 9) + (int16_t)1;
+  if ((prod & (int16_t)0x0100) && ((prod & (uint16_t)0x81FF) != (uint16_t)0x8100)) return (prod >> 9) + (int16_t)1;
   return prod >> 9;
 }
 
@@ -306,7 +306,7 @@ int16_t multshiftround_i16_10(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x03FF) >= (int16_t)0x0200) & ((prod & (uint16_t)0x83FF) != (uint16_t)0x8200)) return (prod >> 10) + (int16_t)1;
+  if ((prod & (int16_t)0x0200) && ((prod & (uint16_t)0x83FF) != (uint16_t)0x8200)) return (prod >> 10) + (int16_t)1;
   return prod >> 10;
 }
 
@@ -322,7 +322,7 @@ int16_t multshiftround_i16_11(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x07FF) >= (int16_t)0x0400) & ((prod & (uint16_t)0x87FF) != (uint16_t)0x8400)) return (prod >> 11) + (int16_t)1;
+  if ((prod & (int16_t)0x0400) && ((prod & (uint16_t)0x87FF) != (uint16_t)0x8400)) return (prod >> 11) + (int16_t)1;
   return prod >> 11;
 }
 
@@ -338,7 +338,7 @@ int16_t multshiftround_i16_12(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x0FFF) >= (int16_t)0x0800) & ((prod & (uint16_t)0x8FFF) != (uint16_t)0x8800)) return (prod >> 12) + (int16_t)1;
+  if ((prod & (int16_t)0x0800) && ((prod & (uint16_t)0x8FFF) != (uint16_t)0x8800)) return (prod >> 12) + (int16_t)1;
   return prod >> 12;
 }
 
@@ -354,7 +354,7 @@ int16_t multshiftround_i16_13(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x1FFF) >= (int16_t)0x1000) & ((prod & (uint16_t)0x9FFF) != (uint16_t)0x9000)) return (prod >> 13) + (int16_t)1;
+  if ((prod & (int16_t)0x1000) && ((prod & (uint16_t)0x9FFF) != (uint16_t)0x9000)) return (prod >> 13) + (int16_t)1;
   return prod >> 13;
 }
 
@@ -370,7 +370,7 @@ int16_t multshiftround_i16_14(const int16_t num, const int16_t mul) {
   #endif
 
   int16_t prod = num * mul;
-  if (((prod & (int16_t)0x3FFF) >= (int16_t)0x2000) & ((prod & (uint16_t)0xBFFF) != (uint16_t)0xA000)) return (prod >> 14) + (int16_t)1;
+  if ((prod & (int16_t)0x2000) && ((prod & (uint16_t)0xBFFF) != (uint16_t)0xA000)) return (prod >> 14) + (int16_t)1;
   return prod >> 14;
 }
 
@@ -406,7 +406,7 @@ int32_t multshiftround_i32_2(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00000003) >= 0x00000002) & ((prod & 0x80000003u) != 0x80000002u)) return (prod >> 2) + 1;
+  if ((prod & 0x00000002) && ((prod & 0x80000003u) != 0x80000002u)) return (prod >> 2) + 1;
   return prod >> 2;
 }
 
@@ -422,7 +422,7 @@ int32_t multshiftround_i32_3(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00000007) >= 0x00000004) & ((prod & 0x80000007u) != 0x80000004u)) return (prod >> 3) + 1;
+  if ((prod & 0x00000004) && ((prod & 0x80000007u) != 0x80000004u)) return (prod >> 3) + 1;
   return prod >> 3;
 }
 
@@ -438,7 +438,7 @@ int32_t multshiftround_i32_4(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0000000F) >= 0x00000008) & ((prod & 0x8000000Fu) != 0x80000008u)) return (prod >> 4) + 1;
+  if ((prod & 0x00000008) && ((prod & 0x8000000Fu) != 0x80000008u)) return (prod >> 4) + 1;
   return prod >> 4;
 }
 
@@ -454,7 +454,7 @@ int32_t multshiftround_i32_5(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0000001F) >= 0x00000010) & ((prod & 0x8000001Fu) != 0x80000010u)) return (prod >> 5) + 1;
+  if ((prod & 0x00000010) && ((prod & 0x8000001Fu) != 0x80000010u)) return (prod >> 5) + 1;
   return prod >> 5;
 }
 
@@ -470,7 +470,7 @@ int32_t multshiftround_i32_6(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0000003F) >= 0x00000020) & ((prod & 0x8000003Fu) != 0x80000020u)) return (prod >> 6) + 1;
+  if ((prod & 0x00000020) && ((prod & 0x8000003Fu) != 0x80000020u)) return (prod >> 6) + 1;
   return prod >> 6;
 }
 
@@ -486,7 +486,7 @@ int32_t multshiftround_i32_7(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0000007F) >= 0x00000040) & ((prod & 0x8000007Fu) != 0x80000040u)) return (prod >> 7) + 1;
+  if ((prod & 0x00000040) && ((prod & 0x8000007Fu) != 0x80000040u)) return (prod >> 7) + 1;
   return prod >> 7;
 }
 
@@ -502,7 +502,7 @@ int32_t multshiftround_i32_8(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x000000FF) >= 0x00000080) & ((prod & 0x800000FFu) != 0x80000080u)) return (prod >> 8) + 1;
+  if ((prod & 0x00000080) && ((prod & 0x800000FFu) != 0x80000080u)) return (prod >> 8) + 1;
   return prod >> 8;
 }
 
@@ -518,7 +518,7 @@ int32_t multshiftround_i32_9(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x000001FF) >= 0x00000100) & ((prod & 0x800001FFu) != 0x80000100u)) return (prod >> 9) + 1;
+  if ((prod & 0x00000100) && ((prod & 0x800001FFu) != 0x80000100u)) return (prod >> 9) + 1;
   return prod >> 9;
 }
 
@@ -534,7 +534,7 @@ int32_t multshiftround_i32_10(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x000003FF) >= 0x00000200) & ((prod & 0x800003FFu) != 0x80000200u)) return (prod >> 10) + 1;
+  if ((prod & 0x00000200) && ((prod & 0x800003FFu) != 0x80000200u)) return (prod >> 10) + 1;
   return prod >> 10;
 }
 
@@ -550,7 +550,7 @@ int32_t multshiftround_i32_11(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x000007FF) >= 0x00000400) & ((prod & 0x800007FFu) != 0x80000400u)) return (prod >> 11) + 1;
+  if ((prod & 0x00000400) && ((prod & 0x800007FFu) != 0x80000400u)) return (prod >> 11) + 1;
   return prod >> 11;
 }
 
@@ -566,7 +566,7 @@ int32_t multshiftround_i32_12(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00000FFF) >= 0x00000800) & ((prod & 0x80000FFFu) != 0x80000800u)) return (prod >> 12) + 1;
+  if ((prod & 0x00000800) && ((prod & 0x80000FFFu) != 0x80000800u)) return (prod >> 12) + 1;
   return prod >> 12;
 }
 
@@ -582,7 +582,7 @@ int32_t multshiftround_i32_13(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00001FFF) >= 0x00001000) & ((prod & 0x80001FFFu) != 0x80001000u)) return (prod >> 13) + 1;
+  if ((prod & 0x00001000) && ((prod & 0x80001FFFu) != 0x80001000u)) return (prod >> 13) + 1;
   return prod >> 13;
 }
 
@@ -598,7 +598,7 @@ int32_t multshiftround_i32_14(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00003FFF) >= 0x00002000) & ((prod & 0x80003FFFu) != 0x80002000u)) return (prod >> 14) + 1;
+  if ((prod & 0x00002000) && ((prod & 0x80003FFFu) != 0x80002000u)) return (prod >> 14) + 1;
   return prod >> 14;
 }
 
@@ -614,7 +614,7 @@ int32_t multshiftround_i32_15(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00007FFF) >= 0x00004000) & ((prod & 0x80007FFFu) != 0x80004000u)) return (prod >> 15) + 1;
+  if ((prod & 0x00004000) && ((prod & 0x80007FFFu) != 0x80004000u)) return (prod >> 15) + 1;
   return prod >> 15;
 }
 
@@ -630,7 +630,7 @@ int32_t multshiftround_i32_16(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0000FFFF) >= 0x00008000) & ((prod & 0x8000FFFFu) != 0x80008000u)) return (prod >> 16) + 1;
+  if ((prod & 0x00008000) && ((prod & 0x8000FFFFu) != 0x80008000u)) return (prod >> 16) + 1;
   return prod >> 16;
 }
 
@@ -646,7 +646,7 @@ int32_t multshiftround_i32_17(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0001FFFF) >= 0x00010000) & ((prod & 0x8001FFFFu) != 0x80010000u)) return (prod >> 17) + 1;
+  if ((prod & 0x00010000) && ((prod & 0x8001FFFFu) != 0x80010000u)) return (prod >> 17) + 1;
   return prod >> 17;
 }
 
@@ -662,7 +662,7 @@ int32_t multshiftround_i32_18(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0003FFFF) >= 0x00020000) & ((prod & 0x8003FFFFu) != 0x80020000u)) return (prod >> 18) + 1;
+  if ((prod & 0x00020000) && ((prod & 0x8003FFFFu) != 0x80020000u)) return (prod >> 18) + 1;
   return prod >> 18;
 }
 
@@ -678,7 +678,7 @@ int32_t multshiftround_i32_19(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0007FFFF) >= 0x00040000) & ((prod & 0x8007FFFFu) != 0x80040000u)) return (prod >> 19) + 1;
+  if ((prod & 0x00040000) && ((prod & 0x8007FFFFu) != 0x80040000u)) return (prod >> 19) + 1;
   return prod >> 19;
 }
 
@@ -694,7 +694,7 @@ int32_t multshiftround_i32_20(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x000FFFFF) >= 0x00080000) & ((prod & 0x800FFFFFu) != 0x80080000u)) return (prod >> 20) + 1;
+  if ((prod & 0x00080000) && ((prod & 0x800FFFFFu) != 0x80080000u)) return (prod >> 20) + 1;
   return prod >> 20;
 }
 
@@ -710,7 +710,7 @@ int32_t multshiftround_i32_21(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x001FFFFF) >= 0x00100000) & ((prod & 0x801FFFFFu) != 0x80100000u)) return (prod >> 21) + 1;
+  if ((prod & 0x00100000) && ((prod & 0x801FFFFFu) != 0x80100000u)) return (prod >> 21) + 1;
   return prod >> 21;
 }
 
@@ -726,7 +726,7 @@ int32_t multshiftround_i32_22(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x003FFFFF) >= 0x00200000) & ((prod & 0x803FFFFFu) != 0x80200000u)) return (prod >> 22) + 1;
+  if ((prod & 0x00200000) && ((prod & 0x803FFFFFu) != 0x80200000u)) return (prod >> 22) + 1;
   return prod >> 22;
 }
 
@@ -742,7 +742,7 @@ int32_t multshiftround_i32_23(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x007FFFFF) >= 0x00400000) & ((prod & 0x807FFFFFu) != 0x80400000u)) return (prod >> 23) + 1;
+  if ((prod & 0x00400000) && ((prod & 0x807FFFFFu) != 0x80400000u)) return (prod >> 23) + 1;
   return prod >> 23;
 }
 
@@ -758,7 +758,7 @@ int32_t multshiftround_i32_24(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x00FFFFFF) >= 0x00800000) & ((prod & 0x80FFFFFFu) != 0x80800000u)) return (prod >> 24) + 1;
+  if ((prod & 0x00800000) && ((prod & 0x80FFFFFFu) != 0x80800000u)) return (prod >> 24) + 1;
   return prod >> 24;
 }
 
@@ -774,7 +774,7 @@ int32_t multshiftround_i32_25(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x01FFFFFF) >= 0x01000000) & ((prod & 0x81FFFFFFu) != 0x81000000u)) return (prod >> 25) + 1;
+  if ((prod & 0x01000000) && ((prod & 0x81FFFFFFu) != 0x81000000u)) return (prod >> 25) + 1;
   return prod >> 25;
 }
 
@@ -790,7 +790,7 @@ int32_t multshiftround_i32_26(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x03FFFFFF) >= 0x02000000) & ((prod & 0x83FFFFFFu) != 0x82000000u)) return (prod >> 26) + 1;
+  if ((prod & 0x02000000) && ((prod & 0x83FFFFFFu) != 0x82000000u)) return (prod >> 26) + 1;
   return prod >> 26;
 }
 
@@ -806,7 +806,7 @@ int32_t multshiftround_i32_27(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x07FFFFFF) >= 0x04000000) & ((prod & 0x87FFFFFFu) != 0x84000000u)) return (prod >> 27) + 1;
+  if ((prod & 0x04000000) && ((prod & 0x87FFFFFFu) != 0x84000000u)) return (prod >> 27) + 1;
   return prod >> 27;
 }
 
@@ -822,7 +822,7 @@ int32_t multshiftround_i32_28(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x0FFFFFFF) >= 0x08000000) & ((prod & 0x8FFFFFFFu) != 0x88000000u)) return (prod >> 28) + 1;
+  if ((prod & 0x08000000) && ((prod & 0x8FFFFFFFu) != 0x88000000u)) return (prod >> 28) + 1;
   return prod >> 28;
 }
 
@@ -838,7 +838,7 @@ int32_t multshiftround_i32_29(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x1FFFFFFF) >= 0x10000000) & ((prod & 0x9FFFFFFFu) != 0x90000000u)) return (prod >> 29) + 1;
+  if ((prod & 0x10000000) && ((prod & 0x9FFFFFFFu) != 0x90000000u)) return (prod >> 29) + 1;
   return prod >> 29;
 }
 
@@ -854,7 +854,7 @@ int32_t multshiftround_i32_30(const int32_t num, const int32_t mul) {
   #endif
 
   int32_t prod = num * mul;
-  if (((prod & 0x3FFFFFFF) >= 0x20000000) & ((prod & 0xBFFFFFFFu) != 0xA0000000u)) return (prod >> 30) + 1;
+  if ((prod & 0x20000000) && ((prod & 0xBFFFFFFFu) != 0xA0000000u)) return (prod >> 30) + 1;
   return prod >> 30;
 }
 
@@ -882,7 +882,7 @@ int64_t multshiftround_i64_2(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000000003ll) >= 0x0000000000000002ll) & ((prod & 0x8000000000000003ull) != 0x8000000000000002ull)) return (prod >> 2) + 1ll;
+  if ((prod & 0x0000000000000002ll) && ((prod & 0x8000000000000003ull) != 0x8000000000000002ull)) return (prod >> 2) + 1ll;
   return prod >> 2;
 }
 
@@ -894,7 +894,7 @@ int64_t multshiftround_i64_3(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000000007ll) >= 0x0000000000000004ll) & ((prod & 0x8000000000000007ull) != 0x8000000000000004ull)) return (prod >> 3) + 1ll;
+  if ((prod & 0x0000000000000004ll) && ((prod & 0x8000000000000007ull) != 0x8000000000000004ull)) return (prod >> 3) + 1ll;
   return prod >> 3;
 }
 
@@ -906,7 +906,7 @@ int64_t multshiftround_i64_4(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000000000Fll) >= 0x0000000000000008ll) & ((prod & 0x800000000000000Full) != 0x8000000000000008ull)) return (prod >> 4) + 1ll;
+  if ((prod & 0x0000000000000008ll) && ((prod & 0x800000000000000Full) != 0x8000000000000008ull)) return (prod >> 4) + 1ll;
   return prod >> 4;
 }
 
@@ -918,7 +918,7 @@ int64_t multshiftround_i64_5(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000000001Fll) >= 0x0000000000000010ll) & ((prod & 0x800000000000001Full) != 0x8000000000000010ull)) return (prod >> 5) + 1ll;
+  if ((prod & 0x0000000000000010ll) && ((prod & 0x800000000000001Full) != 0x8000000000000010ull)) return (prod >> 5) + 1ll;
   return prod >> 5;
 }
 
@@ -930,7 +930,7 @@ int64_t multshiftround_i64_6(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000000003Fll) >= 0x0000000000000020ll) & ((prod & 0x800000000000003Full) != 0x8000000000000020ull)) return (prod >> 6) + 1ll;
+  if ((prod & 0x0000000000000020ll) && ((prod & 0x800000000000003Full) != 0x8000000000000020ull)) return (prod >> 6) + 1ll;
   return prod >> 6;
 }
 
@@ -942,7 +942,7 @@ int64_t multshiftround_i64_7(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000000007Fll) >= 0x0000000000000040ll) & ((prod & 0x800000000000007Full) != 0x8000000000000040ull)) return (prod >> 7) + 1ll;
+  if ((prod & 0x0000000000000040ll) && ((prod & 0x800000000000007Full) != 0x8000000000000040ull)) return (prod >> 7) + 1ll;
   return prod >> 7;
 }
 
@@ -954,7 +954,7 @@ int64_t multshiftround_i64_8(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000000000FFll) >= 0x0000000000000080ll) & ((prod & 0x80000000000000FFull) != 0x8000000000000080ull)) return (prod >> 8) + 1ll;
+  if ((prod & 0x0000000000000080ll) && ((prod & 0x80000000000000FFull) != 0x8000000000000080ull)) return (prod >> 8) + 1ll;
   return prod >> 8;
 }
 
@@ -966,7 +966,7 @@ int64_t multshiftround_i64_9(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000000001FFll) >= 0x0000000000000100ll) & ((prod & 0x80000000000001FFull) != 0x8000000000000100ull)) return (prod >> 9) + 1ll;
+  if ((prod & 0x0000000000000100ll) && ((prod & 0x80000000000001FFull) != 0x8000000000000100ull)) return (prod >> 9) + 1ll;
   return prod >> 9;
 }
 
@@ -978,7 +978,7 @@ int64_t multshiftround_i64_10(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000000003FFll) >= 0x0000000000000200ll) & ((prod & 0x80000000000003FFull) != 0x8000000000000200ull)) return (prod >> 10) + 1ll;
+  if ((prod & 0x0000000000000200ll) && ((prod & 0x80000000000003FFull) != 0x8000000000000200ull)) return (prod >> 10) + 1ll;
   return prod >> 10;
 }
 
@@ -990,7 +990,7 @@ int64_t multshiftround_i64_11(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000000007FFll) >= 0x0000000000000400ll) & ((prod & 0x80000000000007FFull) != 0x8000000000000400ull)) return (prod >> 11) + 1ll;
+  if ((prod & 0x0000000000000400ll) && ((prod & 0x80000000000007FFull) != 0x8000000000000400ull)) return (prod >> 11) + 1ll;
   return prod >> 11;
 }
 
@@ -1002,7 +1002,7 @@ int64_t multshiftround_i64_12(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000000FFFll) >= 0x0000000000000800ll) & ((prod & 0x8000000000000FFFull) != 0x8000000000000800ull)) return (prod >> 12) + 1ll;
+  if ((prod & 0x0000000000000800ll) && ((prod & 0x8000000000000FFFull) != 0x8000000000000800ull)) return (prod >> 12) + 1ll;
   return prod >> 12;
 }
 
@@ -1014,7 +1014,7 @@ int64_t multshiftround_i64_13(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000001FFFll) >= 0x0000000000001000ll) & ((prod & 0x8000000000001FFFull) != 0x8000000000001000ull)) return (prod >> 13) + 1ll;
+  if ((prod & 0x0000000000001000ll) && ((prod & 0x8000000000001FFFull) != 0x8000000000001000ull)) return (prod >> 13) + 1ll;
   return prod >> 13;
 }
 
@@ -1026,7 +1026,7 @@ int64_t multshiftround_i64_14(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000003FFFll) >= 0x0000000000002000ll) & ((prod & 0x8000000000003FFFull) != 0x8000000000002000ull)) return (prod >> 14) + 1ll;
+  if ((prod & 0x0000000000002000ll) && ((prod & 0x8000000000003FFFull) != 0x8000000000002000ull)) return (prod >> 14) + 1ll;
   return prod >> 14;
 }
 
@@ -1038,7 +1038,7 @@ int64_t multshiftround_i64_15(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000007FFFll) >= 0x0000000000004000ll) & ((prod & 0x8000000000007FFFull) != 0x8000000000004000ull)) return (prod >> 15) + 1ll;
+  if ((prod & 0x0000000000004000ll) && ((prod & 0x8000000000007FFFull) != 0x8000000000004000ull)) return (prod >> 15) + 1ll;
   return prod >> 15;
 }
 
@@ -1050,7 +1050,7 @@ int64_t multshiftround_i64_16(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000000FFFFll) >= 0x0000000000008000ll) & ((prod & 0x800000000000FFFFull) != 0x8000000000008000ull)) return (prod >> 16) + 1ll;
+  if ((prod & 0x0000000000008000ll) && ((prod & 0x800000000000FFFFull) != 0x8000000000008000ull)) return (prod >> 16) + 1ll;
   return prod >> 16;
 }
 
@@ -1062,7 +1062,7 @@ int64_t multshiftround_i64_17(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000001FFFFll) >= 0x0000000000010000ll) & ((prod & 0x800000000001FFFFull) != 0x8000000000010000ull)) return (prod >> 17) + 1ll;
+  if ((prod & 0x0000000000010000ll) && ((prod & 0x800000000001FFFFull) != 0x8000000000010000ull)) return (prod >> 17) + 1ll;
   return prod >> 17;
 }
 
@@ -1074,7 +1074,7 @@ int64_t multshiftround_i64_18(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000003FFFFll) >= 0x0000000000020000ll) & ((prod & 0x800000000003FFFFull) != 0x8000000000020000ull)) return (prod >> 18) + 1ll;
+  if ((prod & 0x0000000000020000ll) && ((prod & 0x800000000003FFFFull) != 0x8000000000020000ull)) return (prod >> 18) + 1ll;
   return prod >> 18;
 }
 
@@ -1086,7 +1086,7 @@ int64_t multshiftround_i64_19(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000007FFFFll) >= 0x0000000000040000ll) & ((prod & 0x800000000007FFFFull) != 0x8000000000040000ull)) return (prod >> 19) + 1ll;
+  if ((prod & 0x0000000000040000ll) && ((prod & 0x800000000007FFFFull) != 0x8000000000040000ull)) return (prod >> 19) + 1ll;
   return prod >> 19;
 }
 
@@ -1098,7 +1098,7 @@ int64_t multshiftround_i64_20(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000000FFFFFll) >= 0x0000000000080000ll) & ((prod & 0x80000000000FFFFFull) != 0x8000000000080000ull)) return (prod >> 20) + 1ll;
+  if ((prod & 0x0000000000080000ll) && ((prod & 0x80000000000FFFFFull) != 0x8000000000080000ull)) return (prod >> 20) + 1ll;
   return prod >> 20;
 }
 
@@ -1110,7 +1110,7 @@ int64_t multshiftround_i64_21(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000001FFFFFll) >= 0x0000000000100000ll) & ((prod & 0x80000000001FFFFFull) != 0x8000000000100000ull)) return (prod >> 21) + 1ll;
+  if ((prod & 0x0000000000100000ll) && ((prod & 0x80000000001FFFFFull) != 0x8000000000100000ull)) return (prod >> 21) + 1ll;
   return prod >> 21;
 }
 
@@ -1122,7 +1122,7 @@ int64_t multshiftround_i64_22(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000003FFFFFll) >= 0x0000000000200000ll) & ((prod & 0x80000000003FFFFFull) != 0x8000000000200000ull)) return (prod >> 22) + 1ll;
+  if ((prod & 0x0000000000200000ll) && ((prod & 0x80000000003FFFFFull) != 0x8000000000200000ull)) return (prod >> 22) + 1ll;
   return prod >> 22;
 }
 
@@ -1134,7 +1134,7 @@ int64_t multshiftround_i64_23(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000007FFFFFll) >= 0x0000000000400000ll) & ((prod & 0x80000000007FFFFFull) != 0x8000000000400000ull)) return (prod >> 23) + 1ll;
+  if ((prod & 0x0000000000400000ll) && ((prod & 0x80000000007FFFFFull) != 0x8000000000400000ull)) return (prod >> 23) + 1ll;
   return prod >> 23;
 }
 
@@ -1146,7 +1146,7 @@ int64_t multshiftround_i64_24(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000000FFFFFFll) >= 0x0000000000800000ll) & ((prod & 0x8000000000FFFFFFull) != 0x8000000000800000ull)) return (prod >> 24) + 1ll;
+  if ((prod & 0x0000000000800000ll) && ((prod & 0x8000000000FFFFFFull) != 0x8000000000800000ull)) return (prod >> 24) + 1ll;
   return prod >> 24;
 }
 
@@ -1158,7 +1158,7 @@ int64_t multshiftround_i64_25(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000001FFFFFFll) >= 0x0000000001000000ll) & ((prod & 0x8000000001FFFFFFull) != 0x8000000001000000ull)) return (prod >> 25) + 1ll;
+  if ((prod & 0x0000000001000000ll) && ((prod & 0x8000000001FFFFFFull) != 0x8000000001000000ull)) return (prod >> 25) + 1ll;
   return prod >> 25;
 }
 
@@ -1170,7 +1170,7 @@ int64_t multshiftround_i64_26(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000003FFFFFFll) >= 0x0000000002000000ll) & ((prod & 0x8000000003FFFFFFull) != 0x8000000002000000ull)) return (prod >> 26) + 1ll;
+  if ((prod & 0x0000000002000000ll) && ((prod & 0x8000000003FFFFFFull) != 0x8000000002000000ull)) return (prod >> 26) + 1ll;
   return prod >> 26;
 }
 
@@ -1182,7 +1182,7 @@ int64_t multshiftround_i64_27(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000007FFFFFFll) >= 0x0000000004000000ll) & ((prod & 0x8000000007FFFFFFull) != 0x8000000004000000ull)) return (prod >> 27) + 1ll;
+  if ((prod & 0x0000000004000000ll) && ((prod & 0x8000000007FFFFFFull) != 0x8000000004000000ull)) return (prod >> 27) + 1ll;
   return prod >> 27;
 }
 
@@ -1194,7 +1194,7 @@ int64_t multshiftround_i64_28(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000000FFFFFFFll) >= 0x0000000008000000ll) & ((prod & 0x800000000FFFFFFFull) != 0x8000000008000000ull)) return (prod >> 28) + 1ll;
+  if ((prod & 0x0000000008000000ll) && ((prod & 0x800000000FFFFFFFull) != 0x8000000008000000ull)) return (prod >> 28) + 1ll;
   return prod >> 28;
 }
 
@@ -1206,7 +1206,7 @@ int64_t multshiftround_i64_29(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000001FFFFFFFll) >= 0x0000000010000000ll) & ((prod & 0x800000001FFFFFFFull) != 0x8000000010000000ull)) return (prod >> 29) + 1ll;
+  if ((prod & 0x0000000010000000ll) && ((prod & 0x800000001FFFFFFFull) != 0x8000000010000000ull)) return (prod >> 29) + 1ll;
   return prod >> 29;
 }
 
@@ -1218,7 +1218,7 @@ int64_t multshiftround_i64_30(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000003FFFFFFFll) >= 0x0000000020000000ll) & ((prod & 0x800000003FFFFFFFull) != 0x8000000020000000ull)) return (prod >> 30) + 1ll;
+  if ((prod & 0x0000000020000000ll) && ((prod & 0x800000003FFFFFFFull) != 0x8000000020000000ull)) return (prod >> 30) + 1ll;
   return prod >> 30;
 }
 
@@ -1230,7 +1230,7 @@ int64_t multshiftround_i64_31(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000007FFFFFFFll) >= 0x0000000040000000ll) & ((prod & 0x800000007FFFFFFFull) != 0x8000000040000000ull)) return (prod >> 31) + 1ll;
+  if ((prod & 0x0000000040000000ll) && ((prod & 0x800000007FFFFFFFull) != 0x8000000040000000ull)) return (prod >> 31) + 1ll;
   return prod >> 31;
 }
 
@@ -1242,7 +1242,7 @@ int64_t multshiftround_i64_32(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000000FFFFFFFFll) >= 0x0000000080000000ll) & ((prod & 0x80000000FFFFFFFFull) != 0x8000000080000000ull)) return (prod >> 32) + 1ll;
+  if ((prod & 0x0000000080000000ll) && ((prod & 0x80000000FFFFFFFFull) != 0x8000000080000000ull)) return (prod >> 32) + 1ll;
   return prod >> 32;
 }
 
@@ -1254,7 +1254,7 @@ int64_t multshiftround_i64_33(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000001FFFFFFFFll) >= 0x0000000100000000ll) & ((prod & 0x80000001FFFFFFFFull) != 0x8000000100000000ull)) return (prod >> 33) + 1ll;
+  if ((prod & 0x0000000100000000ll) && ((prod & 0x80000001FFFFFFFFull) != 0x8000000100000000ull)) return (prod >> 33) + 1ll;
   return prod >> 33;
 }
 
@@ -1266,7 +1266,7 @@ int64_t multshiftround_i64_34(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000003FFFFFFFFll) >= 0x0000000200000000ll) & ((prod & 0x80000003FFFFFFFFull) != 0x8000000200000000ull)) return (prod >> 34) + 1ll;
+  if ((prod & 0x0000000200000000ll) && ((prod & 0x80000003FFFFFFFFull) != 0x8000000200000000ull)) return (prod >> 34) + 1ll;
   return prod >> 34;
 }
 
@@ -1278,7 +1278,7 @@ int64_t multshiftround_i64_35(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000007FFFFFFFFll) >= 0x0000000400000000ll) & ((prod & 0x80000007FFFFFFFFull) != 0x8000000400000000ull)) return (prod >> 35) + 1ll;
+  if ((prod & 0x0000000400000000ll) && ((prod & 0x80000007FFFFFFFFull) != 0x8000000400000000ull)) return (prod >> 35) + 1ll;
   return prod >> 35;
 }
 
@@ -1290,7 +1290,7 @@ int64_t multshiftround_i64_36(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000000FFFFFFFFFll) >= 0x0000000800000000ll) & ((prod & 0x8000000FFFFFFFFFull) != 0x8000000800000000ull)) return (prod >> 36) + 1ll;
+  if ((prod & 0x0000000800000000ll) && ((prod & 0x8000000FFFFFFFFFull) != 0x8000000800000000ull)) return (prod >> 36) + 1ll;
   return prod >> 36;
 }
 
@@ -1302,7 +1302,7 @@ int64_t multshiftround_i64_37(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000001FFFFFFFFFll) >= 0x0000001000000000ll) & ((prod & 0x8000001FFFFFFFFFull) != 0x8000001000000000ull)) return (prod >> 37) + 1ll;
+  if ((prod & 0x0000001000000000ll) && ((prod & 0x8000001FFFFFFFFFull) != 0x8000001000000000ull)) return (prod >> 37) + 1ll;
   return prod >> 37;
 }
 
@@ -1314,7 +1314,7 @@ int64_t multshiftround_i64_38(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000003FFFFFFFFFll) >= 0x0000002000000000ll) & ((prod & 0x8000003FFFFFFFFFull) != 0x8000002000000000ull)) return (prod >> 38) + 1ll;
+  if ((prod & 0x0000002000000000ll) && ((prod & 0x8000003FFFFFFFFFull) != 0x8000002000000000ull)) return (prod >> 38) + 1ll;
   return prod >> 38;
 }
 
@@ -1326,7 +1326,7 @@ int64_t multshiftround_i64_39(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000007FFFFFFFFFll) >= 0x0000004000000000ll) & ((prod & 0x8000007FFFFFFFFFull) != 0x8000004000000000ull)) return (prod >> 39) + 1ll;
+  if ((prod & 0x0000004000000000ll) && ((prod & 0x8000007FFFFFFFFFull) != 0x8000004000000000ull)) return (prod >> 39) + 1ll;
   return prod >> 39;
 }
 
@@ -1338,7 +1338,7 @@ int64_t multshiftround_i64_40(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000000FFFFFFFFFFll) >= 0x0000008000000000ll) & ((prod & 0x800000FFFFFFFFFFull) != 0x8000008000000000ull)) return (prod >> 40) + 1ll;
+  if ((prod & 0x0000008000000000ll) && ((prod & 0x800000FFFFFFFFFFull) != 0x8000008000000000ull)) return (prod >> 40) + 1ll;
   return prod >> 40;
 }
 
@@ -1350,7 +1350,7 @@ int64_t multshiftround_i64_41(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000001FFFFFFFFFFll) >= 0x0000010000000000ll) & ((prod & 0x800001FFFFFFFFFFull) != 0x8000010000000000ull)) return (prod >> 41) + 1ll;
+  if ((prod & 0x0000010000000000ll) && ((prod & 0x800001FFFFFFFFFFull) != 0x8000010000000000ull)) return (prod >> 41) + 1ll;
   return prod >> 41;
 }
 
@@ -1362,7 +1362,7 @@ int64_t multshiftround_i64_42(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000003FFFFFFFFFFll) >= 0x0000020000000000ll) & ((prod & 0x800003FFFFFFFFFFull) != 0x8000020000000000ull)) return (prod >> 42) + 1ll;
+  if ((prod & 0x0000020000000000ll) && ((prod & 0x800003FFFFFFFFFFull) != 0x8000020000000000ull)) return (prod >> 42) + 1ll;
   return prod >> 42;
 }
 
@@ -1374,7 +1374,7 @@ int64_t multshiftround_i64_43(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000007FFFFFFFFFFll) >= 0x0000040000000000ll) & ((prod & 0x800007FFFFFFFFFFull) != 0x8000040000000000ull)) return (prod >> 43) + 1ll;
+  if ((prod & 0x0000040000000000ll) && ((prod & 0x800007FFFFFFFFFFull) != 0x8000040000000000ull)) return (prod >> 43) + 1ll;
   return prod >> 43;
 }
 
@@ -1386,7 +1386,7 @@ int64_t multshiftround_i64_44(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00000FFFFFFFFFFFll) >= 0x0000080000000000ll) & ((prod & 0x80000FFFFFFFFFFFull) != 0x8000080000000000ull)) return (prod >> 44) + 1ll;
+  if ((prod & 0x0000080000000000ll) && ((prod & 0x80000FFFFFFFFFFFull) != 0x8000080000000000ull)) return (prod >> 44) + 1ll;
   return prod >> 44;
 }
 
@@ -1398,7 +1398,7 @@ int64_t multshiftround_i64_45(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00001FFFFFFFFFFFll) >= 0x0000100000000000ll) & ((prod & 0x80001FFFFFFFFFFFull) != 0x8000100000000000ull)) return (prod >> 45) + 1ll;
+  if ((prod & 0x0000100000000000ll) && ((prod & 0x80001FFFFFFFFFFFull) != 0x8000100000000000ull)) return (prod >> 45) + 1ll;
   return prod >> 45;
 }
 
@@ -1410,7 +1410,7 @@ int64_t multshiftround_i64_46(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00003FFFFFFFFFFFll) >= 0x0000200000000000ll) & ((prod & 0x80003FFFFFFFFFFFull) != 0x8000200000000000ull)) return (prod >> 46) + 1ll;
+  if ((prod & 0x0000200000000000ll) && ((prod & 0x80003FFFFFFFFFFFull) != 0x8000200000000000ull)) return (prod >> 46) + 1ll;
   return prod >> 46;
 }
 
@@ -1422,7 +1422,7 @@ int64_t multshiftround_i64_47(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00007FFFFFFFFFFFll) >= 0x0000400000000000ll) & ((prod & 0x80007FFFFFFFFFFFull) != 0x8000400000000000ull)) return (prod >> 47) + 1ll;
+  if ((prod & 0x0000400000000000ll) && ((prod & 0x80007FFFFFFFFFFFull) != 0x8000400000000000ull)) return (prod >> 47) + 1ll;
   return prod >> 47;
 }
 
@@ -1434,7 +1434,7 @@ int64_t multshiftround_i64_48(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0000FFFFFFFFFFFFll) >= 0x0000800000000000ll) & ((prod & 0x8000FFFFFFFFFFFFull) != 0x8000800000000000ull)) return (prod >> 48) + 1ll;
+  if ((prod & 0x0000800000000000ll) && ((prod & 0x8000FFFFFFFFFFFFull) != 0x8000800000000000ull)) return (prod >> 48) + 1ll;
   return prod >> 48;
 }
 
@@ -1446,7 +1446,7 @@ int64_t multshiftround_i64_49(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0001FFFFFFFFFFFFll) >= 0x0001000000000000ll) & ((prod & 0x8001FFFFFFFFFFFFull) != 0x8001000000000000ull)) return (prod >> 49) + 1ll;
+  if ((prod & 0x0001000000000000ll) && ((prod & 0x8001FFFFFFFFFFFFull) != 0x8001000000000000ull)) return (prod >> 49) + 1ll;
   return prod >> 49;
 }
 
@@ -1458,7 +1458,7 @@ int64_t multshiftround_i64_50(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0003FFFFFFFFFFFFll) >= 0x0002000000000000ll) & ((prod & 0x8003FFFFFFFFFFFFull) != 0x8002000000000000ull)) return (prod >> 50) + 1ll;
+  if ((prod & 0x0002000000000000ll) && ((prod & 0x8003FFFFFFFFFFFFull) != 0x8002000000000000ull)) return (prod >> 50) + 1ll;
   return prod >> 50;
 }
 
@@ -1470,7 +1470,7 @@ int64_t multshiftround_i64_51(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0007FFFFFFFFFFFFll) >= 0x0004000000000000ll) & ((prod & 0x8007FFFFFFFFFFFFull) != 0x8004000000000000ull)) return (prod >> 51) + 1ll;
+  if ((prod & 0x0004000000000000ll) && ((prod & 0x8007FFFFFFFFFFFFull) != 0x8004000000000000ull)) return (prod >> 51) + 1ll;
   return prod >> 51;
 }
 
@@ -1482,7 +1482,7 @@ int64_t multshiftround_i64_52(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x000FFFFFFFFFFFFFll) >= 0x0008000000000000ll) & ((prod & 0x800FFFFFFFFFFFFFull) != 0x8008000000000000ull)) return (prod >> 52) + 1ll;
+  if ((prod & 0x0008000000000000ll) && ((prod & 0x800FFFFFFFFFFFFFull) != 0x8008000000000000ull)) return (prod >> 52) + 1ll;
   return prod >> 52;
 }
 
@@ -1494,7 +1494,7 @@ int64_t multshiftround_i64_53(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x001FFFFFFFFFFFFFll) >= 0x0010000000000000ll) & ((prod & 0x801FFFFFFFFFFFFFull) != 0x8010000000000000ull)) return (prod >> 53) + 1ll;
+  if ((prod & 0x0010000000000000ll) && ((prod & 0x801FFFFFFFFFFFFFull) != 0x8010000000000000ull)) return (prod >> 53) + 1ll;
   return prod >> 53;
 }
 
@@ -1506,7 +1506,7 @@ int64_t multshiftround_i64_54(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x003FFFFFFFFFFFFFll) >= 0x0020000000000000ll) & ((prod & 0x803FFFFFFFFFFFFFull) != 0x8020000000000000ull)) return (prod >> 54) + 1ll;
+  if ((prod & 0x0020000000000000ll) && ((prod & 0x803FFFFFFFFFFFFFull) != 0x8020000000000000ull)) return (prod >> 54) + 1ll;
   return prod >> 54;
 }
 
@@ -1518,7 +1518,7 @@ int64_t multshiftround_i64_55(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x007FFFFFFFFFFFFFll) >= 0x0040000000000000ll) & ((prod & 0x807FFFFFFFFFFFFFull) != 0x8040000000000000ull)) return (prod >> 55) + 1ll;
+  if ((prod & 0x0040000000000000ll) && ((prod & 0x807FFFFFFFFFFFFFull) != 0x8040000000000000ull)) return (prod >> 55) + 1ll;
   return prod >> 55;
 }
 
@@ -1530,7 +1530,7 @@ int64_t multshiftround_i64_56(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x00FFFFFFFFFFFFFFll) >= 0x0080000000000000ll) & ((prod & 0x80FFFFFFFFFFFFFFull) != 0x8080000000000000ull)) return (prod >> 56) + 1ll;
+  if ((prod & 0x0080000000000000ll) && ((prod & 0x80FFFFFFFFFFFFFFull) != 0x8080000000000000ull)) return (prod >> 56) + 1ll;
   return prod >> 56;
 }
 
@@ -1542,7 +1542,7 @@ int64_t multshiftround_i64_57(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x01FFFFFFFFFFFFFFll) >= 0x0100000000000000ll) & ((prod & 0x81FFFFFFFFFFFFFFull) != 0x8100000000000000ull)) return (prod >> 57) + 1ll;
+  if ((prod & 0x0100000000000000ll) && ((prod & 0x81FFFFFFFFFFFFFFull) != 0x8100000000000000ull)) return (prod >> 57) + 1ll;
   return prod >> 57;
 }
 
@@ -1554,7 +1554,7 @@ int64_t multshiftround_i64_58(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x03FFFFFFFFFFFFFFll) >= 0x0200000000000000ll) & ((prod & 0x83FFFFFFFFFFFFFFull) != 0x8200000000000000ull)) return (prod >> 58) + 1ll;
+  if ((prod & 0x0200000000000000ll) && ((prod & 0x83FFFFFFFFFFFFFFull) != 0x8200000000000000ull)) return (prod >> 58) + 1ll;
   return prod >> 58;
 }
 
@@ -1566,7 +1566,7 @@ int64_t multshiftround_i64_59(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x07FFFFFFFFFFFFFFll) >= 0x0400000000000000ll) & ((prod & 0x87FFFFFFFFFFFFFFull) != 0x8400000000000000ull)) return (prod >> 59) + 1ll;
+  if ((prod & 0x0400000000000000ll) && ((prod & 0x87FFFFFFFFFFFFFFull) != 0x8400000000000000ull)) return (prod >> 59) + 1ll;
   return prod >> 59;
 }
 
@@ -1578,7 +1578,7 @@ int64_t multshiftround_i64_60(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x0FFFFFFFFFFFFFFFll) >= 0x0800000000000000ll) & ((prod & 0x8FFFFFFFFFFFFFFFull) != 0x8800000000000000ull)) return (prod >> 60) + 1ll;
+  if ((prod & 0x0800000000000000ll) && ((prod & 0x8FFFFFFFFFFFFFFFull) != 0x8800000000000000ull)) return (prod >> 60) + 1ll;
   return prod >> 60;
 }
 
@@ -1590,7 +1590,7 @@ int64_t multshiftround_i64_61(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x1FFFFFFFFFFFFFFFll) >= 0x1000000000000000ll) & ((prod & 0x9FFFFFFFFFFFFFFFull) != 0x9000000000000000ull)) return (prod >> 61) + 1ll;
+  if ((prod & 0x1000000000000000ll) && ((prod & 0x9FFFFFFFFFFFFFFFull) != 0x9000000000000000ull)) return (prod >> 61) + 1ll;
   return prod >> 61;
 }
 
@@ -1602,7 +1602,7 @@ int64_t multshiftround_i64_62(const int64_t num, const int64_t mul) {
   #endif
 
   int64_t prod = num * mul;
-  if (((prod & 0x3FFFFFFFFFFFFFFFll) >= 0x2000000000000000ll) & ((prod & 0xBFFFFFFFFFFFFFFFull) != 0xA000000000000000ull)) return (prod >> 62) + 1ll;
+  if ((prod & 0x2000000000000000ll) && ((prod & 0xBFFFFFFFFFFFFFFFull) != 0xA000000000000000ull)) return (prod >> 62) + 1ll;
   return prod >> 62;
 }
 
@@ -1632,7 +1632,7 @@ uint8_t multshiftround_u8_2(const uint8_t num, const uint8_t mul) {
   #endif
 
   uint8_t prod = num * mul;
-  if ((prod & (uint8_t)0x03) >= (uint8_t)0x02) return (prod >> 2) + (uint8_t)1;
+  if (prod & (uint8_t)0x02) return (prod >> 2) + (uint8_t)1;
   return prod >> 2;
 }
 
@@ -1645,7 +1645,7 @@ uint8_t multshiftround_u8_3(const uint8_t num, const uint8_t mul) {
   #endif
 
   uint8_t prod = num * mul;
-  if ((prod & (uint8_t)0x07) >= (uint8_t)0x04) return (prod >> 3) + (uint8_t)1;
+  if (prod & (uint8_t)0x04) return (prod >> 3) + (uint8_t)1;
   return prod >> 3;
 }
 
@@ -1658,7 +1658,7 @@ uint8_t multshiftround_u8_4(const uint8_t num, const uint8_t mul) {
   #endif
 
   uint8_t prod = num * mul;
-  if ((prod & (uint8_t)0x0F) >= (uint8_t)0x08) return (prod >> 4) + (uint8_t)1;
+  if (prod & (uint8_t)0x08) return (prod >> 4) + (uint8_t)1;
   return prod >> 4;
 }
 
@@ -1671,7 +1671,7 @@ uint8_t multshiftround_u8_5(const uint8_t num, const uint8_t mul) {
   #endif
 
   uint8_t prod = num * mul;
-  if ((prod & (uint8_t)0x1F) >= (uint8_t)0x10) return (prod >> 5) + (uint8_t)1;
+  if (prod & (uint8_t)0x10) return (prod >> 5) + (uint8_t)1;
   return prod >> 5;
 }
 
@@ -1684,7 +1684,7 @@ uint8_t multshiftround_u8_6(const uint8_t num, const uint8_t mul) {
   #endif
 
   uint8_t prod = num * mul;
-  if ((prod & (uint8_t)0x3F) >= (uint8_t)0x20) return (prod >> 6) + (uint8_t)1;
+  if (prod & (uint8_t)0x20) return (prod >> 6) + (uint8_t)1;
   return prod >> 6;
 }
 
@@ -1697,7 +1697,7 @@ uint8_t multshiftround_u8_7(const uint8_t num, const uint8_t mul) {
   #endif
 
   uint8_t prod = num * mul;
-  if ((prod & (uint8_t)0x7F) >= (uint8_t)0x40) return (prod >> 7) + (uint8_t)1;
+  if (prod & (uint8_t)0x40) return (prod >> 7) + (uint8_t)1;
   return prod >> 7;
 }
 
@@ -1727,7 +1727,7 @@ uint16_t multshiftround_u16_2(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x0003) >= (uint16_t)0x0002) return (prod >> 2) + (uint16_t)1;
+  if (prod & (uint16_t)0x0002) return (prod >> 2) + (uint16_t)1;
   return prod >> 2;
 }
 
@@ -1740,7 +1740,7 @@ uint16_t multshiftround_u16_3(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x0007) >= (uint16_t)0x0004) return (prod >> 3) + (uint16_t)1;
+  if (prod & (uint16_t)0x0004) return (prod >> 3) + (uint16_t)1;
   return prod >> 3;
 }
 
@@ -1753,7 +1753,7 @@ uint16_t multshiftround_u16_4(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x000F) >= (uint16_t)0x0008) return (prod >> 4) + (uint16_t)1;
+  if (prod & (uint16_t)0x0008) return (prod >> 4) + (uint16_t)1;
   return prod >> 4;
 }
 
@@ -1766,7 +1766,7 @@ uint16_t multshiftround_u16_5(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x001F) >= (uint16_t)0x0010) return (prod >> 5) + (uint16_t)1;
+  if (prod & (uint16_t)0x0010) return (prod >> 5) + (uint16_t)1;
   return prod >> 5;
 }
 
@@ -1779,7 +1779,7 @@ uint16_t multshiftround_u16_6(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x003F) >= (uint16_t)0x0020) return (prod >> 6) + (uint16_t)1;
+  if (prod & (uint16_t)0x0020) return (prod >> 6) + (uint16_t)1;
   return prod >> 6;
 }
 
@@ -1792,7 +1792,7 @@ uint16_t multshiftround_u16_7(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x007F) >= (uint16_t)0x0040) return (prod >> 7) + (uint16_t)1;
+  if (prod & (uint16_t)0x0040) return (prod >> 7) + (uint16_t)1;
   return prod >> 7;
 }
 
@@ -1805,7 +1805,7 @@ uint16_t multshiftround_u16_8(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x00FF) >= (uint16_t)0x0080) return (prod >> 8) + (uint16_t)1;
+  if (prod & (uint16_t)0x0080) return (prod >> 8) + (uint16_t)1;
   return prod >> 8;
 }
 
@@ -1818,7 +1818,7 @@ uint16_t multshiftround_u16_9(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x01FF) >= (uint16_t)0x0100) return (prod >> 9) + (uint16_t)1;
+  if (prod & (uint16_t)0x0100) return (prod >> 9) + (uint16_t)1;
   return prod >> 9;
 }
 
@@ -1831,7 +1831,7 @@ uint16_t multshiftround_u16_10(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x03FF) >= (uint16_t)0x0200) return (prod >> 10) + (uint16_t)1;
+  if (prod & (uint16_t)0x0200) return (prod >> 10) + (uint16_t)1;
   return prod >> 10;
 }
 
@@ -1844,7 +1844,7 @@ uint16_t multshiftround_u16_11(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x07FF) >= (uint16_t)0x0400) return (prod >> 11) + (uint16_t)1;
+  if (prod & (uint16_t)0x0400) return (prod >> 11) + (uint16_t)1;
   return prod >> 11;
 }
 
@@ -1857,7 +1857,7 @@ uint16_t multshiftround_u16_12(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x0FFF) >= (uint16_t)0x0800) return (prod >> 12) + (uint16_t)1;
+  if (prod & (uint16_t)0x0800) return (prod >> 12) + (uint16_t)1;
   return prod >> 12;
 }
 
@@ -1870,7 +1870,7 @@ uint16_t multshiftround_u16_13(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x1FFF) >= (uint16_t)0x1000) return (prod >> 13) + (uint16_t)1;
+  if (prod & (uint16_t)0x1000) return (prod >> 13) + (uint16_t)1;
   return prod >> 13;
 }
 
@@ -1883,7 +1883,7 @@ uint16_t multshiftround_u16_14(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x3FFF) >= (uint16_t)0x2000) return (prod >> 14) + (uint16_t)1;
+  if (prod & (uint16_t)0x2000) return (prod >> 14) + (uint16_t)1;
   return prod >> 14;
 }
 
@@ -1896,7 +1896,7 @@ uint16_t multshiftround_u16_15(const uint16_t num, const uint16_t mul) {
   #endif
 
   uint16_t prod = num * mul;
-  if ((prod & (uint16_t)0x7FFF) >= (uint16_t)0x4000) return (prod >> 15) + (uint16_t)1;
+  if (prod & (uint16_t)0x4000) return (prod >> 15) + (uint16_t)1;
   return prod >> 15;
 }
 
@@ -1926,7 +1926,7 @@ uint32_t multshiftround_u32_2(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00000003u) >= 0x00000002u) return (prod >> 2) + 1u;
+  if (prod & 0x00000002u) return (prod >> 2) + 1u;
   return prod >> 2;
 }
 
@@ -1939,7 +1939,7 @@ uint32_t multshiftround_u32_3(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00000007u) >= 0x00000004u) return (prod >> 3) + 1u;
+  if (prod & 0x00000004u) return (prod >> 3) + 1u;
   return prod >> 3;
 }
 
@@ -1952,7 +1952,7 @@ uint32_t multshiftround_u32_4(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0000000Fu) >= 0x00000008u) return (prod >> 4) + 1u;
+  if (prod & 0x00000008u) return (prod >> 4) + 1u;
   return prod >> 4;
 }
 
@@ -1965,7 +1965,7 @@ uint32_t multshiftround_u32_5(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0000001Fu) >= 0x00000010u) return (prod >> 5) + 1u;
+  if (prod & 0x00000010u) return (prod >> 5) + 1u;
   return prod >> 5;
 }
 
@@ -1978,7 +1978,7 @@ uint32_t multshiftround_u32_6(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0000003Fu) >= 0x00000020u) return (prod >> 6) + 1u;
+  if (prod & 0x00000020u) return (prod >> 6) + 1u;
   return prod >> 6;
 }
 
@@ -1991,7 +1991,7 @@ uint32_t multshiftround_u32_7(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0000007Fu) >= 0x00000040u) return (prod >> 7) + 1u;
+  if (prod & 0x00000040u) return (prod >> 7) + 1u;
   return prod >> 7;
 }
 
@@ -2004,7 +2004,7 @@ uint32_t multshiftround_u32_8(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x000000FFu) >= 0x00000080u) return (prod >> 8) + 1u;
+  if (prod & 0x00000080u) return (prod >> 8) + 1u;
   return prod >> 8;
 }
 
@@ -2017,7 +2017,7 @@ uint32_t multshiftround_u32_9(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x000001FFu) >= 0x00000100u) return (prod >> 9) + 1u;
+  if (prod & 0x00000100u) return (prod >> 9) + 1u;
   return prod >> 9;
 }
 
@@ -2030,7 +2030,7 @@ uint32_t multshiftround_u32_10(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x000003FFu) >= 0x00000200u) return (prod >> 10) + 1u;
+  if (prod & 0x00000200u) return (prod >> 10) + 1u;
   return prod >> 10;
 }
 
@@ -2043,7 +2043,7 @@ uint32_t multshiftround_u32_11(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x000007FFu) >= 0x00000400u) return (prod >> 11) + 1u;
+  if (prod & 0x00000400u) return (prod >> 11) + 1u;
   return prod >> 11;
 }
 
@@ -2056,7 +2056,7 @@ uint32_t multshiftround_u32_12(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00000FFFu) >= 0x00000800u) return (prod >> 12) + 1u;
+  if (prod & 0x00000800u) return (prod >> 12) + 1u;
   return prod >> 12;
 }
 
@@ -2069,7 +2069,7 @@ uint32_t multshiftround_u32_13(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00001FFFu) >= 0x00001000u) return (prod >> 13) + 1u;
+  if (prod & 0x00001000u) return (prod >> 13) + 1u;
   return prod >> 13;
 }
 
@@ -2082,7 +2082,7 @@ uint32_t multshiftround_u32_14(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00003FFFu) >= 0x00002000u) return (prod >> 14) + 1u;
+  if (prod & 0x00002000u) return (prod >> 14) + 1u;
   return prod >> 14;
 }
 
@@ -2095,7 +2095,7 @@ uint32_t multshiftround_u32_15(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00007FFFu) >= 0x00004000u) return (prod >> 15) + 1u;
+  if (prod & 0x00004000u) return (prod >> 15) + 1u;
   return prod >> 15;
 }
 
@@ -2108,7 +2108,7 @@ uint32_t multshiftround_u32_16(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0000FFFFu) >= 0x00008000u) return (prod >> 16) + 1u;
+  if (prod & 0x00008000u) return (prod >> 16) + 1u;
   return prod >> 16;
 }
 
@@ -2121,7 +2121,7 @@ uint32_t multshiftround_u32_17(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0001FFFFu) >= 0x00010000u) return (prod >> 17) + 1u;
+  if (prod & 0x00010000u) return (prod >> 17) + 1u;
   return prod >> 17;
 }
 
@@ -2134,7 +2134,7 @@ uint32_t multshiftround_u32_18(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0003FFFFu) >= 0x00020000u) return (prod >> 18) + 1u;
+  if (prod & 0x00020000u) return (prod >> 18) + 1u;
   return prod >> 18;
 }
 
@@ -2147,7 +2147,7 @@ uint32_t multshiftround_u32_19(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0007FFFFu) >= 0x00040000u) return (prod >> 19) + 1u;
+  if (prod & 0x00040000u) return (prod >> 19) + 1u;
   return prod >> 19;
 }
 
@@ -2160,7 +2160,7 @@ uint32_t multshiftround_u32_20(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x000FFFFFu) >= 0x00080000u) return (prod >> 20) + 1u;
+  if (prod & 0x00080000u) return (prod >> 20) + 1u;
   return prod >> 20;
 }
 
@@ -2173,7 +2173,7 @@ uint32_t multshiftround_u32_21(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x001FFFFFu) >= 0x00100000u) return (prod >> 21) + 1u;
+  if (prod & 0x00100000u) return (prod >> 21) + 1u;
   return prod >> 21;
 }
 
@@ -2186,7 +2186,7 @@ uint32_t multshiftround_u32_22(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x003FFFFFu) >= 0x00200000u) return (prod >> 22) + 1u;
+  if (prod & 0x00200000u) return (prod >> 22) + 1u;
   return prod >> 22;
 }
 
@@ -2199,7 +2199,7 @@ uint32_t multshiftround_u32_23(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x007FFFFFu) >= 0x00400000u) return (prod >> 23) + 1u;
+  if (prod & 0x00400000u) return (prod >> 23) + 1u;
   return prod >> 23;
 }
 
@@ -2212,7 +2212,7 @@ uint32_t multshiftround_u32_24(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x00FFFFFFu) >= 0x00800000u) return (prod >> 24) + 1u;
+  if (prod & 0x00800000u) return (prod >> 24) + 1u;
   return prod >> 24;
 }
 
@@ -2225,7 +2225,7 @@ uint32_t multshiftround_u32_25(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x01FFFFFFu) >= 0x01000000u) return (prod >> 25) + 1u;
+  if (prod & 0x01000000u) return (prod >> 25) + 1u;
   return prod >> 25;
 }
 
@@ -2238,7 +2238,7 @@ uint32_t multshiftround_u32_26(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x03FFFFFFu) >= 0x02000000u) return (prod >> 26) + 1u;
+  if (prod & 0x02000000u) return (prod >> 26) + 1u;
   return prod >> 26;
 }
 
@@ -2251,7 +2251,7 @@ uint32_t multshiftround_u32_27(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x07FFFFFFu) >= 0x04000000u) return (prod >> 27) + 1u;
+  if (prod & 0x04000000u) return (prod >> 27) + 1u;
   return prod >> 27;
 }
 
@@ -2264,7 +2264,7 @@ uint32_t multshiftround_u32_28(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x0FFFFFFFu) >= 0x08000000u) return (prod >> 28) + 1u;
+  if (prod & 0x08000000u) return (prod >> 28) + 1u;
   return prod >> 28;
 }
 
@@ -2277,7 +2277,7 @@ uint32_t multshiftround_u32_29(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x1FFFFFFFu) >= 0x10000000u) return (prod >> 29) + 1u;
+  if (prod & 0x10000000u) return (prod >> 29) + 1u;
   return prod >> 29;
 }
 
@@ -2290,7 +2290,7 @@ uint32_t multshiftround_u32_30(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x3FFFFFFFu) >= 0x20000000u) return (prod >> 30) + 1u;
+  if (prod & 0x20000000u) return (prod >> 30) + 1u;
   return prod >> 30;
 }
 
@@ -2303,7 +2303,7 @@ uint32_t multshiftround_u32_31(const uint32_t num, const uint32_t mul) {
   #endif
 
   uint32_t prod = num * mul;
-  if ((prod & 0x7FFFFFFFu) >= 0x40000000u) return (prod >> 31) + 1u;
+  if (prod & 0x40000000u) return (prod >> 31) + 1u;
   return prod >> 31;
 }
 
@@ -2331,7 +2331,7 @@ uint64_t multshiftround_u64_2(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000000003ull) >= 0x0000000000000002ull) return (prod >> 2) + 1ull;
+  if (prod & 0x0000000000000002ull) return (prod >> 2) + 1ull;
   return prod >> 2;
 }
 
@@ -2343,7 +2343,7 @@ uint64_t multshiftround_u64_3(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000000007ull) >= 0x0000000000000004ull) return (prod >> 3) + 1ull;
+  if (prod & 0x0000000000000004ull) return (prod >> 3) + 1ull;
   return prod >> 3;
 }
 
@@ -2355,7 +2355,7 @@ uint64_t multshiftround_u64_4(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000000000Full) >= 0x0000000000000008ull) return (prod >> 4) + 1ull;
+  if (prod & 0x0000000000000008ull) return (prod >> 4) + 1ull;
   return prod >> 4;
 }
 
@@ -2367,7 +2367,7 @@ uint64_t multshiftround_u64_5(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000000001Full) >= 0x0000000000000010ull) return (prod >> 5) + 1ull;
+  if (prod & 0x0000000000000010ull) return (prod >> 5) + 1ull;
   return prod >> 5;
 }
 
@@ -2379,7 +2379,7 @@ uint64_t multshiftround_u64_6(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000000003Full) >= 0x0000000000000020ull) return (prod >> 6) + 1ull;
+  if (prod & 0x0000000000000020ull) return (prod >> 6) + 1ull;
   return prod >> 6;
 }
 
@@ -2391,7 +2391,7 @@ uint64_t multshiftround_u64_7(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000000007Full) >= 0x0000000000000040ull) return (prod >> 7) + 1ull;
+  if (prod & 0x0000000000000040ull) return (prod >> 7) + 1ull;
   return prod >> 7;
 }
 
@@ -2403,7 +2403,7 @@ uint64_t multshiftround_u64_8(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000000000FFull) >= 0x0000000000000080ull) return (prod >> 8) + 1ull;
+  if (prod & 0x0000000000000080ull) return (prod >> 8) + 1ull;
   return prod >> 8;
 }
 
@@ -2415,7 +2415,7 @@ uint64_t multshiftround_u64_9(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000000001FFull) >= 0x0000000000000100ull) return (prod >> 9) + 1ull;
+  if (prod & 0x0000000000000100ull) return (prod >> 9) + 1ull;
   return prod >> 9;
 }
 
@@ -2427,7 +2427,7 @@ uint64_t multshiftround_u64_10(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000000003FFull) >= 0x0000000000000200ull) return (prod >> 10) + 1ull;
+  if (prod & 0x0000000000000200ull) return (prod >> 10) + 1ull;
   return prod >> 10;
 }
 
@@ -2439,7 +2439,7 @@ uint64_t multshiftround_u64_11(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000000007FFull) >= 0x0000000000000400ull) return (prod >> 11) + 1ull;
+  if (prod & 0x0000000000000400ull) return (prod >> 11) + 1ull;
   return prod >> 11;
 }
 
@@ -2451,7 +2451,7 @@ uint64_t multshiftround_u64_12(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000000FFFull) >= 0x0000000000000800ull) return (prod >> 12) + 1ull;
+  if (prod & 0x0000000000000800ull) return (prod >> 12) + 1ull;
   return prod >> 12;
 }
 
@@ -2463,7 +2463,7 @@ uint64_t multshiftround_u64_13(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000001FFFull) >= 0x0000000000001000ull) return (prod >> 13) + 1ull;
+  if (prod & 0x0000000000001000ull) return (prod >> 13) + 1ull;
   return prod >> 13;
 }
 
@@ -2475,7 +2475,7 @@ uint64_t multshiftround_u64_14(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000003FFFull) >= 0x0000000000002000ull) return (prod >> 14) + 1ull;
+  if (prod & 0x0000000000002000ull) return (prod >> 14) + 1ull;
   return prod >> 14;
 }
 
@@ -2487,7 +2487,7 @@ uint64_t multshiftround_u64_15(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000007FFFull) >= 0x0000000000004000ull) return (prod >> 15) + 1ull;
+  if (prod & 0x0000000000004000ull) return (prod >> 15) + 1ull;
   return prod >> 15;
 }
 
@@ -2499,7 +2499,7 @@ uint64_t multshiftround_u64_16(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000000FFFFull) >= 0x0000000000008000ull) return (prod >> 16) + 1ull;
+  if (prod & 0x0000000000008000ull) return (prod >> 16) + 1ull;
   return prod >> 16;
 }
 
@@ -2511,7 +2511,7 @@ uint64_t multshiftround_u64_17(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000001FFFFull) >= 0x0000000000010000ull) return (prod >> 17) + 1ull;
+  if (prod & 0x0000000000010000ull) return (prod >> 17) + 1ull;
   return prod >> 17;
 }
 
@@ -2523,7 +2523,7 @@ uint64_t multshiftround_u64_18(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000003FFFFull) >= 0x0000000000020000ull) return (prod >> 18) + 1ull;
+  if (prod & 0x0000000000020000ull) return (prod >> 18) + 1ull;
   return prod >> 18;
 }
 
@@ -2535,7 +2535,7 @@ uint64_t multshiftround_u64_19(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000007FFFFull) >= 0x0000000000040000ull) return (prod >> 19) + 1ull;
+  if (prod & 0x0000000000040000ull) return (prod >> 19) + 1ull;
   return prod >> 19;
 }
 
@@ -2547,7 +2547,7 @@ uint64_t multshiftround_u64_20(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000000FFFFFull) >= 0x0000000000080000ull) return (prod >> 20) + 1ull;
+  if (prod & 0x0000000000080000ull) return (prod >> 20) + 1ull;
   return prod >> 20;
 }
 
@@ -2559,7 +2559,7 @@ uint64_t multshiftround_u64_21(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000001FFFFFull) >= 0x0000000000100000ull) return (prod >> 21) + 1ull;
+  if (prod & 0x0000000000100000ull) return (prod >> 21) + 1ull;
   return prod >> 21;
 }
 
@@ -2571,7 +2571,7 @@ uint64_t multshiftround_u64_22(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000003FFFFFull) >= 0x0000000000200000ull) return (prod >> 22) + 1ull;
+  if (prod & 0x0000000000200000ull) return (prod >> 22) + 1ull;
   return prod >> 22;
 }
 
@@ -2583,7 +2583,7 @@ uint64_t multshiftround_u64_23(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000007FFFFFull) >= 0x0000000000400000ull) return (prod >> 23) + 1ull;
+  if (prod & 0x0000000000400000ull) return (prod >> 23) + 1ull;
   return prod >> 23;
 }
 
@@ -2595,7 +2595,7 @@ uint64_t multshiftround_u64_24(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000000FFFFFFull) >= 0x0000000000800000ull) return (prod >> 24) + 1ull;
+  if (prod & 0x0000000000800000ull) return (prod >> 24) + 1ull;
   return prod >> 24;
 }
 
@@ -2607,7 +2607,7 @@ uint64_t multshiftround_u64_25(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000001FFFFFFull) >= 0x0000000001000000ull) return (prod >> 25) + 1ull;
+  if (prod & 0x0000000001000000ull) return (prod >> 25) + 1ull;
   return prod >> 25;
 }
 
@@ -2619,7 +2619,7 @@ uint64_t multshiftround_u64_26(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000003FFFFFFull) >= 0x0000000002000000ull) return (prod >> 26) + 1ull;
+  if (prod & 0x0000000002000000ull) return (prod >> 26) + 1ull;
   return prod >> 26;
 }
 
@@ -2631,7 +2631,7 @@ uint64_t multshiftround_u64_27(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000007FFFFFFull) >= 0x0000000004000000ull) return (prod >> 27) + 1ull;
+  if (prod & 0x0000000004000000ull) return (prod >> 27) + 1ull;
   return prod >> 27;
 }
 
@@ -2643,7 +2643,7 @@ uint64_t multshiftround_u64_28(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000000FFFFFFFull) >= 0x0000000008000000ull) return (prod >> 28) + 1ull;
+  if (prod & 0x0000000008000000ull) return (prod >> 28) + 1ull;
   return prod >> 28;
 }
 
@@ -2655,7 +2655,7 @@ uint64_t multshiftround_u64_29(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000001FFFFFFFull) >= 0x0000000010000000ull) return (prod >> 29) + 1ull;
+  if (prod & 0x0000000010000000ull) return (prod >> 29) + 1ull;
   return prod >> 29;
 }
 
@@ -2667,7 +2667,7 @@ uint64_t multshiftround_u64_30(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000003FFFFFFFull) >= 0x0000000020000000ull) return (prod >> 30) + 1ull;
+  if (prod & 0x0000000020000000ull) return (prod >> 30) + 1ull;
   return prod >> 30;
 }
 
@@ -2679,7 +2679,7 @@ uint64_t multshiftround_u64_31(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000007FFFFFFFull) >= 0x0000000040000000ull) return (prod >> 31) + 1ull;
+  if (prod & 0x0000000040000000ull) return (prod >> 31) + 1ull;
   return prod >> 31;
 }
 
@@ -2691,7 +2691,7 @@ uint64_t multshiftround_u64_32(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000000FFFFFFFFull) >= 0x0000000080000000ull) return (prod >> 32) + 1ull;
+  if (prod & 0x0000000080000000ull) return (prod >> 32) + 1ull;
   return prod >> 32;
 }
 
@@ -2703,7 +2703,7 @@ uint64_t multshiftround_u64_33(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000001FFFFFFFFull) >= 0x0000000100000000ull) return (prod >> 33) + 1ull;
+  if (prod & 0x0000000100000000ull) return (prod >> 33) + 1ull;
   return prod >> 33;
 }
 
@@ -2715,7 +2715,7 @@ uint64_t multshiftround_u64_34(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000003FFFFFFFFull) >= 0x0000000200000000ull) return (prod >> 34) + 1ull;
+  if (prod & 0x0000000200000000ull) return (prod >> 34) + 1ull;
   return prod >> 34;
 }
 
@@ -2727,7 +2727,7 @@ uint64_t multshiftround_u64_35(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000007FFFFFFFFull) >= 0x0000000400000000ull) return (prod >> 35) + 1ull;
+  if (prod & 0x0000000400000000ull) return (prod >> 35) + 1ull;
   return prod >> 35;
 }
 
@@ -2739,7 +2739,7 @@ uint64_t multshiftround_u64_36(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000000FFFFFFFFFull) >= 0x0000000800000000ull) return (prod >> 36) + 1ull;
+  if (prod & 0x0000000800000000ull) return (prod >> 36) + 1ull;
   return prod >> 36;
 }
 
@@ -2751,7 +2751,7 @@ uint64_t multshiftround_u64_37(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000001FFFFFFFFFull) >= 0x0000001000000000ull) return (prod >> 37) + 1ull;
+  if (prod & 0x0000001000000000ull) return (prod >> 37) + 1ull;
   return prod >> 37;
 }
 
@@ -2763,7 +2763,7 @@ uint64_t multshiftround_u64_38(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000003FFFFFFFFFull) >= 0x0000002000000000ull) return (prod >> 38) + 1ull;
+  if (prod & 0x0000002000000000ull) return (prod >> 38) + 1ull;
   return prod >> 38;
 }
 
@@ -2775,7 +2775,7 @@ uint64_t multshiftround_u64_39(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000007FFFFFFFFFull) >= 0x0000004000000000ull) return (prod >> 39) + 1ull;
+  if (prod & 0x0000004000000000ull) return (prod >> 39) + 1ull;
   return prod >> 39;
 }
 
@@ -2787,7 +2787,7 @@ uint64_t multshiftround_u64_40(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000000FFFFFFFFFFull) >= 0x0000008000000000ull) return (prod >> 40) + 1ull;
+  if (prod & 0x0000008000000000ull) return (prod >> 40) + 1ull;
   return prod >> 40;
 }
 
@@ -2799,7 +2799,7 @@ uint64_t multshiftround_u64_41(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000001FFFFFFFFFFull) >= 0x0000010000000000ull) return (prod >> 41) + 1ull;
+  if (prod & 0x0000010000000000ull) return (prod >> 41) + 1ull;
   return prod >> 41;
 }
 
@@ -2811,7 +2811,7 @@ uint64_t multshiftround_u64_42(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000003FFFFFFFFFFull) >= 0x0000020000000000ull) return (prod >> 42) + 1ull;
+  if (prod & 0x0000020000000000ull) return (prod >> 42) + 1ull;
   return prod >> 42;
 }
 
@@ -2823,7 +2823,7 @@ uint64_t multshiftround_u64_43(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000007FFFFFFFFFFull) >= 0x0000040000000000ull) return (prod >> 43) + 1ull;
+  if (prod & 0x0000040000000000ull) return (prod >> 43) + 1ull;
   return prod >> 43;
 }
 
@@ -2835,7 +2835,7 @@ uint64_t multshiftround_u64_44(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00000FFFFFFFFFFFull) >= 0x0000080000000000ull) return (prod >> 44) + 1ull;
+  if (prod & 0x0000080000000000ull) return (prod >> 44) + 1ull;
   return prod >> 44;
 }
 
@@ -2847,7 +2847,7 @@ uint64_t multshiftround_u64_45(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00001FFFFFFFFFFFull) >= 0x0000100000000000ull) return (prod >> 45) + 1ull;
+  if (prod & 0x0000100000000000ull) return (prod >> 45) + 1ull;
   return prod >> 45;
 }
 
@@ -2859,7 +2859,7 @@ uint64_t multshiftround_u64_46(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00003FFFFFFFFFFFull) >= 0x0000200000000000ull) return (prod >> 46) + 1ull;
+  if (prod & 0x0000200000000000ull) return (prod >> 46) + 1ull;
   return prod >> 46;
 }
 
@@ -2871,7 +2871,7 @@ uint64_t multshiftround_u64_47(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00007FFFFFFFFFFFull) >= 0x0000400000000000ull) return (prod >> 47) + 1ull;
+  if (prod & 0x0000400000000000ull) return (prod >> 47) + 1ull;
   return prod >> 47;
 }
 
@@ -2883,7 +2883,7 @@ uint64_t multshiftround_u64_48(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0000FFFFFFFFFFFFull) >= 0x0000800000000000ull) return (prod >> 48) + 1ull;
+  if (prod & 0x0000800000000000ull) return (prod >> 48) + 1ull;
   return prod >> 48;
 }
 
@@ -2895,7 +2895,7 @@ uint64_t multshiftround_u64_49(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0001FFFFFFFFFFFFull) >= 0x0001000000000000ull) return (prod >> 49) + 1ull;
+  if (prod & 0x0001000000000000ull) return (prod >> 49) + 1ull;
   return prod >> 49;
 }
 
@@ -2907,7 +2907,7 @@ uint64_t multshiftround_u64_50(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0003FFFFFFFFFFFFull) >= 0x0002000000000000ull) return (prod >> 50) + 1ull;
+  if (prod & 0x0002000000000000ull) return (prod >> 50) + 1ull;
   return prod >> 50;
 }
 
@@ -2919,7 +2919,7 @@ uint64_t multshiftround_u64_51(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0007FFFFFFFFFFFFull) >= 0x0004000000000000ull) return (prod >> 51) + 1ull;
+  if (prod & 0x0004000000000000ull) return (prod >> 51) + 1ull;
   return prod >> 51;
 }
 
@@ -2931,7 +2931,7 @@ uint64_t multshiftround_u64_52(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x000FFFFFFFFFFFFFull) >= 0x0008000000000000ull) return (prod >> 52) + 1ull;
+  if (prod & 0x0008000000000000ull) return (prod >> 52) + 1ull;
   return prod >> 52;
 }
 
@@ -2943,7 +2943,7 @@ uint64_t multshiftround_u64_53(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x001FFFFFFFFFFFFFull) >= 0x0010000000000000ull) return (prod >> 53) + 1ull;
+  if (prod & 0x0010000000000000ull) return (prod >> 53) + 1ull;
   return prod >> 53;
 }
 
@@ -2955,7 +2955,7 @@ uint64_t multshiftround_u64_54(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x003FFFFFFFFFFFFFull) >= 0x0020000000000000ull) return (prod >> 54) + 1ull;
+  if (prod & 0x0020000000000000ull) return (prod >> 54) + 1ull;
   return prod >> 54;
 }
 
@@ -2967,7 +2967,7 @@ uint64_t multshiftround_u64_55(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x007FFFFFFFFFFFFFull) >= 0x0040000000000000ull) return (prod >> 55) + 1ull;
+  if (prod & 0x0040000000000000ull) return (prod >> 55) + 1ull;
   return prod >> 55;
 }
 
@@ -2979,7 +2979,7 @@ uint64_t multshiftround_u64_56(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x00FFFFFFFFFFFFFFull) >= 0x0080000000000000ull) return (prod >> 56) + 1ull;
+  if (prod & 0x0080000000000000ull) return (prod >> 56) + 1ull;
   return prod >> 56;
 }
 
@@ -2991,7 +2991,7 @@ uint64_t multshiftround_u64_57(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x01FFFFFFFFFFFFFFull) >= 0x0100000000000000ull) return (prod >> 57) + 1ull;
+  if (prod & 0x0100000000000000ull) return (prod >> 57) + 1ull;
   return prod >> 57;
 }
 
@@ -3003,7 +3003,7 @@ uint64_t multshiftround_u64_58(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x03FFFFFFFFFFFFFFull) >= 0x0200000000000000ull) return (prod >> 58) + 1ull;
+  if (prod & 0x0200000000000000ull) return (prod >> 58) + 1ull;
   return prod >> 58;
 }
 
@@ -3015,7 +3015,7 @@ uint64_t multshiftround_u64_59(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x07FFFFFFFFFFFFFFull) >= 0x0400000000000000ull) return (prod >> 59) + 1ull;
+  if (prod & 0x0400000000000000ull) return (prod >> 59) + 1ull;
   return prod >> 59;
 }
 
@@ -3027,7 +3027,7 @@ uint64_t multshiftround_u64_60(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x0FFFFFFFFFFFFFFFull) >= 0x0800000000000000ull) return (prod >> 60) + 1ull;
+  if (prod & 0x0800000000000000ull) return (prod >> 60) + 1ull;
   return prod >> 60;
 }
 
@@ -3039,7 +3039,7 @@ uint64_t multshiftround_u64_61(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x1FFFFFFFFFFFFFFFull) >= 0x1000000000000000ull) return (prod >> 61) + 1ull;
+  if (prod & 0x1000000000000000ull) return (prod >> 61) + 1ull;
   return prod >> 61;
 }
 
@@ -3051,7 +3051,7 @@ uint64_t multshiftround_u64_62(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x3FFFFFFFFFFFFFFFull) >= 0x2000000000000000ull) return (prod >> 62) + 1ull;
+  if (prod & 0x2000000000000000ull) return (prod >> 62) + 1ull;
   return prod >> 62;
 }
 
@@ -3063,7 +3063,7 @@ uint64_t multshiftround_u64_63(const uint64_t num, const uint64_t mul) {
   #endif
 
   uint64_t prod = num * mul;
-  if ((prod & 0x7FFFFFFFFFFFFFFFull) >= 0x4000000000000000ull) return (prod >> 63) + 1ull;
+  if (prod & 0x4000000000000000ull) return (prod >> 63) + 1ull;
   return prod >> 63;
 }
 

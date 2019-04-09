@@ -40,7 +40,11 @@
  */
 
 #include "multshiftround_run.h"
-#include "multshiftround_shiftround_masks.h"
+#include "run_masks_type.h"
+
+#ifdef ARRAY_MASKS
+  #include "multshiftround_shiftround_masks.h"
+#endif
 
 #ifdef DEBUG_INTMATH
   #include "stdio.h"
@@ -68,12 +72,19 @@ int8_t multshiftround_i8(const int8_t num, const int8_t mul, const uint8_t shift
   if (shift > (uint8_t)6) return (int8_t)0;
   int8_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  uint8_t mask = masks_8bit[shift - (uint8_t)1];
-  uint8_t half_remainder = (uint8_t)1 << (shift - (uint8_t)1);
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & ((uint8_t)0x80 | mask)) == ((uint8_t)0x80 | half_remainder)) return prod >> shift;
+  
+  #ifdef ARRAY_MASKS
+    uint8_t half_remainder = masks_8bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint8_t half_remainder = (uint8_t)1 << (shift - (uint8_t)1);
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+
+  if ((prod & half_remainder) &&
+      (prod >= (int8_t)0 || (prod & ((half_remainder << 1) - (uint8_t)1)) != half_remainder))
     return (prod >> shift) + (int8_t)1;
-  }
+
   return prod >> shift;
 }
 
@@ -91,8 +102,16 @@ uint8_t multshiftround_u8(const uint8_t num, const uint8_t mul, const uint8_t sh
   if (shift > (uint8_t)7) return (uint8_t)0;
   uint8_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  if ((prod & masks_8bit[shift - (uint8_t)1]) >= 
-      ((uint8_t)1 << (shift - 1))) return (prod >> shift) + (uint8_t)1;
+
+  #ifdef ARRAY_MASKS
+    if (prod & masks_8bit[shift])
+      return (prod >> shift) + (uint8_t)1;
+  #elif defined(COMPUTED_MASKS)
+    if (prod & (uint8_t)1 << (shift - (uint8_t)1))
+      return (prod >> shift) + (uint8_t)1;
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
@@ -118,12 +137,19 @@ int16_t multshiftround_i16(const int16_t num, const int16_t mul, const uint8_t s
   if (shift > (uint8_t)14) return (int16_t)0;
   int16_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  uint16_t mask = masks_16bit[shift - (uint8_t)1];
-  uint16_t half_remainder = (uint16_t)1 << (shift - (uint8_t)1);
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & ((uint16_t)0x8000 | mask)) == ((uint16_t)0x8000 | half_remainder)) return prod >> shift;
+
+  #ifdef ARRAY_MASKS
+    uint16_t half_remainder = masks_16bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint16_t half_remainder = (uint16_t)1 << (shift - (uint8_t)1);
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+  
+  if ((prod & half_remainder) &&
+      (prod >= (int16_t)0 || (prod & ((half_remainder << 1) - (uint16_t)1)) != half_remainder))
     return (prod >> shift) + (int16_t)1;
-  }
+
   return prod >> shift;
 }
 
@@ -141,8 +167,16 @@ uint16_t multshiftround_u16(const uint16_t num, const uint16_t mul, const uint8_
   if (shift > (uint8_t)15) return (uint16_t)0;
   uint16_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  if ((prod & masks_16bit[shift - (uint8_t)1]) >=
-      ((uint16_t)1 << (shift - (uint8_t)1))) return (prod >> shift) + (uint16_t)1;
+
+  #ifdef ARRAY_MASKS
+    if (prod & masks_16bit[shift])
+      return (prod >> shift) + (uint16_t)1;
+  #elif defined(COMPUTED_MASKS)
+    if (prod & (uint16_t)1 << (shift - (uint8_t)1))
+      return (prod >> shift) + (uint16_t)1;
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
@@ -168,12 +202,19 @@ int32_t multshiftround_i32(const int32_t num, const int32_t mul, const uint8_t s
   if (shift > (uint8_t)30) return 0;
   int32_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  uint32_t mask = masks_32bit[shift - (uint8_t)1];
-  uint32_t half_remainder = 1u << (shift - (uint8_t)1);
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & (0x80000000u | mask)) == (0x80000000u | half_remainder)) return prod >> shift;
+
+  #ifdef ARRAY_MASKS
+    uint32_t half_remainder = masks_32bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint32_t half_remainder = 1u << (shift - (uint8_t)1);
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+
+  if ((prod & half_remainder) &&
+      (prod >= 0 || (prod & ((half_remainder << 1) - 1)) != half_remainder))
     return (prod >> shift) + 1;
-  }
+
   return prod >> shift;
 }
 
@@ -191,8 +232,16 @@ uint32_t multshiftround_u32(const uint32_t num, const uint32_t mul, const uint8_
   if (shift > (uint8_t)31) return 0u;
   uint32_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  if ((prod & masks_32bit[shift - (uint8_t)1]) >=
-      (1u << (shift - (uint8_t)1))) return (prod >> shift) + 1u;
+
+  #ifdef ARRAY_MASKS
+    if (prod & masks_32bit[shift])
+      return (prod >> shift) + 1u;
+  #elif defined(COMPUTED_MASKS)
+    if (prod & 1u << (shift - (uint8_t)1))
+      return (prod >> shift) + 1u;
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
@@ -214,12 +263,19 @@ int64_t multshiftround_i64(const int64_t num, const int64_t mul, const uint8_t s
   if (shift > (uint8_t)62) return 0ll;
   int64_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  uint64_t mask = masks_64bit[shift - (uint8_t)1];
-  uint64_t half_remainder = 1ull << (shift - (uint8_t)1);
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & (0x8000000000000000ull | mask)) == (0x8000000000000000ull | half_remainder)) return prod >> shift;
+
+  #ifdef ARRAY_MASKS
+    uint64_t half_remainder = masks_64bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint64_t half_remainder = 1ull << (shift - (uint8_t)1);
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+
+  if ((prod & half_remainder) &&
+      (prod >= 0ll || (prod & ((half_remainder << 1) - 1ll)) != half_remainder))
     return (prod >> shift) + 1ll;
-  }
+
   return prod >> shift;
 }
 
@@ -236,8 +292,16 @@ uint64_t multshiftround_u64(const uint64_t num, const uint64_t mul, const uint8_
   if (shift > (uint8_t)63) return 0ull;
   uint64_t prod = num * mul;
   if (shift == (uint8_t)0) return prod;
-  if ((prod & masks_64bit[shift - (uint8_t)1]) >=
-      (1ull << (shift - (uint8_t)1))) return (prod >> shift) + 1ull;
+
+  #ifdef ARRAY_MASKS
+    if (prod & masks_64bit[shift])
+      return (prod >> shift) + 1ull;
+  #elif defined(COMPUTED_MASKS)
+    if (prod & 1ull << (shift - (uint8_t)1))
+      return (prod >> shift) + 1ull;
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
