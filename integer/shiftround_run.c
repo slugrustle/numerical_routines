@@ -183,6 +183,9 @@ uint32_t shiftround_u32(const uint32_t num, const uint8_t shift) {
 	    fprintf(stderr, "ERROR: shiftround_u32(%u, %u), shift = %u is invalid; it must be on the range [0,31].\n", num, shift, shift);
   #endif
 
+  if (shift > (uint8_t)31) return 0;
+  if (shift == (uint8_t)0) return num;
+
   #ifdef ARRAY_MASKS
     if (num & masks_32bit[shift])
       return (num >> shift) + 1u;
