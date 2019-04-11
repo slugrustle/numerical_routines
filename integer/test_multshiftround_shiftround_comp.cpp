@@ -15021,7 +15021,7 @@ void test_shiftround_u64_comp_c(uint8_t shift, size_t thread_index) {
 
 int main()
 {
-  std::printf("Testing multiplication operation in all multshiftround routines.\n");
+  std::printf("\nTesting multiplication operation in all multshiftround routines.\n");
 
   /**
    * int8_t multshiftround routines that require the shift value at compile time
@@ -15975,7 +15975,7 @@ int main()
   msr_u64 = multshiftround<uint64_t, 63>(2147483648ull, 4294967296ull);
   if (msr_u64 != 1ull) std::printf("\nERROR: multshiftround<uint64_t, 63>(2147483648ull, 4294967296ull) returned %" PRIu64 ". expected 1.\n\n", msr_u64);
 
-  std::printf("\n");
+  std::printf("Multiplication tests finished.\n\n");
 
   /**
    * Test int8_t multshiftround for num on [-128, 127] and shift on [1, 6].

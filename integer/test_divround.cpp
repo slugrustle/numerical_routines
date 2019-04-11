@@ -514,7 +514,7 @@ void test_divround_u64_cpp(uint64_t dividend_start, uint64_t dividend_end) {
 }
 
 int main() {
-  std::printf("Testing divround_i8\n");
+  std::printf("\nTesting divround_i8\n");
   int8_t dividend_i8 = std::numeric_limits<int8_t>::lowest();
   while (true) {
     int8_t divisor = std::numeric_limits<int8_t>::lowest();

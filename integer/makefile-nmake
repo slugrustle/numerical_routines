@@ -24,16 +24,16 @@ test_saturate_value.exe:test_saturate_value.cpp saturate_value.c saturate_value.
 	cl $(BASE_OPTIONS) $(NON_BOOST_OPTIONS) saturate_value.c test_saturate_value.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
 test_divround.exe:test_divround.cpp divround.c divround.h divround.hpp
-	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) divround.c test_divround.cpp $(LINK_OPTIONS) /OUT:$(@F)
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /D"DEBUG_INTMATH" divround.c test_divround.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
 test_multshiftround_shiftround_comp.exe:test_multshiftround_shiftround_comp.cpp detect_product_overflow.c multshiftround_comp.c shiftround_comp.c detect_product_overflow.h multshiftround_comp.h shiftround_comp.h multshiftround_comp.hpp shiftround_comp.hpp
-	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) multshiftround_comp.c shiftround_comp.c detect_product_overflow.c test_multshiftround_shiftround_comp.cpp $(LINK_OPTIONS) /OUT:$(@F)
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /D"DEBUG_INTMATH" multshiftround_comp.c shiftround_comp.c detect_product_overflow.c test_multshiftround_shiftround_comp.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
 test_multshiftround_shiftround_run_array_masks.exe:test_multshiftround_shiftround_run.cpp detect_product_overflow.c multshiftround_run.c shiftround_run.c multshiftround_shiftround_masks.c detect_product_overflow.h multshiftround_run.h shiftround_run.h multshiftround_shiftround_masks.h multshiftround_run.hpp shiftround_run.hpp
-	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /D"ARRAY_MASKS" multshiftround_run.c shiftround_run.c multshiftround_shiftround_masks.c detect_product_overflow.c test_multshiftround_shiftround_run.cpp $(LINK_OPTIONS) /OUT:$(@F)
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /D"DEBUG_INTMATH" /D"ARRAY_MASKS" multshiftround_run.c shiftround_run.c multshiftround_shiftround_masks.c detect_product_overflow.c test_multshiftround_shiftround_run.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
 test_multshiftround_shiftround_run_computed_masks.exe:test_multshiftround_shiftround_run.cpp detect_product_overflow.c multshiftround_run.c shiftround_run.c detect_product_overflow.h multshiftround_run.h shiftround_run.h multshiftround_run.hpp shiftround_run.hpp
-	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /D"COMPUTED_MASKS" multshiftround_run.c shiftround_run.c detect_product_overflow.c test_multshiftround_shiftround_run.cpp $(LINK_OPTIONS) /OUT:$(@F)
+	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /D"DEBUG_INTMATH" /D"COMPUTED_MASKS" multshiftround_run.c shiftround_run.c detect_product_overflow.c test_multshiftround_shiftround_run.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
 test_debug_code.exe:test_debug_code.cpp divround.c detect_product_overflow.c multshiftround_comp.c multshiftround_run.c shiftround_run.c multshiftround_shiftround_masks.c divround.h detect_product_overflow.h multshiftround_comp.h multshiftround_run.h shiftround_run.h multshiftround_shiftround_masks.h divround.hpp multshiftround_comp.hpp multshiftround_run.hpp shiftround_run.hpp
 	cl $(BASE_OPTIONS) $(NON_BOOST_OPTIONS) /D"DEBUG_INTMATH" divround.c multshiftround_comp.c multshiftround_run.c shiftround_run.c multshiftround_shiftround_masks.c detect_product_overflow.c test_debug_code.cpp $(LINK_OPTIONS) /OUT:$(@F)
