@@ -244,4 +244,3 @@ int16_t read_thermistor(const uint16_t ADCcount)
   }
 }
 ```
-thermistor\_interpolator.cpp uses some code from version 3.3.7 of the Eigen library, which I retrieved from http://eigen.tuxfamily.org/. The files needed for compiling the thermistor\_interpolator program are stored in the Eigen directory in this repository. Eigen distributed under the [MPL2 license](http://mozilla.org/MPL/2.0/).

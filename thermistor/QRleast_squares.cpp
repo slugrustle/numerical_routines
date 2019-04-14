@@ -56,17 +56,17 @@ void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, 
   }
 
   /**
-    * Sort the rows of the least squares problem by maximum elementwise
-    * absolute value in each regressor matrix row, descending. This does
-    * not change the problem mathematically, but it does limit the amount
-    * of roundoff error accumulated in the QR decomposition.
-    */
+   * Sort the rows of the least squares problem by maximum elementwise
+   * absolute value in each regressor matrix row, descending. This does
+   * not change the problem mathematically, but it does limit the amount
+   * of roundoff error accumulated in the QR decomposition.
+   */
   heapSort(least_squares_data, nPoints-1u);
 
   /**
-    * Exchange columns in the regressor matrix, if necessary,
-    * so that the column with larger norm is dealt with first.
-    */
+   * Exchange columns in the regressor matrix, if necessary,
+   * so that the column with larger norm is dealt with first.
+   */
   uint8_t col0 = 0u;
   uint8_t col1 = 1u;
   if (column_sum_squares[1] > column_sum_squares[0])
@@ -76,9 +76,9 @@ void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, 
   }
   
   /**
-    * Compute the householder vector (v) that will zero out all rows
-    * past the first in col0.
-    */
+   * Compute the householder vector (v) that will zero out all rows
+   * past the first in col0.
+   */
   v[0] = signum(least_squares_data[0].columns[col0]) * std::sqrt(column_sum_squares[col0]) + least_squares_data[0].columns[col0];
   double v_sum_squares = column_sum_squares[col0] - least_squares_data[0].columns[col0] * least_squares_data[0].columns[col0] + v[0] * v[0];
   double inv_v_norm = 1.0 / std::sqrt(v_sum_squares);
@@ -90,10 +90,10 @@ void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, 
   }
 
   /**
-    * Apply v to the regressor matrix and right hand side in the least squares
-    * data such that the regressor becomes the QR R matrix and the right hand
-    * side becomes Q transpose times the original right hand side.
-    */
+   * Apply v to the regressor matrix and right hand side in the least squares
+   * data such that the regressor becomes the QR R matrix and the right hand
+   * side becomes Q transpose times the original right hand side.
+   */
   double col_multipliers[2] = {0.0, 0.0};
   double rhs_multiplier = 0.0;
   for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
@@ -114,9 +114,9 @@ void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, 
   }
 
   /**
-    * Compute the householder vector (v) that will zero out all rows
-    * past the second in col1.
-    */
+   * Compute the householder vector (v) that will zero out all rows
+   * past the second in col1.
+   */
   column_sum_squares[col1] -= least_squares_data[0].columns[col1] * least_squares_data[0].columns[col1];
   v[1] = signum(least_squares_data[1].columns[col1]) * std::sqrt(column_sum_squares[col1]) + least_squares_data[1].columns[col1];
   v_sum_squares = column_sum_squares[col1] - least_squares_data[1].columns[col1] * least_squares_data[1].columns[col1] + v[1] * v[1];
@@ -129,10 +129,10 @@ void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, 
   }
 
   /**
-    * Apply v to the regressor matrix and right hand side in the least squares
-    * data such that the regressor becomes the QR R matrix and the right hand
-    * side becomes Q transpose times the original right hand side.
-    */
+   * Apply v to the regressor matrix and right hand side in the least squares
+   * data such that the regressor becomes the QR R matrix and the right hand
+   * side becomes Q transpose times the original right hand side.
+   */
   col_multipliers[1] = 0.0;
   rhs_multiplier = 0.0;
   for (uint16_t jPoint = 1u; jPoint < nPoints; jPoint++)
@@ -150,13 +150,13 @@ void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, 
   }
 
   /**
-    * col0 and col1 in least_squares_data[].columns now store the R matrix
-    * in the QR decomposition. least_squares_data[].rhs now stores Q transpose
-    * times the original rhs.
-    * 
-    * This system is now upper triangular in R. Use this fact to solve for
-    * the parameter vector.
-    */
+   * col0 and col1 in least_squares_data[].columns now store the R matrix
+   * in the QR decomposition. least_squares_data[].rhs now stores Q transpose
+   * times the original rhs.
+   * 
+   * This system is now upper triangular in R. Use this fact to solve for
+   * the parameter vector.
+   */
   parameters[col1] = least_squares_data[1].rhs / least_squares_data[1].columns[col1];
   parameters[col0] = (least_squares_data[0].rhs - parameters[col1] * least_squares_data[0].columns[col1]) / least_squares_data[0].columns[col0];
 }
