@@ -1,64 +1,99 @@
 /**
- * multshiftround_shiftround_masks.c
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead defined in this file.
+ * NTCcalculations.cpp
  *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays defined below.
+ * Definitions of several mathematical routines concerned with calculating
+ * the resistance, temperature, or ADCreading associated with a Negative
+ * Temperature Coefficient (NTC) thermistor in a circuit with a pullup
+ * resistor and optional isolation resistor monitored by an Analog to Digital
+ * Converter (ADC).
+ * 
+ * These functions use global variables declared in globals.h whose values
+ * are expected to be set by the main() routine in thermistor_interpolator.cpp.
  *
- * Written in 2018 by Ben Tesch.
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide.This software is distributed without any warranty.
+ * worldwide. This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "multshiftround_shiftround_masks.h"
+#include "NTCcalculations.h"
+#include "globals.h"
+#include <cassert>
+#include <cmath>
+#include <limits>
 
-const uint8_t masks_8bit[8] = {
-  0x00u, 0x01u, 0x02u, 0x04u, 0x08u, 
-         0x10u, 0x20u, 0x40u
-};
+/**
+ * Calculates nominal NTC resistance in Ohms
+ * given an ADC reading on the range [0, ADC_counts - 1].
+ */
+double Rntc_from_ADCread(const uint16_t ADCread)
+{
+  assert(ADCread < ADC_counts);
+  
+  double ADCratio;
+  if (ADCread == 0u) ADCratio = 0.5 * inv_ADC_counts_minus_one;
+  else if (ADCread == ADC_counts - 1u) ADCratio = (static_cast<double>(ADC_counts) - 1.5) * inv_ADC_counts_minus_one;
+  else ADCratio = static_cast<double>(ADCread) * inv_ADC_counts_minus_one;
+  return (Rpullup_nom_Ohms * ADCratio - Riso_nom_Ohms * (1.0 - ADCratio)) / (1.0 - ADCratio);
+}
 
-const uint16_t masks_16bit[16] = {
-  0x0000u, 0x0001u, 0x0002u, 0x0004u, 0x0008u,
-           0x0010u, 0x0020u, 0x0040u, 0x0080u,
-           0x0100u, 0x0200u, 0x0400u, 0x0800u,
-           0x1000u, 0x2000u, 0x4000u
-};
+/**
+ * Calculates nominal NTC resistance in Ohms for a given
+ * NTC temperature in degrees Celsius
+ */
+double Rntc_from_Tntc(double Tntc)
+{
+  assert(Tntc >= -kelvin_offset);
+  assert(std::isfinite(Tntc));
 
-const uint32_t masks_32bit[32] = {
-  0x00000000u, 0x00000001u, 0x00000002u, 0x00000004u, 0x00000008u,
-               0x00000010u, 0x00000020u, 0x00000040u, 0x00000080u,
-               0x00000100u, 0x00000200u, 0x00000400u, 0x00000800u,
-               0x00001000u, 0x00002000u, 0x00004000u, 0x00008000u,
-               0x00010000u, 0x00020000u, 0x00040000u, 0x00080000u,
-               0x00100000u, 0x00200000u, 0x00400000u, 0x00800000u,
-               0x01000000u, 0x02000000u, 0x04000000u, 0x08000000u,
-               0x10000000u, 0x20000000u, 0x40000000u
-};
+  return Rntc_nom_Ohms * std::exp(beta_K * (1.0 / (Tntc + kelvin_offset) - inv_NTC_nom_temp_K));
+}
 
-const uint64_t masks_64bit[64] = { 
-  0x0000000000000000ull, 0x0000000000000001ull, 0x0000000000000002ull, 0x0000000000000004ull, 0x0000000000000008ull,
-                         0x0000000000000010ull, 0x0000000000000020ull, 0x0000000000000040ull, 0x0000000000000080ull,
-                         0x0000000000000100ull, 0x0000000000000200ull, 0x0000000000000400ull, 0x0000000000000800ull,
-                         0x0000000000001000ull, 0x0000000000002000ull, 0x0000000000004000ull, 0x0000000000008000ull,
-                         0x0000000000010000ull, 0x0000000000020000ull, 0x0000000000040000ull, 0x0000000000080000ull,
-                         0x0000000000100000ull, 0x0000000000200000ull, 0x0000000000400000ull, 0x0000000000800000ull,
-                         0x0000000001000000ull, 0x0000000002000000ull, 0x0000000004000000ull, 0x0000000008000000ull,
-                         0x0000000010000000ull, 0x0000000020000000ull, 0x0000000040000000ull, 0x0000000080000000ull,
-                         0x0000000100000000ull, 0x0000000200000000ull, 0x0000000400000000ull, 0x0000000800000000ull,
-                         0x0000001000000000ull, 0x0000002000000000ull, 0x0000004000000000ull, 0x0000008000000000ull,
-                         0x0000010000000000ull, 0x0000020000000000ull, 0x0000040000000000ull, 0x0000080000000000ull,
-                         0x0000100000000000ull, 0x0000200000000000ull, 0x0000400000000000ull, 0x0000800000000000ull,
-                         0x0001000000000000ull, 0x0002000000000000ull, 0x0004000000000000ull, 0x0008000000000000ull,
-                         0x0010000000000000ull, 0x0020000000000000ull, 0x0040000000000000ull, 0x0080000000000000ull,
-                         0x0100000000000000ull, 0x0200000000000000ull, 0x0400000000000000ull, 0x0800000000000000ull,
-                         0x1000000000000000ull, 0x2000000000000000ull, 0x4000000000000000ull
-};
+/**
+ * Calculates nominal NTC temperature in degrees
+ * Celsius given an ADC reading on the range
+ * [0, ADC_counts - 1].
+ * Returns NaN for infeasible ADC readings.
+ */
+double Tntc_from_ADCread(const uint16_t ADCread)
+{
+  assert(ADCread < ADC_counts);
+
+  double Rntc = Rntc_from_ADCread(ADCread);
+  if (Rntc <= 0.0) return std::numeric_limits<double>::quiet_NaN();
+  return 1.0 / (std::log(Rntc * inv_Rntc_nom_Ohms) * inv_beta_K + inv_NTC_nom_temp_K) - kelvin_offset;
+}
+
+/**
+ * Calculates nominal ADC reading for a given
+ * NTC temperature in degrees Celsius
+ */
+uint16_t ADCread_from_Tntc(double Tntc)
+{
+  assert(Tntc >= -kelvin_offset);
+  assert(std::isfinite(Tntc));
+
+  double Rntc = Rntc_from_Tntc(Tntc);
+  assert(Rntc >= 0.0);
+
+  double ADCratio = (Rntc + Riso_nom_Ohms) / (Rntc + Riso_nom_Ohms + Rpullup_nom_Ohms);
+  return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - 1u)));
+}
+
+/**
+ * Convert a floating point degrees Celsius temperature
+ * into (1/128) degrees Celsius fixed point.
+ */
+int16_t fixed_point_C(double temp_C)
+{
+  assert(temp_C >= -256.0);
+  assert(temp_C <= 255.9921875);
+
+  return static_cast<int16_t>(std::round(128.0 * temp_C));
+}
 
 /*
 Creative Commons Legal Code

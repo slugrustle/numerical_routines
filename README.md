@@ -22,10 +22,6 @@ All code in this repository that has been produced by the author is distributed 
 
 A portion of the boost library is distributed in the integer/boost directory. See integer/boost\_license\_report.hml and integer/LICENSE\_1\_0.txt for more information.
 
-A portion of the Eigen library is distributed in the thermistor/Eigen directory; Eigen is distributed under the Mozilla Public License Version 2.0, which can be found at http://mozilla.org/MPL/2.0/.
-
 ## Acknowledgment
 
 [boost](https://www.boost.org/) provides, among other things, high precision floating point types that made the helper utility and some of the test programs in the integer directory much easier to develop.
-
-[Eigen](http://eigen.tuxfamily.org/) is a lovely header-only linear algebra library. It is used in the thermistor\_interpolator program for the lowly task of performing least-squares fitting of line segments.

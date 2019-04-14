@@ -20,233 +20,72 @@
 #include <cstdio>
 #include <cinttypes>
 #include <cmath>
-#include <cassert>
 #include <limits>
-#include <vector>
-#include <Eigen/Dense>
+#include <string>
+#include <algorithm>
 #include "multshiftround_run.hpp"
+#include "globals.h"
+#include "types.h"
+#include "parsers.h"
+#include "NTCcalculations.h"
+#include "QRleast_squares.h"
 
 /**
- * Major variables used in calculations.
- * These are also taken as input arguments from
- * the command line.
+ * Defining variables declared in globals.h
+ * These are also shared with NTCcalculations.cpp
  */
-double min_table_temp_C;
-double max_table_temp_C;
 double Rntc_nom_Ohms;
-double NTC_nom_temp_C;
 double beta_K;
 double Rpullup_nom_Ohms;
 double Riso_nom_Ohms;
 uint16_t ADC_counts;
-double max_interp_error_C;
+double inv_Rntc_nom_Ohms;
+double inv_NTC_nom_temp_K;
+double inv_beta_K;
+double inv_ADC_counts_minus_one;
 
 /**
- * Calculates nominal NTC resistance in Ohms
- * given an ADC reading on the range [0, ADC_counts - 1].
+ * Input or calculation variables used in main.
  */
-double Rntc_from_ADCread(const uint16_t ADCread)
-{
-  assert(ADCread < ADC_counts);
-  
-  double ADCratio;
-  if (ADCread == 0u) ADCratio = 0.5 / static_cast<double>(ADC_counts - 1u);
-  else if (ADCread == ADC_counts - 1u) ADCratio = (static_cast<double>(ADC_counts) - 1.5) / static_cast<double>(ADC_counts - 1u);
-  else ADCratio = static_cast<double>(ADCread) / static_cast<double>(ADC_counts - 1u);
-  return (Rpullup_nom_Ohms * ADCratio - Riso_nom_Ohms * (1.0 - ADCratio)) / (1.0 - ADCratio);
-}
+static double NTC_nom_temp_C;
+static double min_table_temp_C;
+static double max_table_temp_C;
+static double max_interp_error_C;
+static const double inv_128 = 1.0 / 128.0;
 
 /**
- * Calculates nominal NTC resistance in Ohms for a given
- * NTC temperature in degrees Celsius
+ * The ADC_counts input is limited to 2^15 = 32768.
+ * Max size the storage for the least squares problem
+ * and use subsets of this array during computation.
  */
-double Rntc_from_Tntc(double Tntc)
-{
-  assert(Tntc >= -273.15);
-  assert(std::isfinite(Tntc));
-
-  return Rntc_nom_Ohms * std::exp(beta_K * (1.0 / (Tntc + 273.15) - 1.0 / (NTC_nom_temp_C + 273.15)));
-}
+static least_squares_row_t least_squares_data[32768];
 
 /**
- * Calculates nominal NTC temperature in degrees
- * Celsius given an ADC reading on the range
- * [0, ADC_counts - 1].
- * Returns NaN for infeasible ADC readings.
+ * Instead of calling Tntc_from_ADCread() on the same input
+ * variables all the time, compute it for all ADC inputs in
+ * the range of the table once and store those results in
+ * Tntc_array.
+ * 
+ * Not all indices will be used.
  */
-double Tntc_from_ADCread(const uint16_t ADCread)
-{
-  assert(ADCread < ADC_counts);
-
-  double Rntc = Rntc_from_ADCread(ADCread);
-  if (Rntc <= 0.0) return std::numeric_limits<double>::quiet_NaN();
-  return 1.0 / (std::log(Rntc/Rntc_nom_Ohms) / beta_K + 1.0 / (273.15 + NTC_nom_temp_C)) - 273.15;
-}
+static double Tntc_array[32768];
 
 /**
- * Calculates nominal ADC reading for a given
- * NTC temperature in degrees Celsius
+ * storage for the table's linear interpolation segments
+ * and for statistics data about those segments.
  */
-uint16_t ADCread_from_Tntc(double Tntc)
-{
-  assert(Tntc >= -273.15);
-  assert(std::isfinite(Tntc));
-
-  double Rntc = Rntc_from_Tntc(Tntc);
-  assert(Rntc >= 0.0);
-
-  double ADCratio = (Rntc + Riso_nom_Ohms) / (Rntc + Riso_nom_Ohms + Rpullup_nom_Ohms);
-  return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - 1u)));
-}
+static interp_segment_t interp_segments[32768];
+static uint16_t n_stored_segments;
+static segment_stats_t segment_stats[32768];
 
 /**
- * Convert a floating point degrees Celsius temperature
- * into (1/128) degrees Celsius fixed point.
+ * Main routine of thermistor_interpolator.
+ * 1. Displays usage message
+ * 2. Parses & validates user input
+ * 3. Computes near-optimal thermistor table
+ * 4. Prints table, related data structures, and code
+ *    that performs lookups on the table
  */
-int16_t fixed_point_C(double temp_C)
-{
-  assert(temp_C >= -256.0);
-  assert(temp_C <= 255.9921875);
-
-  return static_cast<int16_t>(std::round(128.0 * temp_C));
-}
-
-/**
- * interp_segment_t defines a single linear interpolation
- *                  segment.
- *
- * start_count: the ADC count value corresponding to 
- *              start_temp
- *
- * start_temp: the temperature corresponding to start_count
- *             in 1/128ths of a degree Celsius.
- *             This is signed Q9.7 format fixed point.
- *
- * slope_multiplier: these two define the slope of the
- * slope_shift:      line segment as the rational number
- *                   (slope_multiplier / 2^slope_shift).
- *                   Units are 1/128ths of a degree Celsius
- *                   per ADC count.
- *
- * Each segment ends one count before the start of the
- * next segment. end_count in interp_table_t gives the last
- * valid ADC count for the final segment.
- */
-typedef struct
-{
-  uint16_t start_count;
-  int16_t start_temp;
-  int32_t slope_multiplier;
-  uint8_t slope_shift;
-} interp_segment_t;
-
-/**
- * Holds fit statistics for a single interpolation segment.
- * Only used for informational purposes.
- */
-typedef struct
-{
-  uint16_t num_points;
-  double mean_error;
-  double max_error;
-} segment_stats_t;
-
-/**
- * Parses a string to an int64_t. Sets success true/false based on
- * whether the entire input string was an integer or not.
- */
-int64_t parse_int64(const std::string &in_str, bool &success)
-{
-  if (in_str.length() == 0u)
-  {
-    success = false;
-    return 0ll;
-  }
-
-  size_t after_int = 0u;
-  int64_t value = 0ll;
-  try
-  {
-    value = std::stoll(in_str, &after_int, 10);
-  }
-  catch (const std::invalid_argument &e)
-  {
-    success = false;
-    return 0ll;
-  }
-  catch (const std::out_of_range &e)
-  {
-    success = false;
-    return 0ll;
-  }
-
-  if (after_int != in_str.length())
-  {
-    success = false;
-    return 0ll;
-  }
-
-  success = true;
-  return value;
-}
-
-/**
- * Parses a string to a double. Returns NaN if it can't.
- */
-double parse_double(const std::string &in_str)
-{
-  if (in_str.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
-
-  size_t after_double = 0u;
-  double value = std::numeric_limits<double>::quiet_NaN();
-  try
-  {
-    value = std::stod(in_str, &after_double);
-  }
-  catch (const std::invalid_argument &e)
-  {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  catch (const std::out_of_range &e)
-  {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-
-  if (after_double != in_str.length()) return std::numeric_limits<double>::quiet_NaN();
-  return value;
-}
-
-/**
- * Parse resistances such as 33.2k, 10M, 100.2, 1, etc.
- * into a value in Ohms. Only the suffixes k and M are
- * recognized.
- * Return NaN if not parseable.
- * Negative and 0 values are returned as valid.
- */
-double parse_resistance(std::string &res_string)
-{
-  if (res_string.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
-
-  // Look for a k or M suffix
-  char suffix = ' ';
-  size_t suffix_idx = 0u;
-  if (res_string.length() > 1u)
-  {
-    suffix_idx = res_string.length() - 1u;
-    suffix = res_string.at(suffix_idx);
-  }
-
-  std::string number_buffer;
-  if ('k' == suffix || 'M' == suffix) number_buffer = res_string.substr(0u, suffix_idx);
-  else number_buffer = res_string;
-
-  double res_val = parse_double(number_buffer);
-  if (std::isnan(res_val)) return res_val;
-  if ('k' == suffix) return 1000.0 * res_val;
-  if ('M' == suffix) return 1.0e6 * res_val;
-  return res_val;
-}
-
 int main (int argc, char **argv)
 {
   /**
@@ -299,27 +138,27 @@ int main (int argc, char **argv)
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
     return 0;
   }
-  else if (min_table_temp_C < -273.15)
+  else if (min_table_temp_C < -kelvin_offset)
   {
     std::printf(u8"Input Error: the lowest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
     std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
     return 0;
   }
-  else if (min_table_temp_C < std::numeric_limits<int16_t>::lowest() / 128.0)
+  else if (min_table_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
   {
     std::printf(u8"Input Error: the lowest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() / 128.0);
+    std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
     std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
     return 0;
   }
-  else if (min_table_temp_C > std::numeric_limits<int16_t>::max() / 128.0)
+  else if (min_table_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
   {
     std::printf(u8"Input Error: the lowest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() / 128.0);
+    std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
     std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
     return 0;
@@ -337,27 +176,27 @@ int main (int argc, char **argv)
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
     return 0;
   }
-  else if (max_table_temp_C < -273.15)
+  else if (max_table_temp_C < -kelvin_offset)
   {
     std::printf(u8"Input Error: the highest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
     std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
     return 0;
   }
-  else if (max_table_temp_C < std::numeric_limits<int16_t>::lowest() / 128.0)
+  else if (max_table_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
   {
     std::printf(u8"Input Error: the highest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() / 128.0);
+    std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
     std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
     return 0;
   }
-  else if (max_table_temp_C > std::numeric_limits<int16_t>::max() / 128.0)
+  else if (max_table_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
   {
     std::printf(u8"Input Error: the highest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() / 128.0);
+    std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
     std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
     return 0;
@@ -398,6 +237,8 @@ int main (int argc, char **argv)
     return 0;
   }
 
+  inv_Rntc_nom_Ohms = 1.0 / Rntc_nom_Ohms;
+
   /**
    * Parse the temperature of NTC nominal resistance input.
    */
@@ -410,7 +251,7 @@ int main (int argc, char **argv)
     std::printf(u8"             nominal resistance, \"%s\".\n\n", this_input.c_str());    
     return 0;
   }
-  else if (NTC_nom_temp_C < -273.15)
+  else if (NTC_nom_temp_C < -kelvin_offset)
   {
     std::printf(u8"Input Error: the temperature for the NTC nominal resistance\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
@@ -425,6 +266,8 @@ int main (int argc, char **argv)
     std::printf(u8"             resistor substrate Alumina melts @ 2054\u00B0C.\n\n");
     return 0;
   }
+
+  inv_NTC_nom_temp_K = 1.0 / (NTC_nom_temp_C + kelvin_offset);
 
   /**
    * Parse NTC nominal Beta coefficient input.
@@ -452,6 +295,8 @@ int main (int argc, char **argv)
     std::printf(u8"             should not be >100,000K.\n\n");
     return 0;
   }
+
+  inv_beta_K = 1.0 / beta_K;
 
   /**
    * Parse the pullup resistance input.
@@ -492,11 +337,11 @@ int main (int argc, char **argv)
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
     return 0;
   }
-  else if (Riso_nom_Ohms < 1.0)
+  else if (Riso_nom_Ohms < 0.0)
   {
     std::printf(u8"Input Error: the isolation resistor nominal resistance value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <1\u03A9.\n\n");
+    std::printf(u8"             should not be <0\u03A9.\n\n");
     return 0;
   }
   else if (Riso_nom_Ohms > 100.0e6)
@@ -527,15 +372,16 @@ int main (int argc, char **argv)
     std::printf(u8"             should not be <8.\n\n");
     return 0;
   }
-  else if (tmp_ADC_counts > std::numeric_limits<uint16_t>::max())
+  else if (tmp_ADC_counts > (1ll << 15))
   {
     std::printf(u8"Input Error: the ADC number of counts\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >%u.\n\n", std::numeric_limits<uint16_t>::max());
+    std::printf(u8"             should not be >%u.\n\n", 1u << 15);
     return 0;
   }
 
   ADC_counts = static_cast<uint16_t>(tmp_ADC_counts);
+  inv_ADC_counts_minus_one = 1.0 / static_cast<double>(ADC_counts - 1u);
 
   /**
    * Parse the maximum interpolation error input.
@@ -602,12 +448,12 @@ int main (int argc, char **argv)
     }
   }
 
-  if (real_max_table_temp > std::numeric_limits<int16_t>::max() / 128.0)
+  if (real_max_table_temp > std::numeric_limits<int16_t>::max() * inv_128)
   {
     std::printf(u8"Input Error: the nearest ADC count that encompasses\n");
     std::printf(u8"             the highest table temperature value results\n");
     std::printf(u8"             in an actual highest table temperature that\n");
-    std::printf(u8"             exceeds %.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() / 128.0);
+    std::printf(u8"             exceeds %.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
     std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
     return 0;
@@ -621,18 +467,18 @@ int main (int argc, char **argv)
     real_min_table_temp = Tntc_from_ADCread(table_end_count);
   }
 
-  if (real_min_table_temp < std::numeric_limits<int16_t>::lowest() / 128.0)
+  if (real_min_table_temp < std::numeric_limits<int16_t>::lowest() * inv_128)
   {
     std::printf(u8"Input Error: the nearest ADC count that encompasses\n");
     std::printf(u8"             the lowest table temperature value results\n");
     std::printf(u8"             in an actual lowest table temperature less\n");
-    std::printf(u8"             than %.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() / 128.0);
+    std::printf(u8"             than %.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
     std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
     return 0;
   }
 
-  if (real_min_table_temp - min_table_temp_C > 1.0 / 128.0)
+  if (real_min_table_temp - min_table_temp_C > inv_128)
   {
     std::printf(u8"WARNING: The interpolation table actual minimum temperature\n");
     std::printf(u8"         is %.10f\u00B0C, which is less than\n", real_min_table_temp);
@@ -656,22 +502,26 @@ int main (int argc, char **argv)
   std::printf("table end:   ADC count %5u\n", table_end_count);
 
   /**
+   * Fill in table of NTC temperature readings indexed by ADC count
+   * for the whole table range.
+   */
+  for (uint16_t ADC_read = table_start_count; ADC_read <= table_end_count; ADC_read++)
+  {
+    Tntc_array[ADC_read] = Tntc_from_ADCread(ADC_read);
+  }
+
+  /**
    * Solve for interpolation segments.
    * 
    * Basic strategy:
    * Least squares fit each interpolation segment to a wider and wider
    * section of data points until the maximum error of the interpolation
    * segment exceeds the maximum interpolation error.
-   * Then save the segment with one less data point than the first segment
-   * that exceeded the maximum interpolation error.
+   * Then backtrack to find the segment with the most points that also
+   * does not exceed the maximum interpolation error.
    */
-
-  /**
-   * Storage for segments & segment stats.
-   */
-  std::vector<interp_segment_t> vInterp_segments;
-  std::vector<segment_stats_t> vSegment_stats;
   uint16_t next_start_count = table_start_count;
+  n_stored_segments = 0u;
 
   while (true)
   {
@@ -682,14 +532,37 @@ int main (int argc, char **argv)
      */
     interp_segment_t kept_segment;
     kept_segment.start_count = next_start_count;
-    kept_segment.start_temp = fixed_point_C(Tntc_from_ADCread(kept_segment.start_count));
+    kept_segment.start_temp = fixed_point_C(Tntc_array[kept_segment.start_count]);
     kept_segment.slope_multiplier = 0;
     kept_segment.slope_shift = 0u;
-    double kept_mean_err = std::fabs(kept_segment.start_temp / 128.0 - Tntc_from_ADCread(kept_segment.start_count));
+    double kept_mean_err = std::fabs(kept_segment.start_temp * inv_128 - Tntc_array[kept_segment.start_count]);
     double kept_max_err = kept_mean_err;
-    uint16_t nPoints;
+    uint16_t nPoints = 1u;
+    uint16_t previous_nPoints = nPoints;
+    uint16_t max_nPoints = table_end_count + static_cast<uint16_t>(1) - next_start_count;
 
-    for (nPoints = 2u; next_start_count + nPoints - 1u <= table_end_count; nPoints++)
+    /**
+     * A backtracking line search algorithm is used to find the largest
+     * value of nPoints for which this segment does not exceed the maximum
+     * interpolation error.
+     * It starts by trying fixed multiples of nPoints for the next nPoints
+     * if the error is low, then reverts to increasing nPoints by fixed
+     * increments.
+     * The multiplier or increment is decreased each time a segment exceeds
+     * maximum interpolation error, until this occurs with an increment of 1.
+     */
+    bool trying_multiples = true;
+    bool trying_increments = true;
+    uint16_t last_multiple = 1u;
+    uint16_t last_increment = 1u;
+    
+
+    if (2u <= max_nPoints)
+    {
+      nPoints = 2u;
+    }
+
+    while (nPoints >= 2u && nPoints <= max_nPoints)
     {
       /**
        * Use least squares to find the best fit line segment
@@ -699,54 +572,46 @@ int main (int argc, char **argv)
       interp_segment_t test_segment;
       test_segment = kept_segment;
 
-      Eigen::Matrix<double, Eigen::Dynamic, 2> regressor(nPoints, 2);
-      Eigen::Matrix<double, Eigen::Dynamic, 1> dataVector(nPoints);
       /**
        * Line segment parameters are in offset + slope form.
        * Offset is parameters(0).
        * Slope is parameters(1).
        */
-      Eigen::Matrix<double, 2, 1> parameters;
+      double parameters[2] = {0.0, 0.0};
 
       for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
       {
         /**
-         * The independent variable for this line segment is
+         * The independent variable for this line segment is offset
          * ADC counts, with segment.start_count as the 0 point.
          */
-        regressor(jPoint,0) = 1.0;
-        regressor(jPoint,1) = static_cast<double>(jPoint);
+        least_squares_data[jPoint].columns[0] = 1.0;
+        least_squares_data[jPoint].columns[1] = static_cast<double>(jPoint);
 
         /**
          * The dependent variable is thermistor temperature
          * in 1/128ths of a degree Celsius, so the slope will
          * be in 1/128ths of a degree Celsius per ADC count.
          */
-        dataVector(jPoint) = 128.0 * Tntc_from_ADCread(next_start_count + jPoint);
+        least_squares_data[jPoint].rhs = 128.0 * Tntc_array[next_start_count + jPoint];
       }
 
-      /**
-       * Jacobi SVD (non bidiagonalizing) with full pivot QR preconditioning
-       * is the most numerically stable least squares solver in the Eigen
-       * library.
-       */
-      Eigen::JacobiSVD<Eigen::Matrix<double, Eigen::Dynamic, 2>, Eigen::FullPivHouseholderQRPreconditioner> svd(regressor, Eigen::ComputeFullU | Eigen::ComputeFullV);
-      parameters = svd.solve(dataVector);
+      QRleast_squares(least_squares_data, nPoints, parameters);
 
       /**
        * Store the segment offset.
        */
-      test_segment.start_temp = static_cast<int16_t>(std::round(parameters(0)));
+      test_segment.start_temp = static_cast<int16_t>(std::round(parameters[0]));
 
       /**
-       * Translate parameters(1), the slope, into a rational number
+       * Translate parameters[1], the slope, into a rational number
        * with base-2 denominator and use the value of that rational
        * for error calculation.
        * This way the error calculation includes errors in the fixed
        * point representation of the interpolation table.
        */
       bool found_rational = false;
-      double frac_slope = parameters(1);
+      double frac_slope = parameters[1];
       test_segment.slope_shift = 0u;
       test_segment.slope_multiplier = 0;
 
@@ -786,8 +651,8 @@ int main (int argc, char **argv)
 
       for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
       {
-        int16_t this_temp = test_segment.start_temp + multshiftround<int32_t>(jPoint, test_segment.slope_multiplier, test_segment.slope_shift);
-        double this_abs_error = std::fabs(dataVector(jPoint) / 128.0 - static_cast<double>(this_temp) / 128.0);
+        int16_t this_temp = static_cast<int16_t>(static_cast<int32_t>(test_segment.start_temp) + multshiftround<int32_t>(jPoint, test_segment.slope_multiplier, test_segment.slope_shift));
+        double this_abs_error = std::fabs(Tntc_array[test_segment.start_count + jPoint] - static_cast<double>(this_temp) * inv_128);
         mean_error += this_abs_error;
         max_error = std::max(max_error, this_abs_error);
         if (this_abs_error > max_interp_error_C) keepSegment = false;
@@ -796,43 +661,279 @@ int main (int argc, char **argv)
       mean_error /= static_cast<double>(nPoints);
 
       /**
-       * Store segment statistics.
+       * Figure out the next value for nPoints using a
+       * backtracking line search.
        */
       if (keepSegment) 
       {
+        /**
+         * Store segment statistics.
+         */
         kept_segment = test_segment;
         kept_mean_err = mean_error;
         kept_max_err = max_error;
+        previous_nPoints = nPoints;
+
+        if (nPoints == max_nPoints)
+        {
+          /**
+           * No more points to interpolate.
+           */
+          break;
+        }
+
+        if (nPoints <= 2u)
+        {
+          /**
+           * nPoints == 2 has a perfect fit by definition.
+           * Wait until we have an actual error measure to
+           * perform the backtracking line search.
+           */
+          nPoints++;
+          last_multiple = 1u;
+          last_increment = 1u;
+        }
+        else
+        {
+          /**
+           * Multiply nPoints to get next nPoints only if the segment error
+           * is significantly below the max interpolation error.
+           */
+          bool multiple_found = false;
+
+          if (trying_multiples)
+          {
+            if (kept_max_err < 0.1 * max_interp_error_C)
+            {
+              last_multiple = 5u;
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints * last_multiple));
+              last_increment = nPoints - previous_nPoints;
+              multiple_found = true;
+            }
+            else if (kept_max_err < 0.5 * max_interp_error_C)
+            {
+              last_multiple = 2u;
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints * last_multiple));
+              last_increment = nPoints - previous_nPoints;
+              multiple_found = true;
+            }
+          }
+
+          /**
+           * Fall back to incrementing nPoints if we are not far enough
+           * below max interpolation error to attempt multiplying nPoints.
+           */
+          if (trying_increments & !multiple_found)
+          {
+            trying_multiples = false;
+            last_multiple = 1u;
+
+            if (last_increment >= 500u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 500u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment >= 200u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 200u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment >= 100u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 100u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment >= 50u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 50u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment >= 20u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 20u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment >= 10u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 10u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment >= 5u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 5u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(nPoints + 2u));
+              last_increment = nPoints - previous_nPoints;
+            }
+          }
+          else if (!multiple_found)
+          {
+            trying_multiples = false;
+            last_multiple = 1u;
+
+            nPoints++;
+            last_increment = 1u;
+          }
+        }
       }
-      else break;
+      else if (trying_multiples)
+      {
+        /**
+         * Segment exceeded max interpolation error when multiplying nPoints
+         * to get next nPoints.
+         * Try a smaller multiplier, or fall back to incrementing nPoints
+         * by an appropriate amount.
+         */
+        if (last_multiple > 2u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints * 2u));
+          last_multiple = 2u;
+        }
+        else
+        {
+          trying_multiples = false;
+          last_multiple = 1u;
+
+          if (trying_increments)
+          {
+            if (last_increment > 500u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 500u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 200u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 200u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 100u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 100u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 50u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 50u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 20u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 20u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 10u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 10u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 5u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 5u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else if (last_increment > 2u)
+            {
+              nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 2u));
+              last_increment = nPoints - previous_nPoints;
+            }
+            else
+            {
+              trying_increments = false;
+              last_increment = 1u;
+              nPoints = previous_nPoints + last_increment;
+            }
+          }
+          else
+          {
+            last_increment = 1u;
+            nPoints = previous_nPoints + last_increment;
+          }
+        }
+      }
+      else if (trying_increments)
+      {
+        /**
+         * Segment exceeded max interpolation error when incrementing
+         * nPoints to get next nPoints.
+         * Try a smaller increment value, down to 1 if necessary.
+         */
+        last_multiple = 1u;
+
+        if (last_increment >= 500u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 200u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else if (last_increment >= 200u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 100u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else if (last_increment >= 100u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 50u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else if (last_increment >= 50u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 20u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else if (last_increment >= 20u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 10u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else if (last_increment >= 10u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 5u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else if (last_increment >= 5u)
+        {
+          nPoints = std::min(max_nPoints, static_cast<uint16_t>(previous_nPoints + 2u));
+          last_increment = nPoints - previous_nPoints;
+        }
+        else
+        {
+          trying_increments = false;
+          last_increment = 1u;
+          nPoints = previous_nPoints + last_increment;
+        }
+      }
+      else
+      {
+        /**
+         * Segment exceeded max interpolation error when incrementing nPoints by 1.
+         * We're done.
+         */
+        break;
+      }
     }
 
     /**
-     * Adjust for the last increment in the for loop
-     * or for the for loop assignment if a single point
-     * "segment".
+     * Store the last kept segment.
      */
-    nPoints--;
-
-    /**
-     * Store the segment.
-     */
-    vInterp_segments.push_back(kept_segment);
-    vSegment_stats.push_back({nPoints, kept_mean_err, kept_max_err});
-    if (kept_segment.start_count + nPoints - 1u == table_end_count) break;
-    next_start_count = kept_segment.start_count + nPoints;
+    interp_segments[n_stored_segments] = kept_segment;
+    segment_stats[n_stored_segments] = {previous_nPoints, kept_mean_err, kept_max_err};
+    n_stored_segments++;
+    if (kept_segment.start_count + previous_nPoints - 1u == table_end_count) break;
+    next_start_count = kept_segment.start_count + previous_nPoints;
   }
 
   /**
    * Print all the segment info, expanding each fixed point value
    * into recognizable units.
    */
-  for (size_t jSegment = 0ull; jSegment < vInterp_segments.size(); jSegment++)
+  for (uint16_t jSegment = 0u; jSegment < n_stored_segments; jSegment++)
   {
-    interp_segment_t this_segment = vInterp_segments.at(jSegment);
-    std::printf(u8"segment %3" PRIu64 ":  start ADC count = %5u,  offset = % 7i = % 12.6f \u00B0C,  slope = % 6i / 2^(% 3i) = % 12.6f (1/128)\u00B0C / ADC count.\n",
+    interp_segment_t this_segment = interp_segments[jSegment];
+    std::printf(u8"segment %3u:  start ADC count = %5u,  offset = % 7i = % 12.6f \u00B0C,  slope = % 6i / 2^(% 3i) = % 12.6f (1/128)\u00B0C / ADC count.\n",
                 jSegment, this_segment.start_count, this_segment.start_temp,
-                static_cast<double>(this_segment.start_temp) / 128.0,
+                static_cast<double>(this_segment.start_temp) * inv_128,
                 this_segment.slope_multiplier, this_segment.slope_shift,
                 static_cast<double>(this_segment.slope_multiplier) / static_cast<double>(1ull << this_segment.slope_shift));
   }
@@ -842,10 +943,10 @@ int main (int argc, char **argv)
    * Print segment statistics, largely to make me feel good.
    * (statistics make me feel good)
    */
-  for (size_t jSegment = 0ull; jSegment < vSegment_stats.size(); jSegment++)
+  for (uint16_t jSegment = 0u; jSegment < n_stored_segments; jSegment++)
   {
-    segment_stats_t these_stats = vSegment_stats.at(jSegment);
-    std::printf(u8"segment %3" PRIu64 " stats:  # points = %4u,  mean error = % 9.6f \u00B0C,  max error = % 9.6f \u00B0C\n",
+    segment_stats_t these_stats = segment_stats[jSegment];
+    std::printf(u8"segment %3u stats:  # points = %4u,  mean error = % 9.6f \u00B0C,  max error = % 9.6f \u00B0C\n",
                 jSegment, these_stats.num_points, these_stats.mean_error, these_stats.max_error);
   }
   std::printf("\n");
@@ -899,21 +1000,21 @@ int main (int argc, char **argv)
   std::printf(" * Max interpolation error: %.8f deg. C\n", max_interp_error_C);
   std::printf(" * Table range: %.8f to %.8f deg. C\n", real_min_table_temp, real_max_table_temp);
   std::printf(" * ADCcount inputs >= %u result in the minimum table temperature.\n", table_end_count);
-  std::printf(" * ADCcount inputs <= %u result in the maximum table temperature.\n", vInterp_segments.at(0).start_count);
+  std::printf(" * ADCcount inputs <= %u result in the maximum table temperature.\n", interp_segments[0].start_count);
   std::printf(" *" "/\n");
   std::printf("int16_t read_thermistor(const uint16_t ADCcount)\n");
   std::printf("{\n");
-  std::printf("  static const uint16_t num_segments = %" PRIu64 "u;\n", vInterp_segments.size());
+  std::printf("  static const uint16_t num_segments = %uu;\n", n_stored_segments);
   std::printf("  static const interp_segment_t interp_segments[num_segments] = {\n");
-  for (size_t jSegment = 0ull; jSegment + 1ull < vInterp_segments.size(); jSegment++)
+  for (uint16_t jSegment = 0u; jSegment + 1u < n_stored_segments; jSegment++)
   {
-    interp_segment_t this_segment = vInterp_segments.at(jSegment);
+    interp_segment_t this_segment = interp_segments[jSegment];
     std::printf("    {%5u, % 6i, % 6i, %2u},\n", this_segment.start_count, this_segment.start_temp, this_segment.slope_multiplier, this_segment.slope_shift);
   }
   
-  if (vInterp_segments.size() > 0ull)
+  if (n_stored_segments > 0u)
   {
-    interp_segment_t this_segment = vInterp_segments.back();
+    interp_segment_t this_segment = interp_segments[n_stored_segments-1u];
     std::printf("    {%5u, % 6i, % 6i, %2u}\n", this_segment.start_count, this_segment.start_temp, this_segment.slope_multiplier, this_segment.slope_shift);
   }
 

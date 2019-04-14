@@ -1,64 +1,165 @@
 /**
- * multshiftround_shiftround_masks.c
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead defined in this file.
+ * QRleast_squares.h
  *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays defined below.
+ * Definitions of the QRleast_squares function, which solves a two-variable
+ * least squares problem by QR decomposition, along with several helper functions
+ * and storage for the householder vectors used in the QR decomposition.
  *
- * Written in 2018 by Ben Tesch.
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide.This software is distributed without any warranty.
+ * worldwide. This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "multshiftround_shiftround_masks.h"
+#include <cmath>
+#include <cassert>
+#include "QRleast_squares.h"
+#include "heapSort.h"
 
-const uint8_t masks_8bit[8] = {
-  0x00u, 0x01u, 0x02u, 0x04u, 0x08u, 
-         0x10u, 0x20u, 0x40u
-};
+/**
+ * Storage for householder reflection vector used
+ * by QR decomposition.
+ */
+static double v[32768];
 
-const uint16_t masks_16bit[16] = {
-  0x0000u, 0x0001u, 0x0002u, 0x0004u, 0x0008u,
-           0x0010u, 0x0020u, 0x0040u, 0x0080u,
-           0x0100u, 0x0200u, 0x0400u, 0x0800u,
-           0x1000u, 0x2000u, 0x4000u
-};
+/**
+ * Returns the "sign" of the input number. Used to compute
+ * householder reflection vectors in the QR decomposition.
+ */
+static inline double signum(double number)
+{
+  if (number < 0.0) return -1.0;
+  return 1.0;
+}
 
-const uint32_t masks_32bit[32] = {
-  0x00000000u, 0x00000001u, 0x00000002u, 0x00000004u, 0x00000008u,
-               0x00000010u, 0x00000020u, 0x00000040u, 0x00000080u,
-               0x00000100u, 0x00000200u, 0x00000400u, 0x00000800u,
-               0x00001000u, 0x00002000u, 0x00004000u, 0x00008000u,
-               0x00010000u, 0x00020000u, 0x00040000u, 0x00080000u,
-               0x00100000u, 0x00200000u, 0x00400000u, 0x00800000u,
-               0x01000000u, 0x02000000u, 0x04000000u, 0x08000000u,
-               0x10000000u, 0x20000000u, 0x40000000u
-};
+/**
+ * Solves a two-parameter least-squares problem by way of a
+ * QR decomposition implemented with householder reflections
+ * and full pivoting (rows & columns).
+ */
+void QRleast_squares(least_squares_row_t *least_squares_data, uint16_t nPoints, double *parameters)
+{
+  assert(nPoints >= 2u);
 
-const uint64_t masks_64bit[64] = { 
-  0x0000000000000000ull, 0x0000000000000001ull, 0x0000000000000002ull, 0x0000000000000004ull, 0x0000000000000008ull,
-                         0x0000000000000010ull, 0x0000000000000020ull, 0x0000000000000040ull, 0x0000000000000080ull,
-                         0x0000000000000100ull, 0x0000000000000200ull, 0x0000000000000400ull, 0x0000000000000800ull,
-                         0x0000000000001000ull, 0x0000000000002000ull, 0x0000000000004000ull, 0x0000000000008000ull,
-                         0x0000000000010000ull, 0x0000000000020000ull, 0x0000000000040000ull, 0x0000000000080000ull,
-                         0x0000000000100000ull, 0x0000000000200000ull, 0x0000000000400000ull, 0x0000000000800000ull,
-                         0x0000000001000000ull, 0x0000000002000000ull, 0x0000000004000000ull, 0x0000000008000000ull,
-                         0x0000000010000000ull, 0x0000000020000000ull, 0x0000000040000000ull, 0x0000000080000000ull,
-                         0x0000000100000000ull, 0x0000000200000000ull, 0x0000000400000000ull, 0x0000000800000000ull,
-                         0x0000001000000000ull, 0x0000002000000000ull, 0x0000004000000000ull, 0x0000008000000000ull,
-                         0x0000010000000000ull, 0x0000020000000000ull, 0x0000040000000000ull, 0x0000080000000000ull,
-                         0x0000100000000000ull, 0x0000200000000000ull, 0x0000400000000000ull, 0x0000800000000000ull,
-                         0x0001000000000000ull, 0x0002000000000000ull, 0x0004000000000000ull, 0x0008000000000000ull,
-                         0x0010000000000000ull, 0x0020000000000000ull, 0x0040000000000000ull, 0x0080000000000000ull,
-                         0x0100000000000000ull, 0x0200000000000000ull, 0x0400000000000000ull, 0x0800000000000000ull,
-                         0x1000000000000000ull, 0x2000000000000000ull, 0x4000000000000000ull
-};
+  /**
+   * Columnwise sum of squares are used both for column pivoting
+   * and for calculation of the householder reflection vectors.
+   */
+  double column_sum_squares[2] = {0.0, 0.0};
+  for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
+  {
+    column_sum_squares[0] += least_squares_data[jPoint].columns[0] * least_squares_data[jPoint].columns[0];
+    column_sum_squares[1] += least_squares_data[jPoint].columns[1] * least_squares_data[jPoint].columns[1];
+  }
+
+  /**
+    * Sort the rows of the least squares problem by maximum elementwise
+    * absolute value in each regressor matrix row, descending. This does
+    * not change the problem mathematically, but it does limit the amount
+    * of roundoff error accumulated in the QR decomposition.
+    */
+  heapSort(least_squares_data, nPoints-1u);
+
+  /**
+    * Exchange columns in the regressor matrix, if necessary,
+    * so that the column with larger norm is dealt with first.
+    */
+  uint8_t col0 = 0u;
+  uint8_t col1 = 1u;
+  if (column_sum_squares[1] > column_sum_squares[0])
+  {
+    col0 = 1u;
+    col1 = 0u;
+  }
+  
+  /**
+    * Compute the householder vector (v) that will zero out all rows
+    * past the first in col0.
+    */
+  v[0] = signum(least_squares_data[0].columns[col0]) * std::sqrt(column_sum_squares[col0]) + least_squares_data[0].columns[col0];
+  double v_sum_squares = column_sum_squares[col0] - least_squares_data[0].columns[col0] * least_squares_data[0].columns[col0] + v[0] * v[0];
+  double inv_v_norm = 1.0 / std::sqrt(v_sum_squares);
+  v[0] *= inv_v_norm;
+
+  for (uint16_t jPoint = 1u; jPoint < nPoints; jPoint++)
+  {
+    v[jPoint] = least_squares_data[jPoint].columns[col0] * inv_v_norm;
+  }
+
+  /**
+    * Apply v to the regressor matrix and right hand side in the least squares
+    * data such that the regressor becomes the QR R matrix and the right hand
+    * side becomes Q transpose times the original right hand side.
+    */
+  double col_multipliers[2] = {0.0, 0.0};
+  double rhs_multiplier = 0.0;
+  for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
+  {
+    col_multipliers[0] += v[jPoint] * least_squares_data[jPoint].columns[col0];
+    col_multipliers[1] += v[jPoint] * least_squares_data[jPoint].columns[col1];
+    rhs_multiplier += v[jPoint] * least_squares_data[jPoint].rhs;
+  }
+  col_multipliers[0] *= 2.0;
+  col_multipliers[1] *= 2.0;
+  rhs_multiplier *= 2.0;
+
+  for (uint16_t jPoint = 0u; jPoint < nPoints; jPoint++)
+  {
+    least_squares_data[jPoint].columns[col0] -= v[jPoint] * col_multipliers[0];
+    least_squares_data[jPoint].columns[col1] -= v[jPoint] * col_multipliers[1];
+    least_squares_data[jPoint].rhs -= v[jPoint] * rhs_multiplier;
+  }
+
+  /**
+    * Compute the householder vector (v) that will zero out all rows
+    * past the second in col1.
+    */
+  column_sum_squares[col1] -= least_squares_data[0].columns[col1] * least_squares_data[0].columns[col1];
+  v[1] = signum(least_squares_data[1].columns[col1]) * std::sqrt(column_sum_squares[col1]) + least_squares_data[1].columns[col1];
+  v_sum_squares = column_sum_squares[col1] - least_squares_data[1].columns[col1] * least_squares_data[1].columns[col1] + v[1] * v[1];
+  inv_v_norm = 1.0 / std::sqrt(v_sum_squares);
+  v[1] *= inv_v_norm;
+
+  for (uint16_t jPoint = 2u; jPoint < nPoints; jPoint++)
+  {
+    v[jPoint] = least_squares_data[jPoint].columns[col1] * inv_v_norm;
+  }
+
+  /**
+    * Apply v to the regressor matrix and right hand side in the least squares
+    * data such that the regressor becomes the QR R matrix and the right hand
+    * side becomes Q transpose times the original right hand side.
+    */
+  col_multipliers[1] = 0.0;
+  rhs_multiplier = 0.0;
+  for (uint16_t jPoint = 1u; jPoint < nPoints; jPoint++)
+  {
+    col_multipliers[1] += v[jPoint] * least_squares_data[jPoint].columns[col1];
+    rhs_multiplier += v[jPoint] * least_squares_data[jPoint].rhs;
+  }
+  col_multipliers[1] *= 2.0;
+  rhs_multiplier *= 2.0;
+
+  for (uint16_t jPoint = 1u; jPoint < nPoints; jPoint++)
+  {
+    least_squares_data[jPoint].columns[col1] -= v[jPoint] * col_multipliers[1];
+    least_squares_data[jPoint].rhs -= v[jPoint] * rhs_multiplier;
+  }
+
+  /**
+    * col0 and col1 in least_squares_data[].columns now store the R matrix
+    * in the QR decomposition. least_squares_data[].rhs now stores Q transpose
+    * times the original rhs.
+    * 
+    * This system is now upper triangular in R. Use this fact to solve for
+    * the parameter vector.
+    */
+  parameters[col1] = least_squares_data[1].rhs / least_squares_data[1].columns[col1];
+  parameters[col0] = (least_squares_data[0].rhs - parameters[col1] * least_squares_data[0].columns[col1]) / least_squares_data[0].columns[col0];
+}
 
 /*
 Creative Commons Legal Code

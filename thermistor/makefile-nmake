@@ -1,0 +1,31 @@
+# Run 
+# nmake /F makefile-nmake 
+# from the Visual Studio Command Prompt to build all executables
+# in this directory.
+#
+# Run 
+# nmake /F makefile-nmake clean
+# to delete all .exe and .obj files created during the build.
+#
+# Run 
+# nmake /F makefile-nmake cleanobj
+# to delete all .obj files created during the build.
+
+BASE_OPTIONS = /O2 /Ob2 /Oi /Ot /Oy /Za /Zc:wchar_t- /Zc:inline /Zc:rvalueCast /Zc:forScope /GR- /GF /Gm- /GS- /GT /Gy /EHsc /guard:cf- /fp:strict /fp:except /Qspectre- /Qpar- /GL /permissive- /nologo /Y- /utf-8 /validate-charset /W4 /MT
+LINK_OPTIONS = /link /INCREMENTAL:NO /OPT:REF /OPT:ICF /DYNAMICBASE:NO /NXCOMPAT:NO /LTCG /MACHINE:X64
+OBJ_FILES = heapSort.obj multshiftround_shiftround_masks.obj NTCcalculations.obj parsers.obj QRleast_squares.obj thermistor_interpolator.obj thermistor_tolerance.obj
+EXE_FILES = thermistor_interpolator.exe thermistor_tolerance.exe
+
+all: $(EXE_FILES)
+
+thermistor_tolerance.exe:thermistor_tolerance.cpp parsers.h parsers.cpp
+	cl $(BASE_OPTIONS) parsers.cpp thermistor_tolerance.cpp $(LINK_OPTIONS) /OUT:$(@F)
+
+thermistor_interpolator.exe:thermistor_interpolator.cpp globals.h heapSort.cpp heapSort.h multshiftround_run.hpp multshiftround_shiftround_masks.c multshiftround_shiftround_masks.h NTCcalculations.cpp NTCcalculations.h parsers.cpp parsers.h QRleast_squares.cpp QRleast_squares.h run_masks_type.h types.h
+	cl $(BASE_OPTIONS) heapSort.cpp QRleast_squares.cpp parsers.cpp NTCcalculations.cpp multshiftround_shiftround_masks.c thermistor_interpolator.cpp $(LINK_OPTIONS) /OUT:$(@F)
+
+clean:
+	del $(EXE_FILES) $(OBJ_FILES)
+
+cleanobj:
+	del $(OBJ_FILES)

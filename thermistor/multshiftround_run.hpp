@@ -41,14 +41,18 @@
 #define MULTSHIFTROUND_RUN_HPP_
 
 #include <cinttypes>
-extern "C"
-{
-  #include "multshiftround_shiftround_masks.h"
-}
+#include "run_masks_type.h"
+
+#ifdef ARRAY_MASKS
+  extern "C"
+  {
+    #include "multshiftround_shiftround_masks.h"
+  }
+#endif
 
 #ifdef DEBUG_INTMATH
-  #include <cstdio>
   #include <limits>
+  #include <cstdio>
   extern "C"
   {
 	  #include "detect_product_overflow.h"
@@ -87,12 +91,20 @@ template <> int8_t multshiftround<int8_t>(const int8_t num, const int8_t mul, co
   if (shift > static_cast<uint8_t>(6)) return static_cast<int8_t>(0);
   int8_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  uint8_t mask = masks_8bit[shift - static_cast<uint8_t>(1)];
-  uint8_t half_remainder = static_cast<uint8_t>(1) << (shift - static_cast<uint8_t>(1));
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & (static_cast<uint8_t>(0x80) | mask)) == (static_cast<uint8_t>(0x80) | half_remainder)) return prod >> shift;
+  
+  #ifdef ARRAY_MASKS
+    uint8_t half_remainder = masks_8bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint8_t half_remainder = static_cast<uint8_t>(1) << (shift - static_cast<uint8_t>(1));
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+
+  if ((prod & half_remainder) &&
+      (prod >= static_cast<int8_t>(0) ||
+       (prod & ((half_remainder << 1) - static_cast<uint8_t>(1))) != half_remainder))
     return (prod >> shift) + static_cast<int8_t>(1);
-  }
+
   return prod >> shift;
 }
 
@@ -110,9 +122,16 @@ template <> uint8_t multshiftround<uint8_t>(const uint8_t num, const uint8_t mul
   if (shift > static_cast<uint8_t>(7)) return static_cast<uint8_t>(0);
   uint8_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  if ((prod & masks_8bit[shift - static_cast<uint8_t>(1)]) >= 
-      (static_cast<uint8_t>(1u) << (shift - static_cast<uint8_t>(1)))) 
-    return (prod >> shift) + static_cast<uint8_t>(1);
+
+  #ifdef ARRAY_MASKS
+    if (prod & masks_8bit[shift])
+      return (prod >> shift) + static_cast<uint8_t>(1);
+  #elif defined(COMPUTED_MASKS)
+    if (prod & static_cast<uint8_t>(1) << (shift - static_cast<uint8_t>(1)))
+      return (prod >> shift) + static_cast<uint8_t>(1);
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
@@ -138,12 +157,20 @@ template <> int16_t multshiftround<int16_t>(const int16_t num, const int16_t mul
   if (shift > static_cast<uint8_t>(14)) return static_cast<int16_t>(0);
   int16_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  uint16_t mask = masks_16bit[shift - static_cast<uint8_t>(1)];
-  uint16_t half_remainder = static_cast<uint16_t>(1) << (shift - static_cast<uint8_t>(1));
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & (static_cast<uint16_t>(0x8000) | mask)) == (static_cast<uint16_t>(0x8000) | half_remainder)) return prod >> shift;
+  
+  #ifdef ARRAY_MASKS
+    uint16_t half_remainder = masks_16bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint16_t half_remainder = static_cast<uint16_t>(1) << (shift - static_cast<uint8_t>(1));
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+
+  if ((prod & half_remainder) &&
+      (prod >= static_cast<int16_t>(0) ||
+       (prod & ((half_remainder << 1) - static_cast<uint16_t>(1))) != half_remainder))
     return (prod >> shift) + static_cast<int16_t>(1);
-  }
+
   return prod >> shift;
 }
 
@@ -161,9 +188,16 @@ template <> uint16_t multshiftround<uint16_t>(const uint16_t num, const uint16_t
   if (shift > static_cast<uint8_t>(15)) return static_cast<uint16_t>(0);
   uint16_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  if ((prod & masks_16bit[shift - static_cast<uint8_t>(1)]) >= 
-      (static_cast<uint16_t>(1) << (shift - static_cast<uint8_t>(1))))
-    return (prod >> shift) + static_cast<uint16_t>(1);
+  
+  #ifdef ARRAY_MASKS
+    if (prod & masks_16bit[shift])
+      return (prod >> shift) + static_cast<uint16_t>(1);
+  #elif defined(COMPUTED_MASKS)
+    if (prod & static_cast<uint16_t>(1) << (shift - static_cast<uint8_t>(1)))
+      return (prod >> shift) + static_cast<uint16_t>(1);
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
@@ -189,12 +223,19 @@ template <> int32_t multshiftround<int32_t>(const int32_t num, const int32_t mul
   if (shift > static_cast<uint8_t>(30)) return 0;
   int32_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  uint32_t mask = masks_32bit[shift - static_cast<uint8_t>(1)];
-  uint32_t half_remainder = 1u << (shift - static_cast<uint8_t>(1));
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & (0x80000000u | mask)) == (0x80000000u | half_remainder)) return prod >> shift;
+  
+  #ifdef ARRAY_MASKS
+    uint32_t half_remainder = masks_32bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint32_t half_remainder = 1u << (shift - static_cast<uint8_t>(1));
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+  
+  if ((prod & half_remainder) &&
+      (prod >= 0 || (prod & ((half_remainder << 1) - 1u)) != half_remainder))
     return (prod >> shift) + 1;
-  }
+  
   return prod >> shift;
 }
 
@@ -212,8 +253,16 @@ template <> uint32_t multshiftround<uint32_t>(const uint32_t num, const uint32_t
   if (shift > static_cast<uint8_t>(31)) return 0u;
   uint32_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  if ((prod & masks_32bit[shift - static_cast<uint8_t>(1)]) >=
-      (1u << (shift - static_cast<uint8_t>(1)))) return (prod >> shift) + 1u;
+
+  #ifdef ARRAY_MASKS
+    if (prod & masks_32bit[shift])
+      return (prod >> shift) + 1u;
+  #elif defined(COMPUTED_MASKS)
+    if (prod & 1u << (shift - static_cast<uint8_t>(1)))
+      return (prod >> shift) + 1u;
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }
@@ -235,12 +284,19 @@ template <> int64_t multshiftround<int64_t>(const int64_t num, const int64_t mul
   if (shift > static_cast<uint8_t>(62)) return 0ll;
   int64_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  uint64_t mask = masks_64bit[shift - static_cast<uint8_t>(1)];
-  uint64_t half_remainder = 1ull << (shift - static_cast<uint8_t>(1));
-  if ((prod & mask) >= half_remainder) {
-    if ((prod & (0x8000000000000000ull | mask)) == (0x8000000000000000ull | half_remainder)) return prod >> shift;
+
+  #ifdef ARRAY_MASKS
+    uint64_t half_remainder = masks_64bit[shift];
+  #elif defined(COMPUTED_MASKS)
+    uint64_t half_remainder = 1ull << (shift - static_cast<uint8_t>(1));
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
+
+  if ((prod & half_remainder) &&
+      (prod >= 0ll || (prod & ((half_remainder << 1) - 1ull)) != half_remainder))
     return (prod >> shift) + 1ll;
-  }
+  
   return prod >> shift;
 }
 
@@ -257,8 +313,16 @@ template <> uint64_t multshiftround<uint64_t>(const uint64_t num, const uint64_t
   if (shift > static_cast<uint8_t>(63)) return 0ull;
   uint64_t prod = num * mul;
   if (shift == static_cast<uint8_t>(0)) return prod;
-  if ((prod & masks_64bit[shift - static_cast<uint8_t>(1)]) >=
-      (1ull << (shift - static_cast<uint8_t>(1)))) return (prod >> shift) + 1ull;
+
+  #ifdef ARRAY_MASKS
+    if (num & masks_64bit[shift])
+      return (num >> shift) + 1ull;
+  #elif defined(COMPUTED_MASKS)
+    if (num & 1ull << (shift - static_cast<uint8_t>(1)))
+      return (num >> shift) + 1ull;
+  #else
+    #error "Exactly one of ARRAY_MASKS or COMPUTED_MASKS must be defined."
+  #endif
 
   return prod >> shift;
 }

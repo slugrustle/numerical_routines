@@ -714,55 +714,155 @@ void test_shiftround_u64_run_c(uint8_t shift, size_t thread_index) {
 
 int main()
 {
+  /**
+   * Result variables for initial quick multiplication and rounding tests.
+   */
+  int8_t msr_i8;
+  uint8_t msr_u8;
+  int16_t msr_i16;
+  uint16_t msr_u16;
+  int32_t msr_i32;
+  uint32_t msr_u32;
+  int64_t msr_i64;
+  uint64_t msr_u64;
+
   std::printf("\nTesting multiplication operation in multshiftround routines.\n");
 
-  int8_t msr_i8 = multshiftround_i8(2, 2, 1);
-  if (msr_i8 != 2) std::printf("\nERROR: multshiftround_i8(2, 2, 1) returned %i. expected 2.\n\n", msr_i8);
+  for (uint8_t shift = 0u; shift <= 6u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    int8_t result = 1;
+    int8_t num = static_cast<int8_t>(1) << half_shift;
+    if (num < 2) {
+      num = 2;
+      result = 2;
+    }
+    int8_t mul = static_cast<int8_t>(1) << (shift - half_shift);
+    
+    msr_i8 = multshiftround_i8(num, mul, shift);
+    if (msr_i8 != result) std::printf("\nERROR: multshiftround_i8(%i, %i, %u) returned %i. expected %i.\n\n", num, mul, shift, msr_i8, result);
 
-  uint8_t msr_u8 = multshiftround_u8(2u, 2u, 1);
-  if (msr_u8 != 2u) std::printf("\nERROR: multshiftround_u8(2u, 2u, 1) returned %u. expected 2.\n\n", msr_u8);
+    msr_i8 = multshiftround<int8_t>(num, mul, shift);
+    if (msr_i8 != result) std::printf("\nERROR: multshiftround<int8_t>(%i, %i, %u) returned %i. expected %i.\n\n", num, mul, shift, msr_i8, result);
+  }
 
-  int16_t msr_i16 = multshiftround_i16(2, 2, 1);
-  if (msr_i16 != 2) std::printf("\nERROR: multshiftround_i16(2, 2, 1) returned %i. expected 2.\n\n", msr_i16);
+  for (uint8_t shift = 0u; shift <= 7u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    uint8_t result = 1u;
+    uint8_t num = static_cast<uint8_t>(1) << half_shift;
+    if (num < 2u) {
+      num = 2u;
+      result = 2u;
+    }
+    uint8_t mul = static_cast<uint8_t>(1) << (shift - half_shift);
+    
+    msr_u8 = multshiftround_u8(num, mul, shift);
+    if (msr_u8 != result) std::printf("\nERROR: multshiftround_u8(%u, %u, %u) returned %u. expected %u.\n\n", num, mul, shift, msr_u8, result);
 
-  uint16_t msr_u16 = multshiftround_u16(2u, 2u, 1);
-  if (msr_u16 != 2u) std::printf("\nERROR: multshiftround_u16(2u, 2u, 1) returned %u. expected 2.\n\n", msr_u16);
-
-  int32_t msr_i32 = multshiftround_i32(2, 2, 1);
-  if (msr_i32 != 2) std::printf("\nERROR: multshiftround_i32(2, 2, 1) returned %i. expected 2.\n\n", msr_i32);
-
-  uint32_t msr_u32 = multshiftround_u32(2u, 2u, 1);
-  if (msr_u32 != 2u) std::printf("\nERROR: multshiftround_u32(2u, 2u, 1) returned %u. expected 2.\n\n", msr_u32);
-
-  int64_t msr_i64 = multshiftround_i64(2ll, 2ll, 1);
-  if (msr_i64 != 2ll) std::printf("\nERROR: multshiftround_i64(2ll, 2ll, 1) returned %" PRIi64 ". expected 2.\n\n", msr_i64);
-
-  uint64_t msr_u64 = multshiftround_u64(2ull, 2ull, 1);
-  if (msr_u64 != 2ull) std::printf("\nERROR: multshiftround_u64(2ull, 2ull, 1) returned %" PRIu64 ". expected 2.\n\n", msr_u64);
+    msr_u8 = multshiftround<uint8_t>(num, mul, shift);
+    if (msr_u8 != result) std::printf("\nERROR: multshiftround<uint8_t>(%u, %u, %u) returned %u. expected %u.\n\n", num, mul, shift, msr_u8, result);
+  }
   
-  msr_i8 = multshiftround<int8_t>(2, 2, 1);
-  if (msr_i8 != 2) std::printf("\nERROR: multshiftround<int8_t>(2, 2, 1) returned %i. expected 2.\n\n", msr_i8);
+  for (uint8_t shift = 0u; shift <= 14u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    int16_t result = 1;
+    int16_t num = static_cast<int16_t>(1) << half_shift;
+    if (num < 2) {
+      num = 2;
+      result = 2;
+    }
+    int16_t mul = static_cast<int16_t>(1) << (shift - half_shift);
+    
+    msr_i16 = multshiftround_i16(num, mul, shift);
+    if (msr_i16 != result) std::printf("\nERROR: multshiftround_i16(%i, %i, %u) returned %i. expected %i.\n\n", num, mul, shift, msr_i16, result);
 
-  msr_u8 = multshiftround<uint8_t>(2u, 2u, 1);
-  if (msr_u8 != 2u) std::printf("\nERROR: multshiftround<uint8_t>(2u, 2u, 1) returned %u. expected 2.\n\n", msr_u8);
+    msr_i16 = multshiftround<int16_t>(num, mul, shift);
+    if (msr_i16 != result) std::printf("\nERROR: multshiftround<int16_t>(%i, %i, %u) returned %i. expected %i.\n\n", num, mul, shift, msr_i16, result);
+  }
 
-  msr_i16 = multshiftround<int16_t>(2, 2, 1);
-  if (msr_i16 != 2) std::printf("\nERROR: multshiftround<int16_t>(2, 2, 1) returned %i. expected 2.\n\n", msr_i16);
+  for (uint8_t shift = 0u; shift <= 15u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    uint16_t result = 1u;
+    uint16_t num = static_cast<uint16_t>(1) << half_shift;
+    if (num < 2u) {
+      num = 2u;
+      result = 2u;
+    }
+    uint16_t mul = static_cast<uint16_t>(1) << (shift - half_shift);
+    
+    msr_u16 = multshiftround_u16(num, mul, shift);
+    if (msr_u16 != result) std::printf("\nERROR: multshiftround_u16(%u, %u, %u) returned %u. expected %u.\n\n", num, mul, shift, msr_u16, result);
 
-  msr_u16 = multshiftround<uint16_t>(2u, 2u, 1);
-  if (msr_u16 != 2u) std::printf("\nERROR: multshiftround<uint16_t>(2u, 2u, 1) returned %u. expected 2.\n\n", msr_u16);
+    msr_u16 = multshiftround<uint16_t>(num, mul, shift);
+    if (msr_u16 != result) std::printf("\nERROR: multshiftround<uint16_t>(%u, %u, %u) returned %u. expected %u.\n\n", num, mul, shift, msr_u16, result);
+  }
 
-  msr_i32 = multshiftround<int32_t>(2, 2, 1);
-  if (msr_i32 != 2) std::printf("\nERROR: multshiftround<int32_t>(2, 2, 1) returned %i. expected 2.\n\n", msr_i32);
+  for (uint8_t shift = 0u; shift <= 30u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    int32_t result = 1;
+    int32_t num = 1 << half_shift;
+    if (num < 2) {
+      num = 2;
+      result = 2;
+    }
+    int32_t mul = 1 << (shift - half_shift);
+    
+    msr_i32 = multshiftround_i32(num, mul, shift);
+    if (msr_i32 != result) std::printf("\nERROR: multshiftround_i32(%i, %i, %u) returned %i. expected %i.\n\n", num, mul, shift, msr_i32, result);
 
-  msr_u32 = multshiftround<uint32_t>(2u, 2u, 1);
-  if (msr_u32 != 2u) std::printf("\nERROR: multshiftround<uint32_t>(2u, 2u, 1) returned %u. expected 2.\n\n", msr_u32);
+    msr_i32 = multshiftround<int32_t>(num, mul, shift);
+    if (msr_i32 != result) std::printf("\nERROR: multshiftround<int32_t>(%i, %i, %u) returned %i. expected %i.\n\n", num, mul, shift, msr_i32, result);
+  }
 
-  msr_i64 = multshiftround<int64_t>(2ll, 2ll, 1);
-  if (msr_i64 != 2ll) std::printf("\nERROR: multshiftround<int64_t>(2ll, 2ll, 1) returned %" PRIi64 ". expected 2.\n\n", msr_i64);
+  for (uint8_t shift = 0u; shift <= 31u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    uint32_t result = 1u;
+    uint32_t num = 1u << half_shift;
+    if (num < 2u) {
+      num = 2u;
+      result = 2u;
+    }
+    uint32_t mul = 1u << (shift - half_shift);
+    
+    msr_u32 = multshiftround_u32(num, mul, shift);
+    if (msr_u32 != result) std::printf("\nERROR: multshiftround_u32(%u, %u, %u) returned %u. expected %u.\n\n", num, mul, shift, msr_u32, result);
 
-  msr_u64 = multshiftround<uint64_t>(2ull, 2ull, 1);
-  if (msr_u64 != 2ull) std::printf("\nERROR: multshiftround<uint64_t>(2ull, 2ull, 1) returned %" PRIu64 ". expected 2.\n\n", msr_u64);
+    msr_u32 = multshiftround<uint32_t>(num, mul, shift);
+    if (msr_u32 != result) std::printf("\nERROR: multshiftround<uint32_t>(%u, %u, %u) returned %u. expected %u.\n\n", num, mul, shift, msr_u32, result);
+  }
+
+  for (uint8_t shift = 0u; shift <= 62u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    int64_t result = 1ll;
+    int64_t num = 1ll << half_shift;
+    if (num < 2ll) {
+      num = 2ll;
+      result = 2ll;
+    }
+    int64_t mul = 1ll << (shift - half_shift);
+    
+    msr_i64 = multshiftround_i64(num, mul, shift);
+    if (msr_i64 != result) std::printf("\nERROR: multshiftround_i64(%" PRIi64 ", %" PRIi64 ", %u) returned %" PRIi64 ". expected %" PRIi64 ".\n\n", num, mul, shift, msr_i64, result);
+
+    msr_i64 = multshiftround<int64_t>(num, mul, shift);
+    if (msr_i64 != result) std::printf("\nERROR: multshiftround<int64_t>(%" PRIi64 ", %" PRIi64 ", %u) returned %" PRIi64 ". expected %" PRIi64 ".\n\n", num, mul, shift, msr_i64, result);
+  }
+
+  for (uint8_t shift = 0u; shift <= 63u; shift++) {
+    uint8_t half_shift = shift >> 1;
+    uint64_t result = 1ull;
+    uint64_t num = 1ull << half_shift;
+    if (num < 2ull) {
+      num = 2ull;
+      result = 2ull;
+    }
+    uint64_t mul = 1ull << (shift - half_shift);
+    
+    msr_u64 = multshiftround_u64(num, mul, shift);
+    if (msr_u64 != result) std::printf("\nERROR: multshiftround_u64(%" PRIu64 ", %" PRIu64 ", %u) returned %" PRIu64 ". expected %" PRIu64 ".\n\n", num, mul, shift, msr_u64, result);
+
+    msr_u64 = multshiftround<uint64_t>(num, mul, shift);
+    if (msr_u64 != result) std::printf("\nERROR: multshiftround<uint64_t>(%" PRIu64 ", %" PRIu64 ", %u) returned %" PRIu64 ". expected %" PRIu64 ".\n\n", num, mul, shift, msr_u64, result);
+  }
   
   std::printf("Multiplication tests finished.\n\n");
   

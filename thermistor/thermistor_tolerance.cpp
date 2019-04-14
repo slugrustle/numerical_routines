@@ -24,7 +24,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <thread>
-
+#include "parsers.h"
 
 // Returns a random sample pulled from a normal distribution.
 // Samples outside of [-3σ, +3σ] are thrown out.
@@ -213,96 +213,6 @@ void ADC_thread(const uint64_t rand_seed, const uint32_t nTrials, const int64_t 
   }
 }
 
-// Parses a string to an int64_t. Sets success true/false based on
-// whether the entire input string was an integer or not.
-int64_t parse_int64(const std::string &in_str, bool &success)
-{
-  if (in_str.length() == 0u)
-  {
-    success = false;
-    return 0ll;
-  }
-
-  size_t after_int = 0u;
-  int64_t value = 0ll;
-  try
-  {
-    value = std::stoll(in_str, &after_int, 10);
-  }
-  catch (const std::invalid_argument &e)
-  {
-    success = false;
-    return 0ll;
-  }
-  catch (const std::out_of_range &e)
-  {
-    success = false;
-    return 0ll;
-  }
-
-  if (after_int != in_str.length())
-  {
-    success = false;
-    return 0ll;
-  }
-
-  success = true;
-  return value;
-}
-
-// Parses a string to a double. Returns NaN if it can't.
-double parse_double(const std::string &in_str)
-{
-  if (in_str.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
-
-  size_t after_double = 0u;
-  double value = std::numeric_limits<double>::quiet_NaN();
-  try
-  {
-    value = std::stod(in_str, &after_double);
-  }
-  catch (const std::invalid_argument &e)
-  {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  catch (const std::out_of_range &e)
-  {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-
-  if (after_double != in_str.length()) return std::numeric_limits<double>::quiet_NaN();
-  return value;
-}
-
-// Parse resistances such as 33.2k, 10M, 100.2, 1, etc.
-// into a value in Ohms. Only the suffixes k and M are
-// recognized.
-// Return NaN if not parseable.
-// Negative and 0 values are returned as valid.
-double parse_resistance(std::string &res_string)
-{
-  if (res_string.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
-
-  // Look for a k or M suffix
-  char suffix = ' ';
-  size_t suffix_idx = 0u;
-  if (res_string.length() > 1u)
-  {
-    suffix_idx = res_string.length() - 1u;
-    suffix = res_string.at(suffix_idx);
-  }
-
-  std::string number_buffer;
-  if ('k' == suffix || 'M' == suffix) number_buffer = res_string.substr(0u, suffix_idx);
-  else number_buffer = res_string;
-
-  double res_val = parse_double(number_buffer);
-  if (std::isnan(res_val)) return res_val;
-  if ('k' == suffix) return 1000.0 * res_val;
-  if ('M' == suffix) return 1.0e6 * res_val;
-  return res_val;
-}
-
 int main(int argc, char *argv[])
 {
   // Help text. Just print it every time.
@@ -310,7 +220,7 @@ int main(int argc, char *argv[])
   std::printf(u8"measured by an ADC. Error due to self-heating is not modelled.\n\n");
 
   std::printf(u8"If special characters (\u00B0, \u03A9, \u00B1, etc.) do not display,\n");
-  std::printf(u8"set your console to unicode (powershell> chcp 65001).\n\n");
+  std::printf(u8"set your console to unicode (PowerShell> chcp 65001).\n\n");
 
   std::printf(u8"[Input Arguments]\n");
   std::printf(u8"1.  Pullup resistor nominal resistance (\u03A9)\n");

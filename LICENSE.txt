@@ -2,10 +2,6 @@ For files in the integer/boost directory, see integer/boost_license_report.html,
 integer/LICENSE_1_0.txt, and the files themselves. The boost project is presently
 at https://www.boost.org/.
 
-Files in the thermistor/Eigen directory are distribued under the Mozilla Public License
-Version 2.0, about which see http://mozilla.org/MPL/2.0/. The Eigen project is presently
-at http://eigen.tuxfamily.org/.
-
 All files produced by the author of this repository, including
 detect_product_overflow.c
 detect_product_overflow.h
@@ -36,8 +32,18 @@ test_divround.cpp
 test_multshiftround_shiftround_comp.cpp
 test_multshiftround_shiftround_run.cpp
 test_saturate_value.cpp
-thermistor_interpolator.cpp
 thermistor_tolerance.cpp
+thermistor_interpolator.cpp
+globals.h
+heapSort.cpp
+heapSort.h
+NTCcalculations.cpp
+NTCcalculations.h
+parsers.cpp
+parsers.h
+QRleast_squares.cpp
+QRleast_squares.h
+types.h
 are published under the CC0 1.0 Universal Public Domain Dedication,
 which is reproduced below.
 

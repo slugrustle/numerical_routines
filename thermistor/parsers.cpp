@@ -1,64 +1,119 @@
 /**
- * multshiftround_shiftround_masks.c
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead defined in this file.
+ * parsers.cpp
  *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays defined below.
+ * Definitions of several string to numerical value parsers used to 
+ * interpret and validate user input in thermistor_interpolator.cpp.
  *
- * Written in 2018 by Ben Tesch.
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide.This software is distributed without any warranty.
+ * worldwide. This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "multshiftround_shiftround_masks.h"
+#include "parsers.h"
+#include <exception>
+#include <stdexcept>
+#include <limits>
+#include <cmath>
 
-const uint8_t masks_8bit[8] = {
-  0x00u, 0x01u, 0x02u, 0x04u, 0x08u, 
-         0x10u, 0x20u, 0x40u
-};
+/**
+ * Parses a string to an int64_t. Sets success true/false based on
+ * whether the entire input string was an integer or not.
+ */
+int64_t parse_int64(const std::string &in_str, bool &success)
+{
+  if (in_str.length() == 0u)
+  {
+    success = false;
+    return 0ll;
+  }
 
-const uint16_t masks_16bit[16] = {
-  0x0000u, 0x0001u, 0x0002u, 0x0004u, 0x0008u,
-           0x0010u, 0x0020u, 0x0040u, 0x0080u,
-           0x0100u, 0x0200u, 0x0400u, 0x0800u,
-           0x1000u, 0x2000u, 0x4000u
-};
+  size_t after_int = 0u;
+  int64_t value = 0ll;
+  try
+  {
+    value = std::stoll(in_str, &after_int, 10);
+  }
+  catch (const std::invalid_argument &e)
+  {
+    success = false;
+    return 0ll;
+  }
+  catch (const std::out_of_range &e)
+  {
+    success = false;
+    return 0ll;
+  }
 
-const uint32_t masks_32bit[32] = {
-  0x00000000u, 0x00000001u, 0x00000002u, 0x00000004u, 0x00000008u,
-               0x00000010u, 0x00000020u, 0x00000040u, 0x00000080u,
-               0x00000100u, 0x00000200u, 0x00000400u, 0x00000800u,
-               0x00001000u, 0x00002000u, 0x00004000u, 0x00008000u,
-               0x00010000u, 0x00020000u, 0x00040000u, 0x00080000u,
-               0x00100000u, 0x00200000u, 0x00400000u, 0x00800000u,
-               0x01000000u, 0x02000000u, 0x04000000u, 0x08000000u,
-               0x10000000u, 0x20000000u, 0x40000000u
-};
+  if (after_int != in_str.length())
+  {
+    success = false;
+    return 0ll;
+  }
 
-const uint64_t masks_64bit[64] = { 
-  0x0000000000000000ull, 0x0000000000000001ull, 0x0000000000000002ull, 0x0000000000000004ull, 0x0000000000000008ull,
-                         0x0000000000000010ull, 0x0000000000000020ull, 0x0000000000000040ull, 0x0000000000000080ull,
-                         0x0000000000000100ull, 0x0000000000000200ull, 0x0000000000000400ull, 0x0000000000000800ull,
-                         0x0000000000001000ull, 0x0000000000002000ull, 0x0000000000004000ull, 0x0000000000008000ull,
-                         0x0000000000010000ull, 0x0000000000020000ull, 0x0000000000040000ull, 0x0000000000080000ull,
-                         0x0000000000100000ull, 0x0000000000200000ull, 0x0000000000400000ull, 0x0000000000800000ull,
-                         0x0000000001000000ull, 0x0000000002000000ull, 0x0000000004000000ull, 0x0000000008000000ull,
-                         0x0000000010000000ull, 0x0000000020000000ull, 0x0000000040000000ull, 0x0000000080000000ull,
-                         0x0000000100000000ull, 0x0000000200000000ull, 0x0000000400000000ull, 0x0000000800000000ull,
-                         0x0000001000000000ull, 0x0000002000000000ull, 0x0000004000000000ull, 0x0000008000000000ull,
-                         0x0000010000000000ull, 0x0000020000000000ull, 0x0000040000000000ull, 0x0000080000000000ull,
-                         0x0000100000000000ull, 0x0000200000000000ull, 0x0000400000000000ull, 0x0000800000000000ull,
-                         0x0001000000000000ull, 0x0002000000000000ull, 0x0004000000000000ull, 0x0008000000000000ull,
-                         0x0010000000000000ull, 0x0020000000000000ull, 0x0040000000000000ull, 0x0080000000000000ull,
-                         0x0100000000000000ull, 0x0200000000000000ull, 0x0400000000000000ull, 0x0800000000000000ull,
-                         0x1000000000000000ull, 0x2000000000000000ull, 0x4000000000000000ull
-};
+  success = true;
+  return value;
+}
+
+/**
+ * Parses a string to a double. Returns NaN if it can't.
+ */
+double parse_double(const std::string &in_str)
+{
+  if (in_str.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
+
+  size_t after_double = 0u;
+  double value = std::numeric_limits<double>::quiet_NaN();
+  try
+  {
+    value = std::stod(in_str, &after_double);
+  }
+  catch (const std::invalid_argument &e)
+  {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  catch (const std::out_of_range &e)
+  {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+
+  if (after_double != in_str.length()) return std::numeric_limits<double>::quiet_NaN();
+  return value;
+}
+
+/**
+ * Parse resistances such as 33.2k, 10M, 100.2, 1, etc.
+ * into a value in Ohms. Only the suffixes k and M are
+ * recognized.
+ * Return NaN if res_string is not parseable.
+ * Negative and 0 values are returned as valid.
+ */
+double parse_resistance(std::string &res_string)
+{
+  if (res_string.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
+
+  /* Look for a k or M suffix */
+  char suffix = ' ';
+  size_t suffix_idx = 0u;
+  if (res_string.length() > 1u)
+  {
+    suffix_idx = res_string.length() - 1u;
+    suffix = res_string.at(suffix_idx);
+  }
+
+  std::string number_buffer;
+  if ('k' == suffix || 'M' == suffix) number_buffer = res_string.substr(0u, suffix_idx);
+  else number_buffer = res_string;
+
+  double res_val = parse_double(number_buffer);
+  if (std::isnan(res_val)) return res_val;
+  if ('k' == suffix) return 1000.0 * res_val;
+  if ('M' == suffix) return 1.0e6 * res_val;
+  return res_val;
+}
 
 /*
 Creative Commons Legal Code

@@ -1,64 +1,49 @@
 /**
- * multshiftround_shiftround_masks.c
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead defined in this file.
+ * globals.h
  *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays defined below.
+ * Declarations of global variables shared between thermistor_interpolator.cpp
+ * and NTCcalculations.cpp
  *
- * Written in 2018 by Ben Tesch.
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide.This software is distributed without any warranty.
+ * worldwide. This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "multshiftround_shiftround_masks.h"
+#ifndef GLOBALS_H_
+#define GLOBALS_H_
 
-const uint8_t masks_8bit[8] = {
-  0x00u, 0x01u, 0x02u, 0x04u, 0x08u, 
-         0x10u, 0x20u, 0x40u
-};
+#include "types.h"
 
-const uint16_t masks_16bit[16] = {
-  0x0000u, 0x0001u, 0x0002u, 0x0004u, 0x0008u,
-           0x0010u, 0x0020u, 0x0040u, 0x0080u,
-           0x0100u, 0x0200u, 0x0400u, 0x0800u,
-           0x1000u, 0x2000u, 0x4000u
-};
+/**
+ * Major variables used in calculations.
+ * These are also taken as input arguments from
+ * the command line.
+ */
+extern double Rntc_nom_Ohms;
+extern double beta_K;
+extern double Rpullup_nom_Ohms;
+extern double Riso_nom_Ohms;
+extern uint16_t ADC_counts;
 
-const uint32_t masks_32bit[32] = {
-  0x00000000u, 0x00000001u, 0x00000002u, 0x00000004u, 0x00000008u,
-               0x00000010u, 0x00000020u, 0x00000040u, 0x00000080u,
-               0x00000100u, 0x00000200u, 0x00000400u, 0x00000800u,
-               0x00001000u, 0x00002000u, 0x00004000u, 0x00008000u,
-               0x00010000u, 0x00020000u, 0x00040000u, 0x00080000u,
-               0x00100000u, 0x00200000u, 0x00400000u, 0x00800000u,
-               0x01000000u, 0x02000000u, 0x04000000u, 0x08000000u,
-               0x10000000u, 0x20000000u, 0x40000000u
-};
+/**
+ * Precomputed numerical inverses to reduce the
+ * number of division operations.
+ */
+extern double inv_Rntc_nom_Ohms;
+extern double inv_NTC_nom_temp_K;
+extern double inv_beta_K;
+extern double inv_ADC_counts_minus_one;
 
-const uint64_t masks_64bit[64] = { 
-  0x0000000000000000ull, 0x0000000000000001ull, 0x0000000000000002ull, 0x0000000000000004ull, 0x0000000000000008ull,
-                         0x0000000000000010ull, 0x0000000000000020ull, 0x0000000000000040ull, 0x0000000000000080ull,
-                         0x0000000000000100ull, 0x0000000000000200ull, 0x0000000000000400ull, 0x0000000000000800ull,
-                         0x0000000000001000ull, 0x0000000000002000ull, 0x0000000000004000ull, 0x0000000000008000ull,
-                         0x0000000000010000ull, 0x0000000000020000ull, 0x0000000000040000ull, 0x0000000000080000ull,
-                         0x0000000000100000ull, 0x0000000000200000ull, 0x0000000000400000ull, 0x0000000000800000ull,
-                         0x0000000001000000ull, 0x0000000002000000ull, 0x0000000004000000ull, 0x0000000008000000ull,
-                         0x0000000010000000ull, 0x0000000020000000ull, 0x0000000040000000ull, 0x0000000080000000ull,
-                         0x0000000100000000ull, 0x0000000200000000ull, 0x0000000400000000ull, 0x0000000800000000ull,
-                         0x0000001000000000ull, 0x0000002000000000ull, 0x0000004000000000ull, 0x0000008000000000ull,
-                         0x0000010000000000ull, 0x0000020000000000ull, 0x0000040000000000ull, 0x0000080000000000ull,
-                         0x0000100000000000ull, 0x0000200000000000ull, 0x0000400000000000ull, 0x0000800000000000ull,
-                         0x0001000000000000ull, 0x0002000000000000ull, 0x0004000000000000ull, 0x0008000000000000ull,
-                         0x0010000000000000ull, 0x0020000000000000ull, 0x0040000000000000ull, 0x0080000000000000ull,
-                         0x0100000000000000ull, 0x0200000000000000ull, 0x0400000000000000ull, 0x0800000000000000ull,
-                         0x1000000000000000ull, 0x2000000000000000ull, 0x4000000000000000ull
-};
+/**
+ * Constants
+ */
+const double kelvin_offset = 273.15;
+
+#endif /* #ifndef GLOBALS_H_ */
 
 /*
 Creative Commons Legal Code

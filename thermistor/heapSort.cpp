@@ -1,64 +1,131 @@
 /**
- * multshiftround_shiftround_masks.c
- * The _run versions of multshiftround and shiftround evaluate the shift
- * argument at runtime. Consequently, the masks used for rounding are not
- * hardcoded in the functions themselves and are instead defined in this file.
+ * heapSort.cpp
  *
- * multshiftround_run.c, multshiftround_run.hpp, shiftround_run.c, and
- * shiftround_run.hpp all use the masks_Xbit arrays defined below.
+ * Contains the heapSort() function and related helper functions. These are
+ * used to sort the rows of the regressor matrix of the least squares problem
+ * in QRleast_squares.cpp in descending order by maximum elementwise absolute
+ * value.
  *
- * Written in 2018 by Ben Tesch.
+ * Written in 2019 by Ben Tesch.
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide.This software is distributed without any warranty.
+ * worldwide. This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "multshiftround_shiftround_masks.h"
+#include "heapSort.h"
+#include <algorithm>
+#include <cmath>
 
-const uint8_t masks_8bit[8] = {
-  0x00u, 0x01u, 0x02u, 0x04u, 0x08u, 
-         0x10u, 0x20u, 0x40u
-};
+/**
+ * Helper functions that compute indices of parent and
+ * child elements in a heap that is stored in a linear
+ * array.
+ */
+static inline uint16_t parentIndex(uint16_t index) {
+  return (index-static_cast<uint16_t>(1)) >> 1;
+}
 
-const uint16_t masks_16bit[16] = {
-  0x0000u, 0x0001u, 0x0002u, 0x0004u, 0x0008u,
-           0x0010u, 0x0020u, 0x0040u, 0x0080u,
-           0x0100u, 0x0200u, 0x0400u, 0x0800u,
-           0x1000u, 0x2000u, 0x4000u
-};
+static inline uint16_t leftChildIndex(uint16_t index) {
+  return static_cast<uint16_t>(2)*index + static_cast<uint16_t>(1);
+}
 
-const uint32_t masks_32bit[32] = {
-  0x00000000u, 0x00000001u, 0x00000002u, 0x00000004u, 0x00000008u,
-               0x00000010u, 0x00000020u, 0x00000040u, 0x00000080u,
-               0x00000100u, 0x00000200u, 0x00000400u, 0x00000800u,
-               0x00001000u, 0x00002000u, 0x00004000u, 0x00008000u,
-               0x00010000u, 0x00020000u, 0x00040000u, 0x00080000u,
-               0x00100000u, 0x00200000u, 0x00400000u, 0x00800000u,
-               0x01000000u, 0x02000000u, 0x04000000u, 0x08000000u,
-               0x10000000u, 0x20000000u, 0x40000000u
-};
+static inline uint16_t rightChildIndex(uint16_t index) {
+  return static_cast<uint16_t>(2)*index + static_cast<uint16_t>(2);
+}
 
-const uint64_t masks_64bit[64] = { 
-  0x0000000000000000ull, 0x0000000000000001ull, 0x0000000000000002ull, 0x0000000000000004ull, 0x0000000000000008ull,
-                         0x0000000000000010ull, 0x0000000000000020ull, 0x0000000000000040ull, 0x0000000000000080ull,
-                         0x0000000000000100ull, 0x0000000000000200ull, 0x0000000000000400ull, 0x0000000000000800ull,
-                         0x0000000000001000ull, 0x0000000000002000ull, 0x0000000000004000ull, 0x0000000000008000ull,
-                         0x0000000000010000ull, 0x0000000000020000ull, 0x0000000000040000ull, 0x0000000000080000ull,
-                         0x0000000000100000ull, 0x0000000000200000ull, 0x0000000000400000ull, 0x0000000000800000ull,
-                         0x0000000001000000ull, 0x0000000002000000ull, 0x0000000004000000ull, 0x0000000008000000ull,
-                         0x0000000010000000ull, 0x0000000020000000ull, 0x0000000040000000ull, 0x0000000080000000ull,
-                         0x0000000100000000ull, 0x0000000200000000ull, 0x0000000400000000ull, 0x0000000800000000ull,
-                         0x0000001000000000ull, 0x0000002000000000ull, 0x0000004000000000ull, 0x0000008000000000ull,
-                         0x0000010000000000ull, 0x0000020000000000ull, 0x0000040000000000ull, 0x0000080000000000ull,
-                         0x0000100000000000ull, 0x0000200000000000ull, 0x0000400000000000ull, 0x0000800000000000ull,
-                         0x0001000000000000ull, 0x0002000000000000ull, 0x0004000000000000ull, 0x0008000000000000ull,
-                         0x0010000000000000ull, 0x0020000000000000ull, 0x0040000000000000ull, 0x0080000000000000ull,
-                         0x0100000000000000ull, 0x0200000000000000ull, 0x0400000000000000ull, 0x0800000000000000ull,
-                         0x1000000000000000ull, 0x2000000000000000ull, 0x4000000000000000ull
-};
+/**
+ * Helper function to compute the maximum absolute value
+ * in a row of the regressor matrix part of the least squares
+ * problem data storage.
+ */
+static inline double rowAbsMax(least_squares_row_t *heapArray, uint16_t index) {
+  return std::max(std::fabs(heapArray[index].columns[0]), std::fabs(heapArray[index].columns[1]));
+}
+
+/**
+ * Repairs the min heap stored in heapArray starting
+ * from the index of a parent node with valid children.
+ */
+static void repairHeap(least_squares_row_t *heapArray, uint16_t parent_index, uint16_t last_index)
+{
+  uint16_t left_child_index = leftChildIndex(parent_index);
+  uint16_t right_child_index = left_child_index + static_cast<uint16_t>(1);
+  uint16_t swap_index = parent_index;
+  double swap_row_abs_max = rowAbsMax(heapArray, swap_index);
+  double parent_row_abs_max = swap_row_abs_max;
+
+  while (left_child_index <= last_index)
+  { 
+    double left_child_row_abs_max = rowAbsMax(heapArray, left_child_index);
+    if (swap_row_abs_max > left_child_row_abs_max)
+    {
+      swap_index = left_child_index;
+      swap_row_abs_max = left_child_row_abs_max;
+    }
+
+    double right_child_row_abs_max = rowAbsMax(heapArray, right_child_index);
+    if (right_child_index <= last_index && swap_row_abs_max > right_child_row_abs_max)
+    {
+      swap_index = right_child_index;
+      swap_row_abs_max = right_child_row_abs_max;
+    }
+
+    if (swap_index == parent_index)
+    {
+      return;
+    }
+    else
+    {
+      least_squares_row_t tmp_row = heapArray[parent_index];
+      heapArray[parent_index] = heapArray[swap_index];
+      heapArray[swap_index] = tmp_row;
+      parent_index = swap_index;
+
+      swap_row_abs_max = parent_row_abs_max;
+
+      left_child_index = leftChildIndex(parent_index);
+      right_child_index = left_child_index + static_cast<uint16_t>(1);
+    }
+  }
+}
+
+/**
+ * Reorders the elements of heapArray so that they are stored
+ * as a min heap.
+ */
+static void createHeap(least_squares_row_t *heapArray, uint16_t last_index)
+{
+  uint16_t parent_index = parentIndex(last_index);
+
+  while (true)
+  {
+    repairHeap(heapArray, parent_index, last_index);
+    if (parent_index == static_cast<uint16_t>(0)) break;
+    parent_index--;
+  }
+}
+
+/**
+ * Sorts an array of least_squares_row_t by the maximum absolute
+ * value in columns[] in descending order.
+ */
+void heapSort(least_squares_row_t *inputArray, uint16_t last_index)
+{
+  createHeap(inputArray, last_index);
+
+  while (true)
+  {
+    least_squares_row_t tmp = inputArray[0];
+    inputArray[0] = inputArray[last_index];
+    inputArray[last_index] = tmp;
+    if (last_index == static_cast<uint16_t>(0)) break;
+    last_index--;
+    repairHeap(inputArray, 0, last_index);
+  }
+}
 
 /*
 Creative Commons Legal Code
