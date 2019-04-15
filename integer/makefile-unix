@@ -14,8 +14,8 @@ C_OPTIONS = -Wall -O3 -static -static-libgcc -std=c99 -flto -march=athlon64
 BASE_OPTIONS = -Wall -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlon64 
 BOOST_OPTIONS = -I.
 THREAD_OPTIONS = -pthread -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
-OBJ_FILES = saturate_value.o divround.o multshiftround_comp.o multshiftround_run_array.o multshiftround_run_computed.o shiftround_comp.o shiftround_run_array.o shiftround_run_computed.o multshiftround_shiftround_masks.o detect_product_overflow.o
-EXE_FILES = test_saturate_value test_divround test_multshiftround_shiftround_comp test_multshiftround_shiftround_run_array_masks test_multshiftround_shiftround_run_computed_masks optimal_base2_rational test_debug_code
+OBJ_FILES = saturate_value.o divround.o multshiftround_comp.o multshiftround_run_array.o multshiftround_run_computed.o shiftround_comp.o shiftround_run_array.o shiftround_run_computed.o multshiftround_shiftround_masks.o detect_product_overflow.o divround_non_debug.o multshiftround_run_non_debug.o shiftround_run_non_debug.o
+EXE_FILES = test_saturate_value test_divround test_multshiftround_shiftround_comp test_multshiftround_shiftround_run_array_masks test_multshiftround_shiftround_run_computed_masks optimal_base2_rational test_debug_code test_input_protections
 
 all: $(EXE_FILES)
 
@@ -28,11 +28,17 @@ test_saturate_value:saturate_value.o test_saturate_value.cpp saturate_value.hpp
 divround.o:divround.c divround.h
 	gcc $(C_OPTIONS) -DDEBUG_INTMATH -c -o $@ divround.c
 
+divround_non_debug.o:divround.c divround.h
+	gcc $(C_OPTIONS) -c -o $@ divround.c
+
 test_divround:divround.o test_divround.cpp divround.hpp
 	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) $(THREAD_OPTIONS) -DDEBUG_INTMATH -o $@ divround.o test_divround.cpp
 
 multshiftround_comp.o:multshiftround_comp.c multshiftround_comp.h
 	gcc $(C_OPTIONS) -DDEBUG_INTMATH -c -o $@ multshiftround_comp.c
+
+multshiftround_run_non_debug.o:multshiftround_run.c multshiftround_run.h run_masks_type.h multshiftround_shiftround_masks.h
+	gcc $(C_OPTIONS) -DARRAY_MASKS -c -o $@ multshiftround_run.c
 
 multshiftround_run_array.o:multshiftround_run.c multshiftround_run.h run_masks_type.h multshiftround_shiftround_masks.h
 	gcc $(C_OPTIONS) -DDEBUG_INTMATH -DARRAY_MASKS -c -o $@ multshiftround_run.c
@@ -42,6 +48,9 @@ multshiftround_run_computed.o:multshiftround_run.c multshiftround_run.h run_mask
 
 shiftround_comp.o:shiftround_comp.c shiftround_comp.h
 	gcc $(C_OPTIONS) -c -o $@ shiftround_comp.c
+
+shiftround_run_non_debug.o:shiftround_run.c shiftround_run.h run_masks_type.h multshiftround_shiftround_masks.h
+	gcc $(C_OPTIONS) -DARRAY_MASKS -c -o $@ shiftround_run.c
 
 shiftround_run_array.o:shiftround_run.c shiftround_run.h run_masks_type.h multshiftround_shiftround_masks.h
 	gcc $(C_OPTIONS) -DDEBUG_INTMATH -DARRAY_MASKS -c -o $@ shiftround_run.c
@@ -65,7 +74,10 @@ test_multshiftround_shiftround_run_computed_masks:multshiftround_run_computed.o 
 	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) $(THREAD_OPTIONS) -DDEBUG_INTMATH -o $@ detect_product_overflow.o multshiftround_run_computed.o shiftround_run_computed.o multshiftround_shiftround_masks.o test_multshiftround_shiftround_run.cpp
 
 test_debug_code:multshiftround_comp.o multshiftround_run_array.o shiftround_run_array.o multshiftround_shiftround_masks.o detect_product_overflow.o divround.o test_debug_code.cpp multshiftround_comp.hpp multshiftround_run.hpp shiftround_run.hpp divround.hpp run_masks_type.h
-	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) $(THREAD_OPTIONS) -DDEBUG_INTMATH -o $@ multshiftround_comp.o multshiftround_run_array.o shiftround_run_array.o multshiftround_shiftround_masks.o detect_product_overflow.o divround.o test_debug_code.cpp
+	g++ $(BASE_OPTIONS) -DDEBUG_INTMATH -o $@ multshiftround_comp.o multshiftround_run_array.o shiftround_run_array.o multshiftround_shiftround_masks.o detect_product_overflow.o divround.o test_debug_code.cpp
+
+test_input_protections:multshiftround_run_non_debug.o shiftround_run_non_debug.o multshiftround_shiftround_masks.o multshiftround_run.hpp shiftround_run.hpp divround_non_debug.o divround.hpp test_input_protections.cpp run_masks_type.h
+	g++ $(BASE_OPTIONS) -o $@ multshiftround_run_non_debug.o shiftround_run_non_debug.o multshiftround_shiftround_masks.o divround_non_debug.o test_input_protections.cpp
 
 optimal_base2_rational:optimal_base2_rational.cpp
 	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) -o $@ optimal_base2_rational.cpp
