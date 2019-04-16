@@ -8,4 +8,4 @@ Returns the least common multiple of the two input integers. Throws an std::over
 
 ## general
 
-The gcd and lcm routines are defined for uint16_t, uint32_t, and uint64_t types. They are both completely untested.
+The gcd and lcm routines are defined for uint16_t, uint32_t, and uint64_t types.

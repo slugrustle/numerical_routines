@@ -215,7 +215,7 @@ template <> uint64_t lcm<uint64_t>(uint64_t a, uint64_t b) {
 
     return factor * b;
   } else {
-    uint32_t factor = b / gcd_a_b;
+    uint64_t factor = b / gcd_a_b;
     if (detect_product_overflow_u64(factor, a))
       throw std::overflow_error("overflow in lcm<uint64_t>()");
 
