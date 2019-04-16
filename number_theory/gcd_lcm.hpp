@@ -1,53 +1,231 @@
-For files in the integer/boost directory, see integer/boost_license_report.html,
-integer/LICENSE_1_0.txt, and the files themselves. The boost project is presently
-at https://www.boost.org/.
+/**
+ * gcd_lcm.hpp
+ * Implementations of the greatest common divisor and least common multiple
+ * algorithms with specializations for uint16_t, uint32_t, and uint64_t
+ * types.
+ * 
+ * The lcm() functions throw an std::overflow_error if the result would
+ * overflow the range of the input/output type.
+ * 
+ * Written in 2019 by Ben Tesch.
+ *
+ * To the extent possible under law, the author has dedicated all copyright
+ * and related and neighboring rights to this software to the public domain
+ * worldwide. This software is distributed without any warranty.
+ * The text of the CC0 Public Domain Dedication should be reproduced at the
+ * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
+ */
+#ifndef GCD_LCM_HPP_
+#define GCD_LCM_HPP_
 
-All files produced by the author of this repository, including
-detect_product_overflow.c
-detect_product_overflow.h
-divround.c
-divround.h 
-divround.hpp
-multshiftround_comp.c 
-multshiftround_comp.h 
-multshiftround_comp.hpp 
-multshiftround_run.c 
-multshiftround_run.h 
-multshiftround_run.hpp 
-multshiftround_shiftround_masks.c 
-multshiftround_shiftround_masks.h
-optimal_base2_rational.cpp
-run_masks_type.h
-saturate_value.c 
-saturate_value.h 
-saturate_value.hpp 
-shiftround_comp.c 
-shiftround_comp.h 
-shiftround_comp.hpp 
-shiftround_run.c
-shiftround_run.h
-shiftround_run.hpp
-test_debug_code.cpp
-test_divround.cpp
-test_multshiftround_shiftround_comp.cpp
-test_multshiftround_shiftround_run.cpp
-test_saturate_value.cpp
-thermistor_tolerance.cpp
-thermistor_interpolator.cpp
-globals.h
-heapSort.cpp
-heapSort.h
-NTCcalculations.cpp
-NTCcalculations.h
-parsers.cpp
-parsers.h
-QRleast_squares.cpp
-QRleast_squares.h
-types.h
-gcd_lcm.hpp
-are published under the CC0 1.0 Universal Public Domain Dedication,
-which is reproduced below.
+#include <cinttypes>
+#include <limits>
+#include <exception>
+#include <stdexcept>
 
+/* Allows static_assert message in multshiftround primary template to compile. */
+template <typename type> static bool always_false_gcd_lcm(void) { return false; }
+
+/**
+ * The gcd primary template is a catch-all for invalid
+ * and/or presently unimplemented template arguments.
+ */
+template <typename type> type gcd(type a, type b) {
+  static_assert(always_false_gcd_lcm<type>(), "type gcd<type>(type a, type b) is not defined for the specified type.");
+}
+
+/**
+ * Specialization of the greatest common divisor algorithm
+ * for uint16_t.
+ */
+template <> uint16_t gcd<uint16_t>(uint16_t a, uint16_t b) {
+  uint16_t tmp;
+  
+  if (b > a) {
+    tmp = a;
+    a = b;
+    b = tmp;
+  }
+
+  while (b != static_cast<uint16_t>(0)) {
+    tmp = b;
+    b = a % b;
+    a = tmp;
+  }
+
+  return a;
+}
+
+/**
+ * Specialization of the greatest common divisor algorithm
+ * for uint32_t.
+ */
+template <> uint32_t gcd<uint32_t>(uint32_t a, uint32_t b) {
+  uint32_t tmp;
+  
+  if (b > a) {
+    tmp = a;
+    a = b;
+    b = tmp;
+  }
+
+  while (b != 0u) {
+    tmp = b;
+    b = a % b;
+    a = tmp;
+  }
+
+  return a;
+}
+
+/**
+ * Specialization of the greatest common divisor algorithm
+ * for uint64_t.
+ */
+template <> uint64_t gcd<uint64_t>(uint64_t a, uint64_t b) {
+  uint64_t tmp;
+  
+  if (b > a) {
+    tmp = a;
+    a = b;
+    b = tmp;
+  }
+
+  while (b != 0ull) {
+    tmp = b;
+    b = a % b;
+    a = tmp;
+  }
+
+  return a;
+}
+
+/**
+ * The lcm primary template is a catch-all for invalid
+ * and/or presently unimplemented template arguments.
+ */
+template <typename type> type lcm(type a, type b) {
+  static_assert(always_false_gcd_lcm<type>(), "type lcm<type>(type a, type b) is not defined for the specified type.");
+}
+
+/**
+ * Specialization of the least common multiple algorithm
+ * for uint16_t. Throws an exception if the result would
+ * exceed the range of a uint16_t.
+ */
+template <> uint16_t lcm<uint16_t>(uint16_t a, uint16_t b) {
+  if ((a == static_cast<uint16_t>(0)) | (b == static_cast<uint16_t>(0))) return static_cast<uint16_t>(0);
+
+  uint16_t gcd_a_b = gcd<uint16_t>(a, b);
+  
+  if (a > b) {
+    uint16_t factor = a / gcd_a_b;
+    if (static_cast<uint32_t>(factor) * static_cast<uint32_t>(b) > std::numeric_limits<uint16_t>::max())
+      throw std::overflow_error("overflow in lcm<uint16_t>()");
+
+    return factor * b;
+  } else {
+    uint16_t factor = b / gcd_a_b;
+    if (static_cast<uint32_t>(factor) * static_cast<uint32_t>(a) > std::numeric_limits<uint16_t>::max())
+      throw std::overflow_error("overflow in lcm<uint16_t>()");
+
+    return factor * a;
+  }
+}
+
+/**
+ * Specialization of the least common multiple algorithm
+ * for uint32_t. Throws an exception if the result would
+ * exceed the range of a uint32_t.
+ */
+template <> uint32_t lcm<uint32_t>(uint32_t a, uint32_t b) {
+  if ((a == 0u) | (b == 0u)) return 0u;
+
+  uint32_t gcd_a_b = gcd<uint32_t>(a, b);
+  
+  if (a > b) {
+    uint32_t factor = a / gcd_a_b;
+    if (static_cast<uint64_t>(factor) * static_cast<uint64_t>(b) > std::numeric_limits<uint32_t>::max())
+      throw std::overflow_error("overflow in lcm<uint32_t>()");
+
+    return factor * b;
+  } else {
+    uint32_t factor = b / gcd_a_b;
+    if (static_cast<uint64_t>(factor) * static_cast<uint64_t>(a) > std::numeric_limits<uint32_t>::max())
+      throw std::overflow_error("overflow in lcm<uint32_t>()");
+
+    return factor * a;
+  }
+}
+
+/**
+ * Returns true if the product a * b would overflow the range
+ * of a uin64_t and false otherwise.
+ */
+static bool detect_product_overflow_u64(const uint64_t a, const uint64_t b) {
+  /**
+   * a * b = 2^64 * (a_hi * b_hi) + 
+   *         2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *         a_lo * b_lo
+   * All of the products a_hi*b_hi, a_hi*b_lo,
+   * a_lo*b_hi, and a_lo*b_lo will be on the range
+   * [0,2^64-2^33+1].
+   */
+  uint64_t a_hi = (a & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t a_lo =  a & 0x00000000FFFFFFFFull;
+  uint64_t b_hi = (b & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t b_lo =  b & 0x00000000FFFFFFFFull;
+
+  if (a_hi * b_hi > 0ull) return true;
+  /**
+   * Now we know that a_hi * b_hi == 0.
+   * Consequently,
+   * a * b = 2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *         a_lo * b_lo
+   */
+
+  uint64_t mid_prod_1 = a_hi * b_lo;
+  uint64_t mid_prod_2 = a_lo * b_hi;
+
+  if (std::numeric_limits<uint64_t>::max() - mid_prod_2 < mid_prod_1) return true;
+  /* Now we know that mid_prod_1 + mid_prod_2 <= std::numeric_limits<uint64_t>::max(). */
+  uint64_t mid_prod = mid_prod_1 + mid_prod_2;
+  
+  if (mid_prod >= (1ull << 32)) return true;
+  /* Now we know that 2^32 * mid_prod < std::numeric_limits<uint64_t>::max(). */
+  if (std::numeric_limits<uint64_t>::max() - a_lo * b_lo < mid_prod << 32) return true;
+
+  return false;
+}
+
+/**
+ * Specialization of the least common multiple algorithm
+ * for uint64_t. Throws an exception if the result would
+ * exceed the range of a uint64_t.
+ */
+template <> uint64_t lcm<uint64_t>(uint64_t a, uint64_t b) {
+  if ((a == 0ull) | (b == 0ull)) return 0ull;
+
+  uint64_t gcd_a_b = gcd<uint64_t>(a, b);
+  
+  if (a > b) {
+    uint64_t factor = a / gcd_a_b;
+    if (detect_product_overflow_u64(factor, b))
+      throw std::overflow_error("overflow in lcm<uint64_t>()");
+
+    return factor * b;
+  } else {
+    uint32_t factor = b / gcd_a_b;
+    if (detect_product_overflow_u64(factor, a))
+      throw std::overflow_error("overflow in lcm<uint64_t>()");
+
+    return factor * a;
+  }
+}
+
+#endif /* #ifndef GCD_LCM_HPP_ */
+
+/*
 Creative Commons Legal Code
 
 CC0 1.0 Universal
@@ -169,3 +347,4 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
+*/
