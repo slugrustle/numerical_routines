@@ -16,6 +16,8 @@ multshiftround_run.h
 multshiftround_run.hpp 
 multshiftround_shiftround_masks.c 
 multshiftround_shiftround_masks.h
+number_system.ods
+number_system.xlsx
 optimal_base2_rational.cpp
 run_masks_type.h
 saturate_value.c 
