@@ -44,10 +44,14 @@
 #ifdef DEBUG_INTMATH
   #include <cstdio>
   #include <limits>
-  extern "C"
-  {
+  #ifdef __cplusplus
+    extern "C"
+    {
+  #endif
 	  #include "detect_product_overflow.h"
-  } 
+  #ifdef __cplusplus
+    }
+  #endif
 #endif
 
 /* Allows static_assert message in multshiftround primary template to compile. */

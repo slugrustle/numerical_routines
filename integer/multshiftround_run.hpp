@@ -44,19 +44,27 @@
 #include "run_masks_type.h"
 
 #ifdef ARRAY_MASKS
-  extern "C"
-  {
-    #include "multshiftround_shiftround_masks.h"
-  }
+  #ifdef __cplusplus
+    extern "C"
+    {
+  #endif
+      #include "multshiftround_shiftround_masks.h"
+  #ifdef __cplusplus
+    }
+  #endif
 #endif
 
 #ifdef DEBUG_INTMATH
   #include <limits>
   #include <cstdio>
-  extern "C"
-  {
+  #ifdef __cplusplus
+    extern "C"
+    {
+  #endif
 	  #include "detect_product_overflow.h"
-  } 
+  #ifdef __cplusplus
+    }
+  #endif
 #endif
 
 /* Allows static_assert message in multshiftround primary template to compile. */

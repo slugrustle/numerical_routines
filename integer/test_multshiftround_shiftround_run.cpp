@@ -40,11 +40,15 @@
 #include "multshiftround_run.hpp"
 #include "shiftround_run.hpp"
 
-extern "C"
-{
-  #include "multshiftround_run.h"
-  #include "shiftround_run.h"
-}
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+    #include "multshiftround_run.h"
+    #include "shiftround_run.h"
+#ifdef __cplusplus
+  }
+#endif
 
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/math/special_functions/round.hpp>

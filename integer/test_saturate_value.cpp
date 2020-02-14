@@ -22,10 +22,14 @@
  */
 #include <cstdio>
 #include "saturate_value.hpp"
-extern "C"
-{
-  #include "saturate_value.h"
-}
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+    #include "saturate_value.h"
+#ifdef __cplusplus
+  }
+#endif
 
 int main () {
   int8_t res_i8;

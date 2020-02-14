@@ -35,11 +35,15 @@
 #include "multshiftround_comp.hpp"
 #include "shiftround_comp.hpp"
 
-extern "C"
-{
-  #include "multshiftround_comp.h"
-  #include "shiftround_comp.h"
-}
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+    #include "multshiftround_comp.h"
+    #include "shiftround_comp.h"
+#ifdef __cplusplus
+  }
+#endif
 
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/math/special_functions/round.hpp>

@@ -46,10 +46,14 @@
 #include <thread>
 #include <mutex>
 #include <vector>
-extern "C" 
-{
-  #include "divround.h"
-}
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+    #include "divround.h"
+#ifdef __cplusplus
+  }
+#endif
 #include "divround.hpp"
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/math/special_functions/round.hpp>

@@ -37,10 +37,14 @@
 #include "run_masks_type.h"
 
 #ifdef ARRAY_MASKS
-  extern "C"
-  {
-    #include "multshiftround_shiftround_masks.h"
-  }
+  #ifdef __cplusplus
+    extern "C"
+    {
+  #endif
+      #include "multshiftround_shiftround_masks.h"
+  #ifdef __cplusplus
+    }
+  #endif
 #endif
 
 #ifdef DEBUG_INTMATH

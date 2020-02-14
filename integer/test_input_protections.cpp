@@ -29,12 +29,16 @@
 #include "shiftround_run.hpp"
 #include "divround.hpp"
 
-extern "C"
-{
-  #include "multshiftround_run.h"
-  #include "shiftround_run.h"
-  #include "divround.h"
-}
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+    #include "multshiftround_run.h"
+    #include "shiftround_run.h"
+    #include "divround.h"
+#ifdef __cplusplus
+  }
+#endif
 
 int main() {
 

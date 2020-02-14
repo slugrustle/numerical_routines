@@ -30,13 +30,17 @@
 #include "multshiftround_run.hpp"
 #include "shiftround_run.hpp"
 
-extern "C"
-{
-  #include "divround.h"
-  #include "multshiftround_comp.h"
-  #include "multshiftround_run.h"
-  #include "shiftround_run.h"
-}
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+    #include "divround.h"
+    #include "multshiftround_comp.h"
+    #include "multshiftround_run.h"
+    #include "shiftround_run.h"
+#ifdef __cplusplus
+  }
+#endif
 
 int main() {
   std::printf("\nEach printed function call below should result in an error.\n\n");
