@@ -1,5 +1,5 @@
 /**
- * optimal_base2_rational.cpp
+ * optimal_pow2_rational.cpp
  * This program finds a rational number of the form
  *     mult / 2^shift
  * which approximates a user-supplied fraction to within the roundoff

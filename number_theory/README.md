@@ -4,7 +4,7 @@ Returns the greatest common divisor of the two input integers.
 
 ## lcm
 
-Returns the least common multiple of the two input integers. Throws an std::overflow_error exception instead if the result would overflow the range of the input/output type.
+Returns the least common multiple of the two input integers. Throws an std::overflow_error exception instead if the result would overflow the range of the output type.
 
 ## general
 

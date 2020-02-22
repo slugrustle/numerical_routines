@@ -15,7 +15,7 @@ BASE_OPTIONS = -Wall -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlo
 BOOST_OPTIONS = -I.
 THREAD_OPTIONS = -pthread -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 OBJ_FILES = saturate_value.o divround.o multshiftround_comp.o multshiftround_run_array.o multshiftround_run_computed.o shiftround_comp.o shiftround_run_array.o shiftround_run_computed.o multshiftround_shiftround_masks.o detect_product_overflow.o divround_non_debug.o multshiftround_run_non_debug.o shiftround_run_non_debug.o
-EXE_FILES = test_saturate_value test_divround test_multshiftround_shiftround_comp test_multshiftround_shiftround_run_array_masks test_multshiftround_shiftround_run_computed_masks optimal_base2_rational test_debug_code test_input_protections
+EXE_FILES = test_saturate_value test_divround test_multshiftround_shiftround_comp test_multshiftround_shiftround_run_array_masks test_multshiftround_shiftround_run_computed_masks optimal_pow2_rational test_debug_code test_input_protections
 
 all: $(EXE_FILES)
 
@@ -79,8 +79,8 @@ test_debug_code:multshiftround_comp.o multshiftround_run_array.o shiftround_run_
 test_input_protections:multshiftround_run_non_debug.o shiftround_run_non_debug.o multshiftround_shiftround_masks.o multshiftround_run.hpp shiftround_run.hpp divround_non_debug.o divround.hpp test_input_protections.cpp run_masks_type.h
 	g++ $(BASE_OPTIONS) -o $@ multshiftround_run_non_debug.o shiftround_run_non_debug.o multshiftround_shiftround_masks.o divround_non_debug.o test_input_protections.cpp
 
-optimal_base2_rational:optimal_base2_rational.cpp
-	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) -o $@ optimal_base2_rational.cpp
+optimal_pow2_rational:optimal_pow2_rational.cpp
+	g++ $(BASE_OPTIONS) $(BOOST_OPTIONS) -o $@ optimal_pow2_rational.cpp
 
 clean:
 	rm -f $(EXE_FILES) $(OBJ_FILES)

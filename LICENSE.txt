@@ -3,50 +3,82 @@ integer/LICENSE_1_0.txt, and the files themselves. The boost project is presentl
 at https://www.boost.org/.
 
 All files produced by the author of this repository, including
-detect_product_overflow.c
-detect_product_overflow.h
-divround.c
-divround.h 
-divround.hpp
-multshiftround_comp.c 
-multshiftround_comp.h 
-multshiftround_comp.hpp 
-multshiftround_run.c 
-multshiftround_run.h 
-multshiftround_run.hpp 
-multshiftround_shiftround_masks.c 
-multshiftround_shiftround_masks.h
-number_system.ods
-number_system.xlsx
-optimal_base2_rational.cpp
-run_masks_type.h
-saturate_value.c 
-saturate_value.h 
-saturate_value.hpp 
-shiftround_comp.c 
-shiftround_comp.h 
-shiftround_comp.hpp 
-shiftround_run.c
-shiftround_run.h
-shiftround_run.hpp
-test_debug_code.cpp
-test_divround.cpp
-test_multshiftround_shiftround_comp.cpp
-test_multshiftround_shiftround_run.cpp
-test_saturate_value.cpp
-thermistor_tolerance.cpp
-thermistor_interpolator.cpp
-globals.h
-heapSort.cpp
-heapSort.h
-NTCcalculations.cpp
-NTCcalculations.h
-parsers.cpp
-parsers.h
-QRleast_squares.cpp
-QRleast_squares.h
-types.h
-gcd_lcm.hpp
+
+[integer/ directory]
+  detect_product_overflow.c
+  detect_product_overflow.h
+  divround.c
+  divround.h 
+  divround.hpp
+  makefile-nmake
+  makefile-unix
+  multshiftround_comp.c 
+  multshiftround_comp.h 
+  multshiftround_comp.hpp 
+  multshiftround_run.c 
+  multshiftround_run.h 
+  multshiftround_run.hpp 
+  multshiftround_shiftround_masks.c 
+  multshiftround_shiftround_masks.h
+  number_system.ods
+  number_system.xlsx
+  number_system_8-bit_signed.pdf
+  number_system_8-bit_unsigned.pdf
+  optimal_pow2_rational.cpp
+  README.md
+  run_masks_type.h
+  saturate_value.c 
+  saturate_value.h 
+  saturate_value.hpp 
+  shiftround_comp.c 
+  shiftround_comp.h 
+  shiftround_comp.hpp 
+  shiftround_run.c
+  shiftround_run.h
+  shiftround_run.hpp
+  test_debug_code.cpp
+  test_divround.cpp
+  test_multshiftround_shiftround_comp.cpp
+  test_multshiftround_shiftround_run.cpp
+  test_saturate_value.cpp
+
+[number_theory/ directory]
+  gcd_lcm.hpp
+  README.md
+
+[statistics/ directory]
+  makefile-nmake
+  makefile-unix
+  RCSn.cpp
+  RCSn.h
+  README.md
+  Test_RCSn.cpp
+
+[thermistor/ directory]
+  globals.h
+  heapSort.cpp
+  heapSort.h
+  makefile-nmake
+  makefile-unix
+  multshiftround_run.hpp   (copied from integer/ directory)
+  multshiftround_shiftround_masks.c   (copied from integer/ directory)
+  multshiftround_shiftround_masks.h   (copied from integer/ directory)
+  NTCcalculations.cpp
+  NTCcalculations.h
+  parsers.cpp
+  parsers.h
+  QRleast_squares.cpp
+  QRleast_squares.h
+  README.md
+  run_masks_type.h   (copied from integer/ directory)
+  thermistor_interpolator.cpp
+  thermistor_tolerance.cpp
+  types.h
+
+[Root directory]
+  LICENSE.txt
+  README.md
+
 are published under the CC0 1.0 Universal Public Domain Dedication,
 which is reproduced below.
 

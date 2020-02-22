@@ -15,8 +15,8 @@ BASE_OPTIONS = /O2 /Ob2 /Oi /Ot /Oy /Zc:wchar_t- /Zc:inline /Zc:rvalueCast /Zc:f
 NON_BOOST_OPTIONS = /Za
 BOOST_OPTIONS = /I.
 LINK_OPTIONS = /link /INCREMENTAL:NO /OPT:REF /OPT:ICF /DYNAMICBASE:NO /NXCOMPAT:NO /LTCG /MACHINE:X64
-OBJ_FILES = divround.obj test_divround.obj multshiftround_comp.obj multshiftround_run.obj multshiftround_shiftround_masks.obj test_multshiftround_shiftround_comp.obj test_debug_code.obj optimal_base2_rational.obj saturate_value.obj test_saturate_value.obj shiftround_comp.obj shiftround_run.obj detect_product_overflow.obj test_multshiftround_shiftround_run.obj test_input_protections.obj
-EXE_FILES = test_debug_code.exe test_saturate_value.exe test_divround.exe test_multshiftround_shiftround_comp.exe optimal_base2_rational.exe test_multshiftround_shiftround_run_array_masks.exe test_multshiftround_shiftround_run_computed_masks.exe test_input_protections.exe
+OBJ_FILES = divround.obj test_divround.obj multshiftround_comp.obj multshiftround_run.obj multshiftround_shiftround_masks.obj test_multshiftround_shiftround_comp.obj test_debug_code.obj optimal_pow2_rational.obj saturate_value.obj test_saturate_value.obj shiftround_comp.obj shiftround_run.obj detect_product_overflow.obj test_multshiftround_shiftround_run.obj test_input_protections.obj
+EXE_FILES = test_debug_code.exe test_saturate_value.exe test_divround.exe test_multshiftround_shiftround_comp.exe optimal_pow2_rational.exe test_multshiftround_shiftround_run_array_masks.exe test_multshiftround_shiftround_run_computed_masks.exe test_input_protections.exe
 
 all: $(EXE_FILES)
 
@@ -41,7 +41,7 @@ test_debug_code.exe:test_debug_code.cpp divround.c detect_product_overflow.c mul
 test_input_protections.exe:test_input_protections.cpp divround.c divround.h divround.hpp multshiftround_run.c multshiftround_run.h multshiftround_run.hpp shiftround_run.c shiftround_run.h shiftround_run.hpp multshiftround_shiftround_masks.c multshiftround_shiftround_masks.h run_masks_type.h
 	cl $(BASE_OPTIONS) $(NON_BOOST_OPTIONS) divround.c multshiftround_run.c shiftround_run.c multshiftround_shiftround_masks.c test_input_protections.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
-optimal_base2_rational.exe:optimal_base2_rational.cpp
+optimal_pow2_rational.exe:optimal_pow2_rational.cpp
 	cl $(BASE_OPTIONS) $(BOOST_OPTIONS) /wd4101 $** $(LINK_OPTIONS) /OUT:$(@F)
 
 clean:
