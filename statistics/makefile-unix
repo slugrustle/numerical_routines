@@ -1,0 +1,29 @@
+# Run 
+# make -f makefile-unix
+# from the command line to build all executables in this directory.
+#
+# Run 
+# make -f makefile-unix clean
+# to delete all executables and .o files created during the build.
+#
+# Run 
+# make -f makefile-unix cleanobj
+# to delete all .o files created during the build.
+
+BASE_OPTIONS = -Wall -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlon64 
+OBJ_FILES = RCSn.o
+EXE_FILES = Test_RCSn
+
+all: $(EXE_FILES)
+
+RCSn.o:RCSn.cpp RCSn.h
+	g++ $(BASE_OPTIONS) -c -o $@ RCSn.cpp
+
+Test_RCSn:Test_RCSn.cpp RCSn.o RCSn.h
+	g++ $(BASE_OPTIONS) -o $@ RCSn.o Test_RCSn.cpp
+
+clean:
+	rm -f $(EXE_FILES) $(OBJ_FILES)
+
+cleanobj:
+	rm -f $(OBJ_FILES)

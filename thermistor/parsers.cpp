@@ -39,11 +39,13 @@ int64_t parse_int64(const std::string &in_str, bool &success)
   }
   catch (const std::invalid_argument &e)
   {
+    e;
     success = false;
     return 0ll;
   }
   catch (const std::out_of_range &e)
   {
+    e;
     success = false;
     return 0ll;
   }
@@ -73,10 +75,12 @@ double parse_double(const std::string &in_str)
   }
   catch (const std::invalid_argument &e)
   {
+    e;
     return std::numeric_limits<double>::quiet_NaN();
   }
   catch (const std::out_of_range &e)
   {
+    e;
     return std::numeric_limits<double>::quiet_NaN();
   }
 

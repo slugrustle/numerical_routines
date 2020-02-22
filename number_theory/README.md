@@ -1,6 +1,6 @@
 ## gcd
 
-Returns the greatest commond divisor of the two input integers.
+Returns the greatest common divisor of the two input integers.
 
 ## lcm
 
