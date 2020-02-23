@@ -7,6 +7,7 @@
  * See types.h for the definition and explanation of least_squares_row_t.
  *
  * Written in 2019 by Ben Tesch.
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain

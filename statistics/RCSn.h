@@ -12,7 +12,8 @@
  * DOI https://doi.org/10.1007/978-3-662-26811-7_58
  *
  * Written in 2020 by Ben Tesch.
- *
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
+ * 
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
  * worldwide. This software is distributed without any warranty.

@@ -8,6 +8,7 @@
  * shiftround_run.hpp all use the masks_Xbit arrays declared below.
  *
  * Written in 2018 by Ben Tesch.
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain

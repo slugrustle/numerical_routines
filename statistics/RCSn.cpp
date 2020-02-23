@@ -1,24 +1,25 @@
-#/**
-  * RCSn.cpp
-  * RCSn computes Sn, a robust estimate of scale.
-  * This algorithm has been translated to C++ from the Fortran77 version
-  * found in the paper
-  * "Time-efficient algorithms for two highly robust estimators of scale"
-  * by Christophe Croux and Peter J. Rousseeuw
-  * Published in Computational Statistics,
-  * Volume 1: Proceedings of the 10th Symposium on Computational Statistics
-  * Pages 411-428, Editors Yadolah Dodge and Joe Whittaker
-  * Publisher Physica, Heidleberg. Year 1992
-  * DOI https://doi.org/10.1007/978-3-662-26811-7_58
-  *
-  * Written in 2020 by Ben Tesch.
-  *
-  * To the extent possible under law, the author has dedicated all copyright
-  * and related and neighboring rights to this software to the public domain
-  * worldwide. This software is distributed without any warranty.
-  * The text of the CC0 Public Domain Dedication should be reproduced at the
-  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
-  */
+/**
+ * RCSn.cpp
+ * RCSn computes Sn, a robust estimate of scale.
+ * This algorithm has been translated to C++ from the Fortran77 version
+ * found in the paper
+ * "Time-efficient algorithms for two highly robust estimators of scale"
+ * by Christophe Croux and Peter J. Rousseeuw
+ * Published in Computational Statistics,
+ * Volume 1: Proceedings of the 10th Symposium on Computational Statistics
+ * Pages 411-428, Editors Yadolah Dodge and Joe Whittaker
+ * Publisher Physica, Heidleberg. Year 1992
+ * DOI https://doi.org/10.1007/978-3-662-26811-7_58
+ *
+ * Written in 2020 by Ben Tesch.
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
+ *
+ * To the extent possible under law, the author has dedicated all copyright
+ * and related and neighboring rights to this software to the public domain
+ * worldwide. This software is distributed without any warranty.
+ * The text of the CC0 Public Domain Dedication should be reproduced at the
+ * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
+ */
 
 #include "RCSn.h"
 #include <cmath>

@@ -1,9 +1,11 @@
 ﻿/**
  * thermistor_tolerance.cpp
  * Performs Monte Carlo tolerance analysis of an NTC thermistor and pullup resistor
- * measured by an ADC. Error due to self-heating is not modelled.
+ * measured by an ADC. The goal is to obtain worst-case error among all considered
+ * effects. Error due to self-heating is not modelled.
  *
  * Written in 2019 by Ben Tesch.
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain

@@ -11,8 +11,9 @@
  * Input values less than lower_bound, equal to lower_bound, between
  * lower_bound and uppper_bound, equal to upper_bound, and greater than
  * upper_bound are tested for all functions.
-
+ * 
  * Written in 2018 by Ben Tesch.
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
