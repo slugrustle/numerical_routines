@@ -40,12 +40,12 @@ template <typename type> void saturate_value(type &value, const type lower_bound
  ********           int8_t and uint8_t template specializations          ********
  ********************************************************************************/
 
-template<> void saturate_value<int8_t>(int8_t &value, const int8_t lower_bound, const int8_t upper_bound) {
+template <> inline void saturate_value<int8_t>(int8_t &value, const int8_t lower_bound, const int8_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
 
-template<> void saturate_value<uint8_t>(uint8_t &value, const uint8_t lower_bound, const uint8_t upper_bound) {
+template <> inline void saturate_value<uint8_t>(uint8_t &value, const uint8_t lower_bound, const uint8_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
@@ -54,12 +54,12 @@ template<> void saturate_value<uint8_t>(uint8_t &value, const uint8_t lower_boun
  ********          int16_t and uint16_t template specializations         ********
  ********************************************************************************/
 
-template<> void saturate_value<int16_t>(int16_t &value, const int16_t lower_bound, const int16_t upper_bound) {
+template <> inline void saturate_value<int16_t>(int16_t &value, const int16_t lower_bound, const int16_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
 
-template<> void saturate_value<uint16_t>(uint16_t &value, const uint16_t lower_bound, const uint16_t upper_bound) {
+template <> inline void saturate_value<uint16_t>(uint16_t &value, const uint16_t lower_bound, const uint16_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
@@ -68,12 +68,12 @@ template<> void saturate_value<uint16_t>(uint16_t &value, const uint16_t lower_b
  ********          int32_t and uint32_t template specializations         ********
  ********************************************************************************/
 
-template<> void saturate_value<int32_t>(int32_t &value, const int32_t lower_bound, const int32_t upper_bound) {
+template <> inline void saturate_value<int32_t>(int32_t &value, const int32_t lower_bound, const int32_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
 
-template<> void saturate_value<uint32_t>(uint32_t &value, const uint32_t lower_bound, const uint32_t upper_bound) {
+template <> inline void saturate_value<uint32_t>(uint32_t &value, const uint32_t lower_bound, const uint32_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
@@ -82,12 +82,12 @@ template<> void saturate_value<uint32_t>(uint32_t &value, const uint32_t lower_b
  ********          int64_t and uint64_t template specializations         ********
  ********************************************************************************/
 
-template<> void saturate_value<int64_t>(int64_t &value, const int64_t lower_bound, const int64_t upper_bound) {
+template <> inline void saturate_value<int64_t>(int64_t &value, const int64_t lower_bound, const int64_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }
 
-template<> void saturate_value<uint64_t>(uint64_t &value, const uint64_t lower_bound, const uint64_t upper_bound) {
+template <> inline void saturate_value<uint64_t>(uint64_t &value, const uint64_t lower_bound, const uint64_t upper_bound) {
   if (value < lower_bound) value = lower_bound;
   if (value > upper_bound) value = upper_bound;
 }

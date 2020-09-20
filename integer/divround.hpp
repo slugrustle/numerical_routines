@@ -65,7 +65,7 @@ template <typename type> type divround(const type dividend, const type divisor) 
  * Returns ROUND(dividend / divisor). divisor must never be 0. 
  * divisor must not be -1 when dividend is -128 (-2^7).
  */
-template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor) {
+template <> inline int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == static_cast<int8_t>(0))
       std::fprintf(stderr, "ERROR: divround<int8_t>(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
@@ -103,7 +103,7 @@ template <> int8_t divround<int8_t>(const int8_t dividend, const int8_t divisor)
 }
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divisor) {
+template <> inline uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == static_cast<uint8_t>(0))
       std::fprintf(stderr, "ERROR: divround<uint8_t>(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
@@ -128,7 +128,7 @@ template <> uint8_t divround<uint8_t>(const uint8_t dividend, const uint8_t divi
  * Returns ROUND(dividend / divisor). divisor must never be 0.
  * divisor must not be -1 when dividend is -32768 (-2^15).
  */
-template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divisor) {
+template <> inline int16_t divround<int16_t>(const int16_t dividend, const int16_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == static_cast<int16_t>(0))
       std::fprintf(stderr, "ERROR: divround<int16_t>(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
@@ -166,7 +166,7 @@ template <> int16_t divround<int16_t>(const int16_t dividend, const int16_t divi
 }
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t divisor) {
+template <> inline uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == static_cast<uint16_t>(0))
       std::fprintf(stderr, "ERROR: divround<uint16_t>(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
@@ -191,7 +191,7 @@ template <> uint16_t divround<uint16_t>(const uint16_t dividend, const uint16_t 
  * Returns ROUND(dividend / divisor). divisor must never be 0. 
  * divisor must not be -1 when dividend is -2147483648 (-2^31).
  */
-template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divisor) {
+template <> inline int32_t divround<int32_t>(const int32_t dividend, const int32_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == 0)
       std::fprintf(stderr, "ERROR: divround<int32_t>(%i, %i) divisor argument must not be 0.\n", dividend, divisor);
@@ -229,7 +229,7 @@ template <> int32_t divround<int32_t>(const int32_t dividend, const int32_t divi
 }
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t divisor) {
+template <> inline uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == 0)
       std::fprintf(stderr, "ERROR: divround<uint32_t>(%u, %u) divisor argument must not be 0.\n", dividend, divisor);
@@ -254,7 +254,7 @@ template <> uint32_t divround<uint32_t>(const uint32_t dividend, const uint32_t 
  * Returns ROUND(dividend / divisor). divisor must never be 0. 
  * divisor must not be -1 when dividend is -9223372036854775808 (-2^63).
  */
-template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divisor) {
+template <> inline int64_t divround<int64_t>(const int64_t dividend, const int64_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == 0ll)
       std::fprintf(stderr, "ERROR: divround<int64_t>(%" PRIi64 ", %" PRIi64 ") divisor argument must not be 0.\n", dividend, divisor);
@@ -292,7 +292,7 @@ template <> int64_t divround<int64_t>(const int64_t dividend, const int64_t divi
 }
 
 /* Returns ROUND(dividend / divisor). divisor must not be 0. */
-template <> uint64_t divround<uint64_t>(const uint64_t dividend, const uint64_t divisor) {
+template <> inline uint64_t divround<uint64_t>(const uint64_t dividend, const uint64_t divisor) {
   #ifdef DEBUG_INTMATH
     if (divisor == 0ull)
       std::fprintf(stderr, "ERROR: divround<uint64_t>(%" PRIu64 ", %" PRIu64 ") divisor argument must not be 0.\n", dividend, divisor);

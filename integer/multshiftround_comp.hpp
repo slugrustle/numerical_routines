@@ -71,7 +71,7 @@ template <typename type, uint8_t shift> type multshiftround(const type num, cons
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> int8_t multshiftround<int8_t, 1>(const int8_t num, const int8_t mul) {
+template <> inline int8_t multshiftround<int8_t, 1>(const int8_t num, const int8_t mul) {
   #ifdef DEBUG_INTMATH
     int16_t debug_product = static_cast<int16_t>(num) * static_cast<int16_t>(mul);
     if (debug_product > static_cast<int16_t>(std::numeric_limits<int8_t>::max()))
@@ -87,7 +87,7 @@ template <> int8_t multshiftround<int8_t, 1>(const int8_t num, const int8_t mul)
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> int8_t multshiftround<int8_t, 2>(const int8_t num, const int8_t mul) {
+template <> inline int8_t multshiftround<int8_t, 2>(const int8_t num, const int8_t mul) {
   #ifdef DEBUG_INTMATH
     int16_t debug_product = static_cast<int16_t>(num) * static_cast<int16_t>(mul);
     if (debug_product > static_cast<int16_t>(std::numeric_limits<int8_t>::max()))
@@ -103,7 +103,7 @@ template <> int8_t multshiftround<int8_t, 2>(const int8_t num, const int8_t mul)
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> int8_t multshiftround<int8_t, 3>(const int8_t num, const int8_t mul) {
+template <> inline int8_t multshiftround<int8_t, 3>(const int8_t num, const int8_t mul) {
   #ifdef DEBUG_INTMATH
     int16_t debug_product = static_cast<int16_t>(num) * static_cast<int16_t>(mul);
     if (debug_product > static_cast<int16_t>(std::numeric_limits<int8_t>::max()))
@@ -119,7 +119,7 @@ template <> int8_t multshiftround<int8_t, 3>(const int8_t num, const int8_t mul)
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> int8_t multshiftround<int8_t, 4>(const int8_t num, const int8_t mul) {
+template <> inline int8_t multshiftround<int8_t, 4>(const int8_t num, const int8_t mul) {
   #ifdef DEBUG_INTMATH
     int16_t debug_product = static_cast<int16_t>(num) * static_cast<int16_t>(mul);
     if (debug_product > static_cast<int16_t>(std::numeric_limits<int8_t>::max()))
@@ -135,7 +135,7 @@ template <> int8_t multshiftround<int8_t, 4>(const int8_t num, const int8_t mul)
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> int8_t multshiftround<int8_t, 5>(const int8_t num, const int8_t mul) {
+template <> inline int8_t multshiftround<int8_t, 5>(const int8_t num, const int8_t mul) {
   #ifdef DEBUG_INTMATH
     int16_t debug_product = static_cast<int16_t>(num) * static_cast<int16_t>(mul);
     if (debug_product > static_cast<int16_t>(std::numeric_limits<int8_t>::max()))
@@ -151,7 +151,7 @@ template <> int8_t multshiftround<int8_t, 5>(const int8_t num, const int8_t mul)
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> int8_t multshiftround<int8_t, 6>(const int8_t num, const int8_t mul) {
+template <> inline int8_t multshiftround<int8_t, 6>(const int8_t num, const int8_t mul) {
   #ifdef DEBUG_INTMATH
     int16_t debug_product = static_cast<int16_t>(num) * static_cast<int16_t>(mul);
     if (debug_product > static_cast<int16_t>(std::numeric_limits<int8_t>::max()))
@@ -171,7 +171,7 @@ template <> int8_t multshiftround<int8_t, 6>(const int8_t num, const int8_t mul)
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> int16_t multshiftround<int16_t, 1>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 1>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -187,7 +187,7 @@ template <> int16_t multshiftround<int16_t, 1>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> int16_t multshiftround<int16_t, 2>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 2>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -203,7 +203,7 @@ template <> int16_t multshiftround<int16_t, 2>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> int16_t multshiftround<int16_t, 3>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 3>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -219,7 +219,7 @@ template <> int16_t multshiftround<int16_t, 3>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> int16_t multshiftround<int16_t, 4>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 4>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -235,7 +235,7 @@ template <> int16_t multshiftround<int16_t, 4>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> int16_t multshiftround<int16_t, 5>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 5>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -251,7 +251,7 @@ template <> int16_t multshiftround<int16_t, 5>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> int16_t multshiftround<int16_t, 6>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 6>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -267,7 +267,7 @@ template <> int16_t multshiftround<int16_t, 6>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> int16_t multshiftround<int16_t, 7>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 7>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -283,7 +283,7 @@ template <> int16_t multshiftround<int16_t, 7>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^8) */
-template <> int16_t multshiftround<int16_t, 8>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 8>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -299,7 +299,7 @@ template <> int16_t multshiftround<int16_t, 8>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^9) */
-template <> int16_t multshiftround<int16_t, 9>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 9>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -315,7 +315,7 @@ template <> int16_t multshiftround<int16_t, 9>(const int16_t num, const int16_t 
 }
 
 /* Returns ROUND((num * mul) / 2^10) */
-template <> int16_t multshiftround<int16_t, 10>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 10>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -331,7 +331,7 @@ template <> int16_t multshiftround<int16_t, 10>(const int16_t num, const int16_t
 }
 
 /* Returns ROUND((num * mul) / 2^11) */
-template <> int16_t multshiftround<int16_t, 11>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 11>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -347,7 +347,7 @@ template <> int16_t multshiftround<int16_t, 11>(const int16_t num, const int16_t
 }
 
 /* Returns ROUND((num * mul) / 2^12) */
-template <> int16_t multshiftround<int16_t, 12>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 12>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -363,7 +363,7 @@ template <> int16_t multshiftround<int16_t, 12>(const int16_t num, const int16_t
 }
 
 /* Returns ROUND((num * mul) / 2^13) */
-template <> int16_t multshiftround<int16_t, 13>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 13>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -379,7 +379,7 @@ template <> int16_t multshiftround<int16_t, 13>(const int16_t num, const int16_t
 }
 
 /* Returns ROUND((num * mul) / 2^14) */
-template <> int16_t multshiftround<int16_t, 14>(const int16_t num, const int16_t mul) {
+template <> inline int16_t multshiftround<int16_t, 14>(const int16_t num, const int16_t mul) {
   #ifdef DEBUG_INTMATH
     int32_t debug_product = static_cast<int32_t>(num) * static_cast<int32_t>(mul);
     if (debug_product > static_cast<int32_t>(std::numeric_limits<int16_t>::max()))
@@ -399,7 +399,7 @@ template <> int16_t multshiftround<int16_t, 14>(const int16_t num, const int16_t
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> int32_t multshiftround<int32_t, 1>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 1>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -415,7 +415,7 @@ template <> int32_t multshiftround<int32_t, 1>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> int32_t multshiftround<int32_t, 2>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 2>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -431,7 +431,7 @@ template <> int32_t multshiftround<int32_t, 2>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> int32_t multshiftround<int32_t, 3>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 3>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -447,7 +447,7 @@ template <> int32_t multshiftround<int32_t, 3>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> int32_t multshiftround<int32_t, 4>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 4>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -463,7 +463,7 @@ template <> int32_t multshiftround<int32_t, 4>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> int32_t multshiftround<int32_t, 5>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 5>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -479,7 +479,7 @@ template <> int32_t multshiftround<int32_t, 5>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> int32_t multshiftround<int32_t, 6>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 6>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -495,7 +495,7 @@ template <> int32_t multshiftround<int32_t, 6>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> int32_t multshiftround<int32_t, 7>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 7>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -511,7 +511,7 @@ template <> int32_t multshiftround<int32_t, 7>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^8) */
-template <> int32_t multshiftround<int32_t, 8>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 8>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -527,7 +527,7 @@ template <> int32_t multshiftround<int32_t, 8>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^9) */
-template <> int32_t multshiftround<int32_t, 9>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 9>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -543,7 +543,7 @@ template <> int32_t multshiftround<int32_t, 9>(const int32_t num, const int32_t 
 }
 
 /* Returns ROUND((num * mul) / 2^10) */
-template <> int32_t multshiftround<int32_t, 10>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 10>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -559,7 +559,7 @@ template <> int32_t multshiftround<int32_t, 10>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^11) */
-template <> int32_t multshiftround<int32_t, 11>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 11>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -575,7 +575,7 @@ template <> int32_t multshiftround<int32_t, 11>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^12) */
-template <> int32_t multshiftround<int32_t, 12>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 12>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -591,7 +591,7 @@ template <> int32_t multshiftround<int32_t, 12>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^13) */
-template <> int32_t multshiftround<int32_t, 13>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 13>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -607,7 +607,7 @@ template <> int32_t multshiftround<int32_t, 13>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^14) */
-template <> int32_t multshiftround<int32_t, 14>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 14>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -623,7 +623,7 @@ template <> int32_t multshiftround<int32_t, 14>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^15) */
-template <> int32_t multshiftround<int32_t, 15>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 15>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -639,7 +639,7 @@ template <> int32_t multshiftround<int32_t, 15>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^16) */
-template <> int32_t multshiftround<int32_t, 16>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 16>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -655,7 +655,7 @@ template <> int32_t multshiftround<int32_t, 16>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^17) */
-template <> int32_t multshiftround<int32_t, 17>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 17>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -671,7 +671,7 @@ template <> int32_t multshiftround<int32_t, 17>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^18) */
-template <> int32_t multshiftround<int32_t, 18>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 18>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -687,7 +687,7 @@ template <> int32_t multshiftround<int32_t, 18>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^19) */
-template <> int32_t multshiftround<int32_t, 19>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 19>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -703,7 +703,7 @@ template <> int32_t multshiftround<int32_t, 19>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^20) */
-template <> int32_t multshiftround<int32_t, 20>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 20>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -719,7 +719,7 @@ template <> int32_t multshiftround<int32_t, 20>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^21) */
-template <> int32_t multshiftround<int32_t, 21>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 21>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -735,7 +735,7 @@ template <> int32_t multshiftround<int32_t, 21>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^22) */
-template <> int32_t multshiftround<int32_t, 22>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 22>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -751,7 +751,7 @@ template <> int32_t multshiftround<int32_t, 22>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^23) */
-template <> int32_t multshiftround<int32_t, 23>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 23>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -767,7 +767,7 @@ template <> int32_t multshiftround<int32_t, 23>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^24) */
-template <> int32_t multshiftround<int32_t, 24>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 24>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -783,7 +783,7 @@ template <> int32_t multshiftround<int32_t, 24>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^25) */
-template <> int32_t multshiftround<int32_t, 25>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 25>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -799,7 +799,7 @@ template <> int32_t multshiftround<int32_t, 25>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^26) */
-template <> int32_t multshiftround<int32_t, 26>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 26>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -815,7 +815,7 @@ template <> int32_t multshiftround<int32_t, 26>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^27) */
-template <> int32_t multshiftround<int32_t, 27>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 27>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -831,7 +831,7 @@ template <> int32_t multshiftround<int32_t, 27>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^28) */
-template <> int32_t multshiftround<int32_t, 28>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 28>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -847,7 +847,7 @@ template <> int32_t multshiftround<int32_t, 28>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^29) */
-template <> int32_t multshiftround<int32_t, 29>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 29>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -863,7 +863,7 @@ template <> int32_t multshiftround<int32_t, 29>(const int32_t num, const int32_t
 }
 
 /* Returns ROUND((num * mul) / 2^30) */
-template <> int32_t multshiftround<int32_t, 30>(const int32_t num, const int32_t mul) {
+template <> inline int32_t multshiftround<int32_t, 30>(const int32_t num, const int32_t mul) {
   #ifdef DEBUG_INTMATH
     int64_t debug_product = static_cast<int64_t>(num) * static_cast<int64_t>(mul);
     if (debug_product > static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
@@ -883,7 +883,7 @@ template <> int32_t multshiftround<int32_t, 30>(const int32_t num, const int32_t
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> int64_t multshiftround<int64_t, 1>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 1>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 1>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -895,7 +895,7 @@ template <> int64_t multshiftround<int64_t, 1>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> int64_t multshiftround<int64_t, 2>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 2>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 2>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -907,7 +907,7 @@ template <> int64_t multshiftround<int64_t, 2>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> int64_t multshiftround<int64_t, 3>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 3>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 3>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -919,7 +919,7 @@ template <> int64_t multshiftround<int64_t, 3>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> int64_t multshiftround<int64_t, 4>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 4>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 4>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -931,7 +931,7 @@ template <> int64_t multshiftround<int64_t, 4>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> int64_t multshiftround<int64_t, 5>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 5>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 5>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -943,7 +943,7 @@ template <> int64_t multshiftround<int64_t, 5>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> int64_t multshiftround<int64_t, 6>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 6>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 6>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -955,7 +955,7 @@ template <> int64_t multshiftround<int64_t, 6>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> int64_t multshiftround<int64_t, 7>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 7>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 7>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -967,7 +967,7 @@ template <> int64_t multshiftround<int64_t, 7>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^8) */
-template <> int64_t multshiftround<int64_t, 8>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 8>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 8>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -979,7 +979,7 @@ template <> int64_t multshiftround<int64_t, 8>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^9) */
-template <> int64_t multshiftround<int64_t, 9>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 9>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 9>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -991,7 +991,7 @@ template <> int64_t multshiftround<int64_t, 9>(const int64_t num, const int64_t 
 }
 
 /* Returns ROUND((num * mul) / 2^10) */
-template <> int64_t multshiftround<int64_t, 10>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 10>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 10>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1003,7 +1003,7 @@ template <> int64_t multshiftround<int64_t, 10>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^11) */
-template <> int64_t multshiftround<int64_t, 11>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 11>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 11>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1015,7 +1015,7 @@ template <> int64_t multshiftround<int64_t, 11>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^12) */
-template <> int64_t multshiftround<int64_t, 12>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 12>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 12>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1027,7 +1027,7 @@ template <> int64_t multshiftround<int64_t, 12>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^13) */
-template <> int64_t multshiftround<int64_t, 13>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 13>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 13>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1039,7 +1039,7 @@ template <> int64_t multshiftround<int64_t, 13>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^14) */
-template <> int64_t multshiftround<int64_t, 14>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 14>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 14>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1051,7 +1051,7 @@ template <> int64_t multshiftround<int64_t, 14>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^15) */
-template <> int64_t multshiftround<int64_t, 15>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 15>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 15>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1063,7 +1063,7 @@ template <> int64_t multshiftround<int64_t, 15>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^16) */
-template <> int64_t multshiftround<int64_t, 16>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 16>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 16>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1075,7 +1075,7 @@ template <> int64_t multshiftround<int64_t, 16>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^17) */
-template <> int64_t multshiftround<int64_t, 17>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 17>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 17>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1087,7 +1087,7 @@ template <> int64_t multshiftround<int64_t, 17>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^18) */
-template <> int64_t multshiftround<int64_t, 18>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 18>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 18>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1099,7 +1099,7 @@ template <> int64_t multshiftround<int64_t, 18>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^19) */
-template <> int64_t multshiftround<int64_t, 19>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 19>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 19>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1111,7 +1111,7 @@ template <> int64_t multshiftround<int64_t, 19>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^20) */
-template <> int64_t multshiftround<int64_t, 20>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 20>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 20>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1123,7 +1123,7 @@ template <> int64_t multshiftround<int64_t, 20>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^21) */
-template <> int64_t multshiftround<int64_t, 21>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 21>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 21>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1135,7 +1135,7 @@ template <> int64_t multshiftround<int64_t, 21>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^22) */
-template <> int64_t multshiftround<int64_t, 22>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 22>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 22>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1147,7 +1147,7 @@ template <> int64_t multshiftround<int64_t, 22>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^23) */
-template <> int64_t multshiftround<int64_t, 23>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 23>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 23>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1159,7 +1159,7 @@ template <> int64_t multshiftround<int64_t, 23>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^24) */
-template <> int64_t multshiftround<int64_t, 24>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 24>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 24>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1171,7 +1171,7 @@ template <> int64_t multshiftround<int64_t, 24>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^25) */
-template <> int64_t multshiftround<int64_t, 25>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 25>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 25>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1183,7 +1183,7 @@ template <> int64_t multshiftround<int64_t, 25>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^26) */
-template <> int64_t multshiftround<int64_t, 26>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 26>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 26>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1195,7 +1195,7 @@ template <> int64_t multshiftround<int64_t, 26>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^27) */
-template <> int64_t multshiftround<int64_t, 27>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 27>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 27>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1207,7 +1207,7 @@ template <> int64_t multshiftround<int64_t, 27>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^28) */
-template <> int64_t multshiftround<int64_t, 28>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 28>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 28>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1219,7 +1219,7 @@ template <> int64_t multshiftround<int64_t, 28>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^29) */
-template <> int64_t multshiftround<int64_t, 29>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 29>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 29>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1231,7 +1231,7 @@ template <> int64_t multshiftround<int64_t, 29>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^30) */
-template <> int64_t multshiftround<int64_t, 30>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 30>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 30>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1243,7 +1243,7 @@ template <> int64_t multshiftround<int64_t, 30>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^31) */
-template <> int64_t multshiftround<int64_t, 31>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 31>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 31>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1255,7 +1255,7 @@ template <> int64_t multshiftround<int64_t, 31>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^32) */
-template <> int64_t multshiftround<int64_t, 32>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 32>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 32>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1267,7 +1267,7 @@ template <> int64_t multshiftround<int64_t, 32>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^33) */
-template <> int64_t multshiftround<int64_t, 33>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 33>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 33>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1279,7 +1279,7 @@ template <> int64_t multshiftround<int64_t, 33>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^34) */
-template <> int64_t multshiftround<int64_t, 34>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 34>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 34>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1291,7 +1291,7 @@ template <> int64_t multshiftround<int64_t, 34>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^35) */
-template <> int64_t multshiftround<int64_t, 35>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 35>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 35>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1303,7 +1303,7 @@ template <> int64_t multshiftround<int64_t, 35>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^36) */
-template <> int64_t multshiftround<int64_t, 36>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 36>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 36>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1315,7 +1315,7 @@ template <> int64_t multshiftround<int64_t, 36>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^37) */
-template <> int64_t multshiftround<int64_t, 37>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 37>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 37>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1327,7 +1327,7 @@ template <> int64_t multshiftround<int64_t, 37>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^38) */
-template <> int64_t multshiftround<int64_t, 38>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 38>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 38>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1339,7 +1339,7 @@ template <> int64_t multshiftround<int64_t, 38>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^39) */
-template <> int64_t multshiftround<int64_t, 39>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 39>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 39>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1351,7 +1351,7 @@ template <> int64_t multshiftround<int64_t, 39>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^40) */
-template <> int64_t multshiftround<int64_t, 40>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 40>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 40>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1363,7 +1363,7 @@ template <> int64_t multshiftround<int64_t, 40>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^41) */
-template <> int64_t multshiftround<int64_t, 41>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 41>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 41>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1375,7 +1375,7 @@ template <> int64_t multshiftround<int64_t, 41>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^42) */
-template <> int64_t multshiftround<int64_t, 42>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 42>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 42>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1387,7 +1387,7 @@ template <> int64_t multshiftround<int64_t, 42>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^43) */
-template <> int64_t multshiftround<int64_t, 43>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 43>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 43>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1399,7 +1399,7 @@ template <> int64_t multshiftround<int64_t, 43>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^44) */
-template <> int64_t multshiftround<int64_t, 44>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 44>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 44>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1411,7 +1411,7 @@ template <> int64_t multshiftround<int64_t, 44>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^45) */
-template <> int64_t multshiftround<int64_t, 45>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 45>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 45>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1423,7 +1423,7 @@ template <> int64_t multshiftround<int64_t, 45>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^46) */
-template <> int64_t multshiftround<int64_t, 46>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 46>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 46>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1435,7 +1435,7 @@ template <> int64_t multshiftround<int64_t, 46>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^47) */
-template <> int64_t multshiftround<int64_t, 47>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 47>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 47>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1447,7 +1447,7 @@ template <> int64_t multshiftround<int64_t, 47>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^48) */
-template <> int64_t multshiftround<int64_t, 48>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 48>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 48>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1459,7 +1459,7 @@ template <> int64_t multshiftround<int64_t, 48>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^49) */
-template <> int64_t multshiftround<int64_t, 49>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 49>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 49>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1471,7 +1471,7 @@ template <> int64_t multshiftround<int64_t, 49>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^50) */
-template <> int64_t multshiftround<int64_t, 50>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 50>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 50>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1483,7 +1483,7 @@ template <> int64_t multshiftround<int64_t, 50>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^51) */
-template <> int64_t multshiftround<int64_t, 51>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 51>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 51>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1495,7 +1495,7 @@ template <> int64_t multshiftround<int64_t, 51>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^52) */
-template <> int64_t multshiftround<int64_t, 52>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 52>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 52>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1507,7 +1507,7 @@ template <> int64_t multshiftround<int64_t, 52>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^53) */
-template <> int64_t multshiftround<int64_t, 53>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 53>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 53>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1519,7 +1519,7 @@ template <> int64_t multshiftround<int64_t, 53>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^54) */
-template <> int64_t multshiftround<int64_t, 54>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 54>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 54>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1531,7 +1531,7 @@ template <> int64_t multshiftround<int64_t, 54>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^55) */
-template <> int64_t multshiftround<int64_t, 55>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 55>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 55>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1543,7 +1543,7 @@ template <> int64_t multshiftround<int64_t, 55>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^56) */
-template <> int64_t multshiftround<int64_t, 56>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 56>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 56>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1555,7 +1555,7 @@ template <> int64_t multshiftround<int64_t, 56>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^57) */
-template <> int64_t multshiftround<int64_t, 57>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 57>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 57>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1567,7 +1567,7 @@ template <> int64_t multshiftround<int64_t, 57>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^58) */
-template <> int64_t multshiftround<int64_t, 58>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 58>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 58>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1579,7 +1579,7 @@ template <> int64_t multshiftround<int64_t, 58>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^59) */
-template <> int64_t multshiftround<int64_t, 59>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 59>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 59>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1591,7 +1591,7 @@ template <> int64_t multshiftround<int64_t, 59>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^60) */
-template <> int64_t multshiftround<int64_t, 60>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 60>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 60>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1603,7 +1603,7 @@ template <> int64_t multshiftround<int64_t, 60>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^61) */
-template <> int64_t multshiftround<int64_t, 61>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 61>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 61>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1615,7 +1615,7 @@ template <> int64_t multshiftround<int64_t, 61>(const int64_t num, const int64_t
 }
 
 /* Returns ROUND((num * mul) / 2^62) */
-template <> int64_t multshiftround<int64_t, 62>(const int64_t num, const int64_t mul) {
+template <> inline int64_t multshiftround<int64_t, 62>(const int64_t num, const int64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_i64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<int64_t, 62>(%" PRIi64 ", %" PRIi64 "), numerical overflow or underflow in the product %" PRIi64 " * %" PRIi64 ".\n", num, mul, num, mul);
@@ -1631,7 +1631,7 @@ template <> int64_t multshiftround<int64_t, 62>(const int64_t num, const int64_t
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> uint8_t multshiftround<uint8_t, 1>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 1>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1644,7 +1644,7 @@ template <> uint8_t multshiftround<uint8_t, 1>(const uint8_t num, const uint8_t 
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> uint8_t multshiftround<uint8_t, 2>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 2>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1657,7 +1657,7 @@ template <> uint8_t multshiftround<uint8_t, 2>(const uint8_t num, const uint8_t 
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> uint8_t multshiftround<uint8_t, 3>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 3>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1670,7 +1670,7 @@ template <> uint8_t multshiftround<uint8_t, 3>(const uint8_t num, const uint8_t 
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> uint8_t multshiftround<uint8_t, 4>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 4>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1683,7 +1683,7 @@ template <> uint8_t multshiftround<uint8_t, 4>(const uint8_t num, const uint8_t 
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> uint8_t multshiftround<uint8_t, 5>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 5>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1696,7 +1696,7 @@ template <> uint8_t multshiftround<uint8_t, 5>(const uint8_t num, const uint8_t 
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> uint8_t multshiftround<uint8_t, 6>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 6>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1709,7 +1709,7 @@ template <> uint8_t multshiftround<uint8_t, 6>(const uint8_t num, const uint8_t 
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> uint8_t multshiftround<uint8_t, 7>(const uint8_t num, const uint8_t mul) {
+template <> inline uint8_t multshiftround<uint8_t, 7>(const uint8_t num, const uint8_t mul) {
   #ifdef DEBUG_INTMATH
     uint16_t debug_product = static_cast<uint16_t>(num) * static_cast<uint16_t>(mul);
     if (debug_product > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()))
@@ -1726,7 +1726,7 @@ template <> uint8_t multshiftround<uint8_t, 7>(const uint8_t num, const uint8_t 
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> uint16_t multshiftround<uint16_t, 1>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 1>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1739,7 +1739,7 @@ template <> uint16_t multshiftround<uint16_t, 1>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> uint16_t multshiftround<uint16_t, 2>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 2>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1752,7 +1752,7 @@ template <> uint16_t multshiftround<uint16_t, 2>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> uint16_t multshiftround<uint16_t, 3>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 3>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1765,7 +1765,7 @@ template <> uint16_t multshiftround<uint16_t, 3>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> uint16_t multshiftround<uint16_t, 4>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 4>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1778,7 +1778,7 @@ template <> uint16_t multshiftround<uint16_t, 4>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> uint16_t multshiftround<uint16_t, 5>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 5>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1791,7 +1791,7 @@ template <> uint16_t multshiftround<uint16_t, 5>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> uint16_t multshiftround<uint16_t, 6>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 6>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1804,7 +1804,7 @@ template <> uint16_t multshiftround<uint16_t, 6>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> uint16_t multshiftround<uint16_t, 7>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 7>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1817,7 +1817,7 @@ template <> uint16_t multshiftround<uint16_t, 7>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^8) */
-template <> uint16_t multshiftround<uint16_t, 8>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 8>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1830,7 +1830,7 @@ template <> uint16_t multshiftround<uint16_t, 8>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^9) */
-template <> uint16_t multshiftround<uint16_t, 9>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 9>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1843,7 +1843,7 @@ template <> uint16_t multshiftround<uint16_t, 9>(const uint16_t num, const uint1
 }
 
 /* Returns ROUND((num * mul) / 2^10) */
-template <> uint16_t multshiftround<uint16_t, 10>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 10>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1856,7 +1856,7 @@ template <> uint16_t multshiftround<uint16_t, 10>(const uint16_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^11) */
-template <> uint16_t multshiftround<uint16_t, 11>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 11>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1869,7 +1869,7 @@ template <> uint16_t multshiftround<uint16_t, 11>(const uint16_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^12) */
-template <> uint16_t multshiftround<uint16_t, 12>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 12>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1882,7 +1882,7 @@ template <> uint16_t multshiftround<uint16_t, 12>(const uint16_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^13) */
-template <> uint16_t multshiftround<uint16_t, 13>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 13>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1895,7 +1895,7 @@ template <> uint16_t multshiftround<uint16_t, 13>(const uint16_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^14) */
-template <> uint16_t multshiftround<uint16_t, 14>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 14>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1908,7 +1908,7 @@ template <> uint16_t multshiftround<uint16_t, 14>(const uint16_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^15) */
-template <> uint16_t multshiftround<uint16_t, 15>(const uint16_t num, const uint16_t mul) {
+template <> inline uint16_t multshiftround<uint16_t, 15>(const uint16_t num, const uint16_t mul) {
   #ifdef DEBUG_INTMATH
     uint32_t debug_product = static_cast<uint32_t>(num) * static_cast<uint32_t>(mul);
     if (debug_product > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()))
@@ -1925,7 +1925,7 @@ template <> uint16_t multshiftround<uint16_t, 15>(const uint16_t num, const uint
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> uint32_t multshiftround<uint32_t, 1>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 1>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -1938,7 +1938,7 @@ template <> uint32_t multshiftround<uint32_t, 1>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> uint32_t multshiftround<uint32_t, 2>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 2>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -1951,7 +1951,7 @@ template <> uint32_t multshiftround<uint32_t, 2>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> uint32_t multshiftround<uint32_t, 3>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 3>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -1964,7 +1964,7 @@ template <> uint32_t multshiftround<uint32_t, 3>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> uint32_t multshiftround<uint32_t, 4>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 4>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -1977,7 +1977,7 @@ template <> uint32_t multshiftround<uint32_t, 4>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> uint32_t multshiftround<uint32_t, 5>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 5>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -1990,7 +1990,7 @@ template <> uint32_t multshiftround<uint32_t, 5>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> uint32_t multshiftround<uint32_t, 6>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 6>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2003,7 +2003,7 @@ template <> uint32_t multshiftround<uint32_t, 6>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> uint32_t multshiftround<uint32_t, 7>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 7>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2016,7 +2016,7 @@ template <> uint32_t multshiftround<uint32_t, 7>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^8) */
-template <> uint32_t multshiftround<uint32_t, 8>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 8>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2029,7 +2029,7 @@ template <> uint32_t multshiftround<uint32_t, 8>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^9) */
-template <> uint32_t multshiftround<uint32_t, 9>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 9>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2042,7 +2042,7 @@ template <> uint32_t multshiftround<uint32_t, 9>(const uint32_t num, const uint3
 }
 
 /* Returns ROUND((num * mul) / 2^10) */
-template <> uint32_t multshiftround<uint32_t, 10>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 10>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2055,7 +2055,7 @@ template <> uint32_t multshiftround<uint32_t, 10>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^11) */
-template <> uint32_t multshiftround<uint32_t, 11>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 11>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2068,7 +2068,7 @@ template <> uint32_t multshiftround<uint32_t, 11>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^12) */
-template <> uint32_t multshiftround<uint32_t, 12>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 12>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2081,7 +2081,7 @@ template <> uint32_t multshiftround<uint32_t, 12>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^13) */
-template <> uint32_t multshiftround<uint32_t, 13>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 13>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2094,7 +2094,7 @@ template <> uint32_t multshiftround<uint32_t, 13>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^14) */
-template <> uint32_t multshiftround<uint32_t, 14>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 14>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2107,7 +2107,7 @@ template <> uint32_t multshiftround<uint32_t, 14>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^15) */
-template <> uint32_t multshiftround<uint32_t, 15>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 15>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2120,7 +2120,7 @@ template <> uint32_t multshiftround<uint32_t, 15>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^16) */
-template <> uint32_t multshiftround<uint32_t, 16>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 16>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2133,7 +2133,7 @@ template <> uint32_t multshiftround<uint32_t, 16>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^17) */
-template <> uint32_t multshiftround<uint32_t, 17>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 17>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2146,7 +2146,7 @@ template <> uint32_t multshiftround<uint32_t, 17>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^18) */
-template <> uint32_t multshiftround<uint32_t, 18>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 18>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2159,7 +2159,7 @@ template <> uint32_t multshiftround<uint32_t, 18>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^19) */
-template <> uint32_t multshiftround<uint32_t, 19>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 19>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2172,7 +2172,7 @@ template <> uint32_t multshiftround<uint32_t, 19>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^20) */
-template <> uint32_t multshiftround<uint32_t, 20>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 20>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2185,7 +2185,7 @@ template <> uint32_t multshiftround<uint32_t, 20>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^21) */
-template <> uint32_t multshiftround<uint32_t, 21>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 21>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2198,7 +2198,7 @@ template <> uint32_t multshiftround<uint32_t, 21>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^22) */
-template <> uint32_t multshiftround<uint32_t, 22>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 22>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2211,7 +2211,7 @@ template <> uint32_t multshiftround<uint32_t, 22>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^23) */
-template <> uint32_t multshiftround<uint32_t, 23>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 23>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2224,7 +2224,7 @@ template <> uint32_t multshiftround<uint32_t, 23>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^24) */
-template <> uint32_t multshiftround<uint32_t, 24>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 24>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2237,7 +2237,7 @@ template <> uint32_t multshiftround<uint32_t, 24>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^25) */
-template <> uint32_t multshiftround<uint32_t, 25>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 25>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2250,7 +2250,7 @@ template <> uint32_t multshiftround<uint32_t, 25>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^26) */
-template <> uint32_t multshiftround<uint32_t, 26>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 26>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2263,7 +2263,7 @@ template <> uint32_t multshiftround<uint32_t, 26>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^27) */
-template <> uint32_t multshiftround<uint32_t, 27>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 27>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2276,7 +2276,7 @@ template <> uint32_t multshiftround<uint32_t, 27>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^28) */
-template <> uint32_t multshiftround<uint32_t, 28>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 28>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2289,7 +2289,7 @@ template <> uint32_t multshiftround<uint32_t, 28>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^29) */
-template <> uint32_t multshiftround<uint32_t, 29>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 29>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2302,7 +2302,7 @@ template <> uint32_t multshiftround<uint32_t, 29>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^30) */
-template <> uint32_t multshiftround<uint32_t, 30>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 30>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2315,7 +2315,7 @@ template <> uint32_t multshiftround<uint32_t, 30>(const uint32_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^31) */
-template <> uint32_t multshiftround<uint32_t, 31>(const uint32_t num, const uint32_t mul) {
+template <> inline uint32_t multshiftround<uint32_t, 31>(const uint32_t num, const uint32_t mul) {
   #ifdef DEBUG_INTMATH
     uint64_t debug_product = static_cast<uint64_t>(num) * static_cast<uint64_t>(mul);
     if (debug_product > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()))
@@ -2332,7 +2332,7 @@ template <> uint32_t multshiftround<uint32_t, 31>(const uint32_t num, const uint
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^1) */
-template <> uint64_t multshiftround<uint64_t, 1>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 1>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 1>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2344,7 +2344,7 @@ template <> uint64_t multshiftround<uint64_t, 1>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^2) */
-template <> uint64_t multshiftround<uint64_t, 2>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 2>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 2>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2356,7 +2356,7 @@ template <> uint64_t multshiftround<uint64_t, 2>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^3) */
-template <> uint64_t multshiftround<uint64_t, 3>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 3>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 3>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2368,7 +2368,7 @@ template <> uint64_t multshiftround<uint64_t, 3>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^4) */
-template <> uint64_t multshiftround<uint64_t, 4>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 4>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 4>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2380,7 +2380,7 @@ template <> uint64_t multshiftround<uint64_t, 4>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^5) */
-template <> uint64_t multshiftround<uint64_t, 5>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 5>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 5>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2392,7 +2392,7 @@ template <> uint64_t multshiftround<uint64_t, 5>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^6) */
-template <> uint64_t multshiftround<uint64_t, 6>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 6>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 6>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2404,7 +2404,7 @@ template <> uint64_t multshiftround<uint64_t, 6>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^7) */
-template <> uint64_t multshiftround<uint64_t, 7>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 7>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 7>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2416,7 +2416,7 @@ template <> uint64_t multshiftround<uint64_t, 7>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^8) */
-template <> uint64_t multshiftround<uint64_t, 8>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 8>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 8>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2428,7 +2428,7 @@ template <> uint64_t multshiftround<uint64_t, 8>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^9) */
-template <> uint64_t multshiftround<uint64_t, 9>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 9>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 9>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2440,7 +2440,7 @@ template <> uint64_t multshiftround<uint64_t, 9>(const uint64_t num, const uint6
 }
 
 /* Returns ROUND((num * mul) / 2^10) */
-template <> uint64_t multshiftround<uint64_t, 10>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 10>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 10>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2452,7 +2452,7 @@ template <> uint64_t multshiftround<uint64_t, 10>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^11) */
-template <> uint64_t multshiftround<uint64_t, 11>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 11>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 11>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2464,7 +2464,7 @@ template <> uint64_t multshiftround<uint64_t, 11>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^12) */
-template <> uint64_t multshiftround<uint64_t, 12>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 12>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 12>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2476,7 +2476,7 @@ template <> uint64_t multshiftround<uint64_t, 12>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^13) */
-template <> uint64_t multshiftround<uint64_t, 13>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 13>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 13>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2488,7 +2488,7 @@ template <> uint64_t multshiftround<uint64_t, 13>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^14) */
-template <> uint64_t multshiftround<uint64_t, 14>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 14>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 14>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2500,7 +2500,7 @@ template <> uint64_t multshiftround<uint64_t, 14>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^15) */
-template <> uint64_t multshiftround<uint64_t, 15>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 15>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 15>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2512,7 +2512,7 @@ template <> uint64_t multshiftround<uint64_t, 15>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^16) */
-template <> uint64_t multshiftround<uint64_t, 16>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 16>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 16>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2524,7 +2524,7 @@ template <> uint64_t multshiftround<uint64_t, 16>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^17) */
-template <> uint64_t multshiftround<uint64_t, 17>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 17>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 17>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2536,7 +2536,7 @@ template <> uint64_t multshiftround<uint64_t, 17>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^18) */
-template <> uint64_t multshiftround<uint64_t, 18>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 18>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 18>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2548,7 +2548,7 @@ template <> uint64_t multshiftround<uint64_t, 18>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^19) */
-template <> uint64_t multshiftround<uint64_t, 19>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 19>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 19>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2560,7 +2560,7 @@ template <> uint64_t multshiftround<uint64_t, 19>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^20) */
-template <> uint64_t multshiftround<uint64_t, 20>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 20>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 20>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2572,7 +2572,7 @@ template <> uint64_t multshiftround<uint64_t, 20>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^21) */
-template <> uint64_t multshiftround<uint64_t, 21>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 21>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 21>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2584,7 +2584,7 @@ template <> uint64_t multshiftround<uint64_t, 21>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^22) */
-template <> uint64_t multshiftround<uint64_t, 22>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 22>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 22>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2596,7 +2596,7 @@ template <> uint64_t multshiftround<uint64_t, 22>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^23) */
-template <> uint64_t multshiftround<uint64_t, 23>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 23>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 23>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2608,7 +2608,7 @@ template <> uint64_t multshiftround<uint64_t, 23>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^24) */
-template <> uint64_t multshiftround<uint64_t, 24>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 24>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 24>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2620,7 +2620,7 @@ template <> uint64_t multshiftround<uint64_t, 24>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^25) */
-template <> uint64_t multshiftround<uint64_t, 25>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 25>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 25>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2632,7 +2632,7 @@ template <> uint64_t multshiftround<uint64_t, 25>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^26) */
-template <> uint64_t multshiftround<uint64_t, 26>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 26>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 26>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2644,7 +2644,7 @@ template <> uint64_t multshiftround<uint64_t, 26>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^27) */
-template <> uint64_t multshiftround<uint64_t, 27>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 27>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 27>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2656,7 +2656,7 @@ template <> uint64_t multshiftround<uint64_t, 27>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^28) */
-template <> uint64_t multshiftround<uint64_t, 28>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 28>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 28>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2668,7 +2668,7 @@ template <> uint64_t multshiftround<uint64_t, 28>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^29) */
-template <> uint64_t multshiftround<uint64_t, 29>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 29>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 29>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2680,7 +2680,7 @@ template <> uint64_t multshiftround<uint64_t, 29>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^30) */
-template <> uint64_t multshiftround<uint64_t, 30>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 30>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 30>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2692,7 +2692,7 @@ template <> uint64_t multshiftround<uint64_t, 30>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^31) */
-template <> uint64_t multshiftround<uint64_t, 31>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 31>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 31>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2704,7 +2704,7 @@ template <> uint64_t multshiftround<uint64_t, 31>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^32) */
-template <> uint64_t multshiftround<uint64_t, 32>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 32>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 32>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2716,7 +2716,7 @@ template <> uint64_t multshiftround<uint64_t, 32>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^33) */
-template <> uint64_t multshiftround<uint64_t, 33>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 33>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 33>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2728,7 +2728,7 @@ template <> uint64_t multshiftround<uint64_t, 33>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^34) */
-template <> uint64_t multshiftround<uint64_t, 34>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 34>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 34>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2740,7 +2740,7 @@ template <> uint64_t multshiftround<uint64_t, 34>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^35) */
-template <> uint64_t multshiftround<uint64_t, 35>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 35>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 35>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2752,7 +2752,7 @@ template <> uint64_t multshiftround<uint64_t, 35>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^36) */
-template <> uint64_t multshiftround<uint64_t, 36>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 36>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 36>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2764,7 +2764,7 @@ template <> uint64_t multshiftround<uint64_t, 36>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^37) */
-template <> uint64_t multshiftround<uint64_t, 37>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 37>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 37>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2776,7 +2776,7 @@ template <> uint64_t multshiftround<uint64_t, 37>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^38) */
-template <> uint64_t multshiftround<uint64_t, 38>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 38>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 38>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2788,7 +2788,7 @@ template <> uint64_t multshiftround<uint64_t, 38>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^39) */
-template <> uint64_t multshiftround<uint64_t, 39>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 39>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 39>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2800,7 +2800,7 @@ template <> uint64_t multshiftround<uint64_t, 39>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^40) */
-template <> uint64_t multshiftround<uint64_t, 40>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 40>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 40>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2812,7 +2812,7 @@ template <> uint64_t multshiftround<uint64_t, 40>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^41) */
-template <> uint64_t multshiftround<uint64_t, 41>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 41>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 41>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2824,7 +2824,7 @@ template <> uint64_t multshiftround<uint64_t, 41>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^42) */
-template <> uint64_t multshiftround<uint64_t, 42>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 42>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 42>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2836,7 +2836,7 @@ template <> uint64_t multshiftround<uint64_t, 42>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^43) */
-template <> uint64_t multshiftround<uint64_t, 43>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 43>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 43>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2848,7 +2848,7 @@ template <> uint64_t multshiftround<uint64_t, 43>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^44) */
-template <> uint64_t multshiftround<uint64_t, 44>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 44>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 44>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2860,7 +2860,7 @@ template <> uint64_t multshiftround<uint64_t, 44>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^45) */
-template <> uint64_t multshiftround<uint64_t, 45>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 45>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 45>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2872,7 +2872,7 @@ template <> uint64_t multshiftround<uint64_t, 45>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^46) */
-template <> uint64_t multshiftround<uint64_t, 46>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 46>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 46>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2884,7 +2884,7 @@ template <> uint64_t multshiftround<uint64_t, 46>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^47) */
-template <> uint64_t multshiftround<uint64_t, 47>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 47>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 47>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2896,7 +2896,7 @@ template <> uint64_t multshiftround<uint64_t, 47>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^48) */
-template <> uint64_t multshiftround<uint64_t, 48>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 48>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 48>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2908,7 +2908,7 @@ template <> uint64_t multshiftround<uint64_t, 48>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^49) */
-template <> uint64_t multshiftround<uint64_t, 49>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 49>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 49>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2920,7 +2920,7 @@ template <> uint64_t multshiftround<uint64_t, 49>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^50) */
-template <> uint64_t multshiftround<uint64_t, 50>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 50>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 50>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2932,7 +2932,7 @@ template <> uint64_t multshiftround<uint64_t, 50>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^51) */
-template <> uint64_t multshiftround<uint64_t, 51>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 51>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 51>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2944,7 +2944,7 @@ template <> uint64_t multshiftround<uint64_t, 51>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^52) */
-template <> uint64_t multshiftround<uint64_t, 52>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 52>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 52>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2956,7 +2956,7 @@ template <> uint64_t multshiftround<uint64_t, 52>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^53) */
-template <> uint64_t multshiftround<uint64_t, 53>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 53>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 53>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2968,7 +2968,7 @@ template <> uint64_t multshiftround<uint64_t, 53>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^54) */
-template <> uint64_t multshiftround<uint64_t, 54>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 54>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 54>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2980,7 +2980,7 @@ template <> uint64_t multshiftround<uint64_t, 54>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^55) */
-template <> uint64_t multshiftround<uint64_t, 55>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 55>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 55>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -2992,7 +2992,7 @@ template <> uint64_t multshiftround<uint64_t, 55>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^56) */
-template <> uint64_t multshiftround<uint64_t, 56>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 56>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 56>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3004,7 +3004,7 @@ template <> uint64_t multshiftround<uint64_t, 56>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^57) */
-template <> uint64_t multshiftround<uint64_t, 57>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 57>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 57>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3016,7 +3016,7 @@ template <> uint64_t multshiftround<uint64_t, 57>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^58) */
-template <> uint64_t multshiftround<uint64_t, 58>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 58>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 58>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3028,7 +3028,7 @@ template <> uint64_t multshiftround<uint64_t, 58>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^59) */
-template <> uint64_t multshiftround<uint64_t, 59>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 59>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 59>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3040,7 +3040,7 @@ template <> uint64_t multshiftround<uint64_t, 59>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^60) */
-template <> uint64_t multshiftround<uint64_t, 60>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 60>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 60>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3052,7 +3052,7 @@ template <> uint64_t multshiftround<uint64_t, 60>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^61) */
-template <> uint64_t multshiftround<uint64_t, 61>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 61>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 61>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3064,7 +3064,7 @@ template <> uint64_t multshiftround<uint64_t, 61>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^62) */
-template <> uint64_t multshiftround<uint64_t, 62>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 62>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 62>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
@@ -3076,7 +3076,7 @@ template <> uint64_t multshiftround<uint64_t, 62>(const uint64_t num, const uint
 }
 
 /* Returns ROUND((num * mul) / 2^63) */
-template <> uint64_t multshiftround<uint64_t, 63>(const uint64_t num, const uint64_t mul) {
+template <> inline uint64_t multshiftround<uint64_t, 63>(const uint64_t num, const uint64_t mul) {
   #ifdef DEBUG_INTMATH
     if (detect_product_overflow_u64(num, mul))
       std::fprintf(stderr, "ERROR: multshiftround<uint64_t, 63>(%" PRIu64 ", %" PRIu64 "), numerical overflow in the product %" PRIu64 " * %" PRIu64 ".\n", num, mul, num, mul);
