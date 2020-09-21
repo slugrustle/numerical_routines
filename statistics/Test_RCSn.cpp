@@ -1,6 +1,7 @@
 /**
  * Test_RCSn.cpp
- * This routine tests RCSn against RCSn_naive to ensure they give the same results.
+ * This routine tests RCSn() and RCSn_InPlace() against RCSn_naive() to ensure
+ * the time-efficient variants give the same results as the naive variant.
  *
  * Written in 2020 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
@@ -11,7 +12,7 @@
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
  */
-#include "RCSn.h"
+#include "RCSn.hpp"
 #include <random>
 #include <cstdio>
 #include <chrono>
@@ -26,7 +27,7 @@ int main()
   uint64_t largest_trial = 0ull;
   uint64_t largest_size = 0ull;
 
-  for (uint64_t jTrial = 1ull; jTrial <= 10000ull; jTrial++)
+  for (uint64_t jTrial = 1ull; jTrial < 10000ull; jTrial++)
   {
     std::vector<double> vData;
 
@@ -35,16 +36,22 @@ int main()
       vData.push_back(distribution(rand_generator));
 
       std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
-      double Sn_result_fast = RCSn(vData);
+      double Sn_result_fast = RCSn(vData.cbegin(), vData.cend());
       std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
       uint64_t fast_us = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
+      std::vector<double> vData2(vData);
       begin = std::chrono::high_resolution_clock::now();
-      double Sn_result_naive = RCSn_naive(vData);
+      double Sn_result_in_place = RCSn_InPlace(vData2.begin(), vData2.end());
+      end = std::chrono::high_resolution_clock::now();
+      uint64_t in_place_us = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+      begin = std::chrono::high_resolution_clock::now();
+      double Sn_result_naive = RCSn_naive(vData.cbegin(), vData.cend());
       end = std::chrono::high_resolution_clock::now();
       uint64_t naive_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
-      double diff = std::fabs(Sn_result_fast - Sn_result_naive);
+      double diff = std::max(std::fabs(Sn_result_fast - Sn_result_naive), std::fabs(Sn_result_in_place - Sn_result_naive));
     
       if (diff > largest_diff)
       {
@@ -55,13 +62,13 @@ int main()
 
       if (largest_trial == 0ull)
       {
-        std::printf("trial %06" PRIu64 ", size %06" PRIu64 ", diff: % .15e    largest diff: n/a @ trial n/a  size n/a    fast % .4e, %06" PRIu64 "us  naive % .4e, %06" PRIu64 "ms\n", 
-                    jTrial, vecSize, diff, Sn_result_fast, fast_us, Sn_result_naive, naive_ms);
+        std::printf("trial %04" PRIu64 ", size %04" PRIu64 ", diff: %.4e, largest diff: n/a @ trial n/a, size n/a, fast %.4e, %05" PRIu64 "us, in place %.4e, %05" PRIu64 "us, naive %.4e, %04" PRIu64 "ms\n", 
+                    jTrial, vecSize, diff, Sn_result_fast, fast_us, Sn_result_in_place, in_place_us, Sn_result_naive, naive_ms);
       }
       else
       {
-        std::printf("trial %06" PRIu64 ", size %06" PRIu64 ", diff: % .15e    largest diff: % .15e @ trial %06" PRIu64 " size %06" PRIu64 "    fast % .4e, %06" PRIu64 "us  naive % .4e, %06" PRIu64 "ms\n", 
-                    jTrial, vecSize, diff, largest_diff, largest_trial, largest_size, Sn_result_fast, fast_us, Sn_result_naive, naive_ms);
+        std::printf("trial %04" PRIu64 ", size %04" PRIu64 ", diff: %.4e, largest diff: %.4e @ trial %04" PRIu64 ", size %04" PRIu64 ", fast %.4e, %05" PRIu64 "us, in place %.4e, %05" PRIu64 "us, naive %.4e, %04" PRIu64 "ms\n", 
+                    jTrial, vecSize, diff, largest_diff, largest_trial, largest_size, Sn_result_fast, fast_us, Sn_result_in_place, in_place_us, Sn_result_naive, naive_ms);
       }
     }
   }

@@ -1,48 +1,45 @@
 /**
- * RCSn.h
- * RCSn computes Sn, a robust estimate of scale.
- * This algorithm has been translated to C++ from the Fortran77 version
- * found in the paper
- * "Time-efficient algorithms for two highly robust estimators of scale"
- * by Christophe Croux and Peter J. Rousseeuw
- * Published in Computational Statistics,
- * Volume 1: Proceedings of the 10th Symposium on Computational Statistics
- * Pages 411-428, Editors Yadolah Dodge and Joe Whittaker
- * Publisher Physica, Heidleberg. Year 1992
- * DOI https://doi.org/10.1007/978-3-662-26811-7_58
- *
- * Written in 2020 by Ben Tesch.
- * Originally distributed at https://github.com/slugrustle/numerical_routines
+ * detect_product_overflow.h
+ * detect_product_overflow_u64 detects numeric overflow in the multiplication
+ * of two uint64_t numbers without relying on potentially non-portable
+ * 128-bit integer types.
  * 
+ * Written in 2019 by Ben Tesch.
+ * Originally distributed at https://github.com/slugrustle/numerical_routines
+ *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide. This software is distributed without any warranty.
+ * worldwide.This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
- * end of this file. If not, see http://creativecommons.org/publicdomain/zero/1.0/
+ * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
-#ifndef RCSN_H_
-#define RCSN_H_
+#ifndef DETECT_PRODUCT_OVERFLOW_H_
+#define DETECT_PRODUCT_OVERFLOW_H_
 
-#include <vector>
+#include "inttypes.h"
+#include "stdbool.h"
 
-double RCSn(const std::vector<double> &vData);
-double RCSn_naive(const std::vector<double> &vData);
+/**
+ * Returns true if the product a * b would overflow the range
+ * of a uin64_t and false otherwise.
+ */
+bool detect_product_overflow_u64(const uint64_t a, const uint64_t b);
 
-#endif
+#endif /* #ifndef DETECT_PRODUCT_OVERFLOW_H_ */
 
 /*
 Creative Commons Legal Code
 
 CC0 1.0 Universal
 
-CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
-LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
-ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
-REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
-PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
-THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-HEREUNDER.
+    CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
+    LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
+    ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+    INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
+    REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
+    PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
+    THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
+    HEREUNDER.
 
 Statement of Purpose
 
@@ -75,23 +72,23 @@ protected by copyright and related or neighboring rights ("Copyright and
 Related Rights"). Copyright and Related Rights include, but are not
 limited to, the following:
 
-i. the right to reproduce, adapt, distribute, perform, display,
-communicate, and translate a Work;
-ii. moral rights retained by the original author(s) and/or performer(s);
+  i. the right to reproduce, adapt, distribute, perform, display,
+     communicate, and translate a Work;
+ ii. moral rights retained by the original author(s) and/or performer(s);
 iii. publicity and privacy rights pertaining to a person's image or
-likeness depicted in a Work;
-iv. rights protecting against unfair competition in regards to a Work,
-subject to the limitations in paragraph 4(a), below;
-v. rights protecting the extraction, dissemination, use and reuse of data
-in a Work;
-vi. database rights (such as those arising under Directive 96/9/EC of the
-European Parliament and of the Council of 11 March 1996 on the legal
-protection of databases, and under any national implementation
-thereof, including any amended or successor version of such
-directive); and
+     likeness depicted in a Work;
+ iv. rights protecting against unfair competition in regards to a Work,
+     subject to the limitations in paragraph 4(a), below;
+  v. rights protecting the extraction, dissemination, use and reuse of data
+     in a Work;
+ vi. database rights (such as those arising under Directive 96/9/EC of the
+     European Parliament and of the Council of 11 March 1996 on the legal
+     protection of databases, and under any national implementation
+     thereof, including any amended or successor version of such
+     directive); and
 vii. other similar, equivalent or corresponding rights throughout the
-world based on applicable law or treaty, and any national
-implementations thereof.
+     world based on applicable law or treaty, and any national
+     implementations thereof.
 
 2. Waiver. To the greatest extent permitted by, but not in contravention
 of, applicable law, Affirmer hereby overtly, fully, permanently,
@@ -134,22 +131,22 @@ express Statement of Purpose.
 
 4. Limitations and Disclaimers.
 
-a. No trademark or patent rights held by Affirmer are waived, abandoned,
-surrendered, licensed or otherwise affected by this document.
-b. Affirmer offers the Work as-is and makes no representations or
-warranties of any kind concerning the Work, express, implied,
-statutory or otherwise, including without limitation warranties of
-title, merchantability, fitness for a particular purpose, non
-infringement, or the absence of latent or other defects, accuracy, or
-the present or absence of errors, whether or not discoverable, all to
-the greatest extent permissible under applicable law.
-c. Affirmer disclaims responsibility for clearing rights of other persons
-that may apply to the Work or any use thereof, including without
-limitation any person's Copyright and Related Rights in the Work.
-Further, Affirmer disclaims responsibility for obtaining any necessary
-consents, permissions or other rights required for any use of the
-Work.
-d. Affirmer understands and acknowledges that Creative Commons is not a
-party to this document and has no duty or obligation with respect to
-this CC0 or use of the Work.
+ a. No trademark or patent rights held by Affirmer are waived, abandoned,
+    surrendered, licensed or otherwise affected by this document.
+ b. Affirmer offers the Work as-is and makes no representations or
+    warranties of any kind concerning the Work, express, implied,
+    statutory or otherwise, including without limitation warranties of
+    title, merchantability, fitness for a particular purpose, non
+    infringement, or the absence of latent or other defects, accuracy, or
+    the present or absence of errors, whether or not discoverable, all to
+    the greatest extent permissible under applicable law.
+ c. Affirmer disclaims responsibility for clearing rights of other persons
+    that may apply to the Work or any use thereof, including without
+    limitation any person's Copyright and Related Rights in the Work.
+    Further, Affirmer disclaims responsibility for obtaining any necessary
+    consents, permissions or other rights required for any use of the
+    Work.
+ d. Affirmer understands and acknowledges that Creative Commons is not a
+    party to this document and has no duty or obligation with respect to
+    this CC0 or use of the Work.
 */

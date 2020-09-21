@@ -1,123 +1,59 @@
 /**
- * parsers.cpp
- *
- * Definitions of several string to numerical value parsers used to 
- * interpret and validate user input in thermistor_interpolator.cpp.
- *
+ * detect_product_overflow.c
+ * detect_product_overflow_u64 detects numeric overflow in the multiplication
+ * of two uint64_t numbers without relying on potentially non-portable
+ * 128-bit integer types.
+ * 
  * Written in 2019 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
- * worldwide. This software is distributed without any warranty.
+ * worldwide.This software is distributed without any warranty.
  * The text of the CC0 Public Domain Dedication should be reproduced at the
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include "parsers.h"
-#include <exception>
-#include <stdexcept>
-#include <limits>
-#include <cmath>
+#include "detect_product_overflow.h"
 
 /**
- * Parses a string to an int64_t. Sets success true/false based on
- * whether the entire input string was an integer or not.
+ * Returns true if the product a * b would overflow the range
+ * of a uin64_t and false otherwise.
  */
-int64_t parse_int64(const std::string &in_str, bool &success)
-{
-  if (in_str.length() == 0u)
-  {
-    success = false;
-    return 0ll;
-  }
+bool detect_product_overflow_u64(const uint64_t a, const uint64_t b) {
+  /**
+   * a * b = 2^64 * (a_hi * b_hi) + 
+   *         2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *         a_lo * b_lo
+   * All of the products a_hi*b_hi, a_hi*b_lo,
+   * a_lo*b_hi, and a_lo*b_lo will be on the range
+   * [0,2^64-2^33+1].
+   */
+  uint64_t a_hi = (a & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t a_lo =  a & 0x00000000FFFFFFFFull;
+  uint64_t b_hi = (b & 0xFFFFFFFF00000000ull) >> 32;
+  uint64_t b_lo =  b & 0x00000000FFFFFFFFull;
 
-  size_t after_int = 0u;
-  int64_t value = 0ll;
-  try
-  {
-    value = std::stoll(in_str, &after_int, 10);
-  }
-  catch (const std::invalid_argument &e)
-  {
-    (void) e;
-    success = false;
-    return 0ll;
-  }
-  catch (const std::out_of_range &e)
-  {
-    (void) e;
-    success = false;
-    return 0ll;
-  }
+  if (a_hi * b_hi > 0ull) return true;
+  /**
+   * Now we know that a_hi * b_hi == 0.
+   * Consequently,
+   * a * b = 2^32 * (a_hi * b_lo + a_lo * b_hi) +
+   *         a_lo * b_lo
+   */
 
-  if (after_int != in_str.length())
-  {
-    success = false;
-    return 0ll;
-  }
+  uint64_t mid_prod_1 = a_hi * b_lo;
+  uint64_t mid_prod_2 = a_lo * b_hi;
 
-  success = true;
-  return value;
-}
+  if (UINT64_MAX - mid_prod_2 < mid_prod_1) return true;
+  /* Now we know that mid_prod_1 + mid_prod_2 <= UINT64_MAX. */
+  uint64_t mid_prod = mid_prod_1 + mid_prod_2;
+  
+  if (mid_prod >= (1ull << 32)) return true;
+  /* Now we know that 2^32 * mid_prod < UINT64_MAX. */
+  if (UINT64_MAX - a_lo * b_lo < mid_prod << 32) return true;
 
-/**
- * Parses a string to a double. Returns NaN if it can't.
- */
-double parse_double(const std::string &in_str)
-{
-  if (in_str.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
-
-  size_t after_double = 0u;
-  double value = std::numeric_limits<double>::quiet_NaN();
-  try
-  {
-    value = std::stod(in_str, &after_double);
-  }
-  catch (const std::invalid_argument &e)
-  {
-    (void) e;
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-  catch (const std::out_of_range &e)
-  {
-    (void) e;
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-
-  if (after_double != in_str.length()) return std::numeric_limits<double>::quiet_NaN();
-  return value;
-}
-
-/**
- * Parse resistances such as 33.2k, 10M, 100.2, 1, etc.
- * into a value in Ohms. Only the suffixes k and M are
- * recognized.
- * Return NaN if res_string is not parseable.
- * Negative and 0 values are returned as valid.
- */
-double parse_resistance(std::string &res_string)
-{
-  if (res_string.length() == 0u) return std::numeric_limits<double>::quiet_NaN();
-
-  /* Look for a k or M suffix */
-  char suffix = ' ';
-  size_t suffix_idx = 0u;
-  if (res_string.length() > 1u)
-  {
-    suffix_idx = res_string.length() - 1u;
-    suffix = res_string.at(suffix_idx);
-  }
-
-  std::string number_buffer;
-  if ('k' == suffix || 'M' == suffix) number_buffer = res_string.substr(0u, suffix_idx);
-  else number_buffer = res_string;
-
-  double res_val = parse_double(number_buffer);
-  if (std::isnan(res_val)) return res_val;
-  if ('k' == suffix) return 1000.0 * res_val;
-  if ('M' == suffix) return 1.0e6 * res_val;
-  return res_val;
+  return false;
 }
 
 /*

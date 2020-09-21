@@ -84,7 +84,7 @@ template <typename type> type multshiftround(const type num, const type mul, con
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,6]. */
-template <> int8_t multshiftround<int8_t>(const int8_t num, const int8_t mul, const uint8_t shift) {
+template <> inline int8_t multshiftround<int8_t>(const int8_t num, const int8_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(6))
 	    std::fprintf(stderr, "ERROR: multshiftround<int8_t>(%i, %i, %u), shift = %u is invalid; it must be on the range [0,6].\n", num, mul, shift, shift);
@@ -118,7 +118,7 @@ template <> int8_t multshiftround<int8_t>(const int8_t num, const int8_t mul, co
 }
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,7]. */
-template <> uint8_t multshiftround<uint8_t>(const uint8_t num, const uint8_t mul, const uint8_t shift) {
+template <> inline uint8_t multshiftround<uint8_t>(const uint8_t num, const uint8_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(7))
 	    std::fprintf(stderr, "ERROR: multshiftround<uint8_t>(%u, %u, %u), shift = %u is invalid; it must be on the range [0,7].\n", num, mul, shift, shift);
@@ -150,7 +150,7 @@ template <> uint8_t multshiftround<uint8_t>(const uint8_t num, const uint8_t mul
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,14]. */
-template <> int16_t multshiftround<int16_t>(const int16_t num, const int16_t mul, const uint8_t shift) {
+template <> inline int16_t multshiftround<int16_t>(const int16_t num, const int16_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(14))
 	    std::fprintf(stderr, "ERROR: multshiftround<int16_t>(%i, %i, %u), shift = %u is invalid; it must be on the range [0,14].\n", num, mul, shift, shift);
@@ -184,7 +184,7 @@ template <> int16_t multshiftround<int16_t>(const int16_t num, const int16_t mul
 }
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,15]. */
-template <> uint16_t multshiftround<uint16_t>(const uint16_t num, const uint16_t mul, const uint8_t shift) {
+template <> inline uint16_t multshiftround<uint16_t>(const uint16_t num, const uint16_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(15))
   	  std::fprintf(stderr, "ERROR: multshiftround<uint16_t>(%u, %u, %u), shift = %u is invalid; it must be on the range [0,15].\n", num, mul, shift, shift);
@@ -216,7 +216,7 @@ template <> uint16_t multshiftround<uint16_t>(const uint16_t num, const uint16_t
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,30]. */
-template <> int32_t multshiftround<int32_t>(const int32_t num, const int32_t mul, const uint8_t shift) {
+template <> inline int32_t multshiftround<int32_t>(const int32_t num, const int32_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(30))
 	    std::fprintf(stderr, "ERROR: multshiftround<int32_t>(%i, %i, %u), shift = %u is invalid; it must be on the range [0,30].\n", num, mul, shift, shift);
@@ -249,7 +249,7 @@ template <> int32_t multshiftround<int32_t>(const int32_t num, const int32_t mul
 }
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,31]. */
-template <> uint32_t multshiftround<uint32_t>(const uint32_t num, const uint32_t mul, const uint8_t shift) {
+template <> inline uint32_t multshiftround<uint32_t>(const uint32_t num, const uint32_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(31))
   	  std::fprintf(stderr, "ERROR: multshiftround<uint32_t>(%u, %u, %u), shift = %u is invalid; it must be on the range [0,31].\n", num, mul, shift, shift);
@@ -281,7 +281,7 @@ template <> uint32_t multshiftround<uint32_t>(const uint32_t num, const uint32_t
  ********************************************************************************/
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,62]. */
-template <> int64_t multshiftround<int64_t>(const int64_t num, const int64_t mul, const uint8_t shift) {
+template <> inline int64_t multshiftround<int64_t>(const int64_t num, const int64_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(62))
 	    std::fprintf(stderr, "ERROR: multshiftround<int64_t>(%" PRIi64 ", %" PRIi64 ", %u), shift = %u is invalid; it must be on the range [0,62].\n", num, mul, shift, shift);
@@ -310,7 +310,7 @@ template <> int64_t multshiftround<int64_t>(const int64_t num, const int64_t mul
 }
 
 /* Returns ROUND((num * mul) / 2^shift). shift must be on the range [0,63]. */
-template <> uint64_t multshiftround<uint64_t>(const uint64_t num, const uint64_t mul, const uint8_t shift) {
+template <> inline uint64_t multshiftround<uint64_t>(const uint64_t num, const uint64_t mul, const uint8_t shift) {
   #ifdef DEBUG_INTMATH
     if (shift > static_cast<uint8_t>(63))
 	    std::fprintf(stderr, "ERROR: multshiftround<uint64_t>(%" PRIu64 ", %" PRIu64 ", %u), shift = %u is invalid; it must be on the range [0,63].\n", num, mul, shift, shift);

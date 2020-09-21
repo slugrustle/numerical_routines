@@ -1,0 +1,30 @@
+# Run 
+# make -f makefile-unix
+# from the command line to build all executables in this directory.
+#
+# Run 
+# make -f makefile-unix clean
+# to delete all executables and .o files created during the build.
+#
+# Run 
+# make -f makefile-unix cleanobj
+# to delete all .o files created during the build.
+
+C_OPTIONS = -Wall -O3 -static -static-libgcc -std=c99 -flto -march=athlon64
+BASE_OPTIONS = -Wall -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlon64 
+OBJ_FILES = detect_product_overflow.o
+EXE_FILES = Test_GCD_LCM
+
+all: $(EXE_FILES)
+
+detect_product_overflow.o:detect_product_overflow.c detect_product_overflow.h
+	gcc $(C_OPTIONS) -c -o $@ detect_product_overflow.c
+
+Test_GCD_LCM:Test_GCD_LCM.cpp gcd_lcm.hpp detect_product_overflow.o
+	g++ $(BASE_OPTIONS) -o $@ detect_product_overflow.o Test_GCD_LCM.cpp
+
+clean:
+	rm -f $(EXE_FILES) $(OBJ_FILES)
+
+cleanobj:
+	rm -f $(OBJ_FILES)

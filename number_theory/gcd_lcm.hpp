@@ -1,13 +1,17 @@
 /**
  * gcd_lcm.hpp
  * Implementations of the greatest common divisor and least common multiple
- * algorithms with specializations for uint16_t, uint32_t, and uint64_t
- * types.
+ * algorithms with specializations for uint8_t, uint16_t, uint32_t, and
+ * uint64_t types.
  * 
  * The lcm() functions throw an std::overflow_error if the result would
  * overflow the range of the input/output type.
  * 
- * Written in 2019 by Ben Tesch.
+ * Two-argument and multiple-argument (>= 2, via initializer list or iterators)
+ * versions of both gcd() and lcm() are defined for all numeric types listed
+ * above.
+ * 
+ * Written in 2020 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
@@ -24,22 +28,50 @@
 #include <exception>
 #include <stdexcept>
 
+extern "C"
+{
+  #include "detect_product_overflow.h"
+}
+
 /* Allows static_assert message in multshiftround primary template to compile. */
 template <typename type> static bool always_false_gcd_lcm(void) { return false; }
 
 /**
- * The gcd primary template is a catch-all for invalid
- * and/or presently unimplemented template arguments.
+ * This two-argument gcd primary template is a catch-all for invalid
+ * and/or presently unimplemented unsigned integer types.
  */
-template <typename type> type gcd(type a, type b) {
+template <typename type> 
+typename std::enable_if<std::is_unsigned<type>::value, type>::type gcd(type a, type b) {
   static_assert(always_false_gcd_lcm<type>(), "type gcd<type>(type a, type b) is not defined for the specified type.");
+}
+
+/**
+ * Specialization of the greatest common divisor algorithm
+ * for uint8_t.
+ */
+template <> inline uint8_t gcd<uint8_t>(uint8_t a, uint8_t b) {
+  uint8_t tmp;
+  
+  if (b > a) {
+    tmp = a;
+    a = b;
+    b = tmp;
+  }
+
+  while (b != static_cast<uint8_t>(0)) {
+    tmp = b;
+    b = a % b;
+    a = tmp;
+  }
+
+  return a;
 }
 
 /**
  * Specialization of the greatest common divisor algorithm
  * for uint16_t.
  */
-template <> uint16_t gcd<uint16_t>(uint16_t a, uint16_t b) {
+template <> inline uint16_t gcd<uint16_t>(uint16_t a, uint16_t b) {
   uint16_t tmp;
   
   if (b > a) {
@@ -61,7 +93,7 @@ template <> uint16_t gcd<uint16_t>(uint16_t a, uint16_t b) {
  * Specialization of the greatest common divisor algorithm
  * for uint32_t.
  */
-template <> uint32_t gcd<uint32_t>(uint32_t a, uint32_t b) {
+template <> inline uint32_t gcd<uint32_t>(uint32_t a, uint32_t b) {
   uint32_t tmp;
   
   if (b > a) {
@@ -83,7 +115,7 @@ template <> uint32_t gcd<uint32_t>(uint32_t a, uint32_t b) {
  * Specialization of the greatest common divisor algorithm
  * for uint64_t.
  */
-template <> uint64_t gcd<uint64_t>(uint64_t a, uint64_t b) {
+template <> inline uint64_t gcd<uint64_t>(uint64_t a, uint64_t b) {
   uint64_t tmp;
   
   if (b > a) {
@@ -102,11 +134,138 @@ template <> uint64_t gcd<uint64_t>(uint64_t a, uint64_t b) {
 }
 
 /**
- * The lcm primary template is a catch-all for invalid
- * and/or presently unimplemented template arguments.
+ * This initializer_list-based multi-argument gcd primary template
+ * is a catch-all for invalid and/or presently unimplemented unsigned
+ * integer types.
+ * 
+ * This form accepts multiple (>= 2) arguments via
+ * initializer list.
+ * 
+ * Example: uint32_t out = gcd<uint32_t>({10u, 90u, 3u});
+ * 
+ * This form is only valid for input types for which a two-argument gcd
+ * function is defined above.
  */
-template <typename type> type lcm(type a, type b) {
+template <typename type>
+typename std::enable_if<std::is_unsigned<type>::value, type>::type gcd(const std::initializer_list<type> &i_l) {
+  static_assert(always_false_gcd_lcm<type>(), "type gcd<type>(initializer_list<type> &i_l) is not defined for the specified type.");
+}
+
+/**
+ * Specialization of multiple-input gcd for uint8_t.
+ */
+template <> inline uint8_t gcd<uint8_t>(const std::initializer_list<uint8_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("gcd<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint8_t>::const_iterator itr = i_l.begin();
+  uint8_t running_output = gcd<uint8_t>(*itr, *(itr+1));
+  itr++;
+
+  while ((++itr) != i_l.end()) running_output = gcd<uint8_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Specialization of multiple-input gcd for uint16_t.
+ */
+template <> inline uint16_t gcd<uint16_t>(const std::initializer_list<uint16_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("gcd<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint16_t>::const_iterator itr = i_l.begin();
+  uint16_t running_output = gcd<uint16_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = gcd<uint16_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Specialization of multiple-input gcd for uint32_t.
+ */
+template <> inline uint32_t gcd<uint32_t>(const std::initializer_list<uint32_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("gcd<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint32_t>::const_iterator itr = i_l.begin();
+  uint32_t running_output = gcd<uint32_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = gcd<uint32_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Specialization of multiple-input gcd for uint64_t.
+ */
+template <> inline uint64_t gcd<uint64_t>(const std::initializer_list<uint64_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("gcd<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint64_t>::const_iterator itr = i_l.begin();
+  uint64_t running_output = gcd<uint64_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = gcd<uint64_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Iterator-based multi-argument gcd function.
+ * 
+ * This form accepts multiple (>= 2) arguments via any container
+ * with at least forward iterators.
+ * 
+ * Example: 
+ * std::vector<uint32_t> v{10, 90, 3};
+ * uint32_t out = gcd(v.cbegin(), v.cend());
+ * 
+ * This form is only valid for input types for which a two-argument gcd
+ * function is defined above.
+ */
+template <class Iterator>
+typename std::enable_if<std::is_unsigned<typename std::iterator_traits<Iterator>::value_type>::value, typename std::iterator_traits<Iterator>::value_type>::type 
+gcd(Iterator first, Iterator last) {
+  static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::forward_iterator_tag>::value,
+    "gcd(Iterator first, Iterator last) requires forward iterator (or more capable iterator) arguments.");
+  
+  if ((last - first) < 2) throw std::invalid_argument("gcd(Iterator first, Iterator last) requires at least two input values.");
+
+  Iterator itr = first;
+  typename std::iterator_traits<Iterator>::value_type running_output = gcd<typename std::iterator_traits<Iterator>::value_type>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != last) running_output = gcd<typename std::iterator_traits<Iterator>::value_type>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * The lcm primary template is a catch-all for invalid
+ * and/or presently unimplemented unsigned integer types.
+ */
+template <typename type>
+typename std::enable_if<std::is_unsigned<type>::value, type>::type lcm(type a, type b) {
   static_assert(always_false_gcd_lcm<type>(), "type lcm<type>(type a, type b) is not defined for the specified type.");
+}
+
+/**
+ * Specialization of the least common multiple algorithm
+ * for uint8_t. Throws an exception if the result would
+ * exceed the range of a uint8_t.
+ */
+template <> inline uint8_t lcm<uint8_t>(uint8_t a, uint8_t b) {
+  if ((a == static_cast<uint8_t>(0)) | (b == static_cast<uint8_t>(0))) return static_cast<uint8_t>(0);
+
+  uint8_t gcd_a_b = gcd<uint8_t>(a, b);
+  if (a > b) a = a / gcd_a_b;
+  else b = b / gcd_a_b;
+
+  uint16_t lcm = static_cast<uint16_t>(a) * static_cast<uint16_t>(b);
+  if (lcm > static_cast<uint16_t>(std::numeric_limits<uint8_t>::max())) throw std::overflow_error("overflow in lcm<uint8_t>()");
+  
+  return static_cast<uint8_t>(lcm);
 }
 
 /**
@@ -114,24 +273,17 @@ template <typename type> type lcm(type a, type b) {
  * for uint16_t. Throws an exception if the result would
  * exceed the range of a uint16_t.
  */
-template <> uint16_t lcm<uint16_t>(uint16_t a, uint16_t b) {
+template <> inline uint16_t lcm<uint16_t>(uint16_t a, uint16_t b) {
   if ((a == static_cast<uint16_t>(0)) | (b == static_cast<uint16_t>(0))) return static_cast<uint16_t>(0);
 
   uint16_t gcd_a_b = gcd<uint16_t>(a, b);
+  if (a > b) a = a / gcd_a_b;
+  else b = b / gcd_a_b;
+
+  uint32_t lcm = static_cast<uint32_t>(a) * static_cast<uint32_t>(b);
+  if (lcm > static_cast<uint32_t>(std::numeric_limits<uint16_t>::max())) throw std::overflow_error("overflow in lcm<uint16_t>()");
   
-  if (a > b) {
-    uint16_t factor = a / gcd_a_b;
-    if (static_cast<uint32_t>(factor) * static_cast<uint32_t>(b) > std::numeric_limits<uint16_t>::max())
-      throw std::overflow_error("overflow in lcm<uint16_t>()");
-
-    return factor * b;
-  } else {
-    uint16_t factor = b / gcd_a_b;
-    if (static_cast<uint32_t>(factor) * static_cast<uint32_t>(a) > std::numeric_limits<uint16_t>::max())
-      throw std::overflow_error("overflow in lcm<uint16_t>()");
-
-    return factor * a;
-  }
+  return static_cast<uint16_t>(lcm);
 }
 
 /**
@@ -139,89 +291,151 @@ template <> uint16_t lcm<uint16_t>(uint16_t a, uint16_t b) {
  * for uint32_t. Throws an exception if the result would
  * exceed the range of a uint32_t.
  */
-template <> uint32_t lcm<uint32_t>(uint32_t a, uint32_t b) {
+template <> inline uint32_t lcm<uint32_t>(uint32_t a, uint32_t b) {
   if ((a == 0u) | (b == 0u)) return 0u;
 
   uint32_t gcd_a_b = gcd<uint32_t>(a, b);
+  if (a > b) a = a / gcd_a_b;
+  else b = b / gcd_a_b;
+
+  uint64_t lcm = static_cast<uint64_t>(a) * static_cast<uint64_t>(b);
+  if (lcm > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) throw std::overflow_error("overflow in lcm<uint32_t>()");
   
-  if (a > b) {
-    uint32_t factor = a / gcd_a_b;
-    if (static_cast<uint64_t>(factor) * static_cast<uint64_t>(b) > std::numeric_limits<uint32_t>::max())
-      throw std::overflow_error("overflow in lcm<uint32_t>()");
-
-    return factor * b;
-  } else {
-    uint32_t factor = b / gcd_a_b;
-    if (static_cast<uint64_t>(factor) * static_cast<uint64_t>(a) > std::numeric_limits<uint32_t>::max())
-      throw std::overflow_error("overflow in lcm<uint32_t>()");
-
-    return factor * a;
-  }
-}
-
-/**
- * Returns true if the product a * b would overflow the range
- * of a uin64_t and false otherwise.
- */
-static bool detect_product_overflow_u64(const uint64_t a, const uint64_t b) {
-  /**
-   * a * b = 2^64 * (a_hi * b_hi) + 
-   *         2^32 * (a_hi * b_lo + a_lo * b_hi) +
-   *         a_lo * b_lo
-   * All of the products a_hi*b_hi, a_hi*b_lo,
-   * a_lo*b_hi, and a_lo*b_lo will be on the range
-   * [0,2^64-2^33+1].
-   */
-  uint64_t a_hi = (a & 0xFFFFFFFF00000000ull) >> 32;
-  uint64_t a_lo =  a & 0x00000000FFFFFFFFull;
-  uint64_t b_hi = (b & 0xFFFFFFFF00000000ull) >> 32;
-  uint64_t b_lo =  b & 0x00000000FFFFFFFFull;
-
-  if (a_hi * b_hi > 0ull) return true;
-  /**
-   * Now we know that a_hi * b_hi == 0.
-   * Consequently,
-   * a * b = 2^32 * (a_hi * b_lo + a_lo * b_hi) +
-   *         a_lo * b_lo
-   */
-
-  uint64_t mid_prod_1 = a_hi * b_lo;
-  uint64_t mid_prod_2 = a_lo * b_hi;
-
-  if (std::numeric_limits<uint64_t>::max() - mid_prod_2 < mid_prod_1) return true;
-  /* Now we know that mid_prod_1 + mid_prod_2 <= std::numeric_limits<uint64_t>::max(). */
-  uint64_t mid_prod = mid_prod_1 + mid_prod_2;
-  
-  if (mid_prod >= (1ull << 32)) return true;
-  /* Now we know that 2^32 * mid_prod < std::numeric_limits<uint64_t>::max(). */
-  if (std::numeric_limits<uint64_t>::max() - a_lo * b_lo < mid_prod << 32) return true;
-
-  return false;
+  return static_cast<uint32_t>(lcm);
 }
 
 /**
  * Specialization of the least common multiple algorithm
  * for uint64_t. Throws an exception if the result would
  * exceed the range of a uint64_t.
+ * 
+ * Requires detect_product_overflow_u64 from
+ * detect_product_overflow.c / detect_product_overflow.h.
  */
-template <> uint64_t lcm<uint64_t>(uint64_t a, uint64_t b) {
+template <> inline uint64_t lcm<uint64_t>(uint64_t a, uint64_t b) {
   if ((a == 0ull) | (b == 0ull)) return 0ull;
 
   uint64_t gcd_a_b = gcd<uint64_t>(a, b);
+  if (a > b) a = a / gcd_a_b;
+  else b = b / gcd_a_b;
+
+  if (detect_product_overflow_u64(a, b)) throw std::overflow_error("overflow in lcm<uint64_t>()");
+
+  return a * b;
+}
+
+/**
+ * This initializer_list-based multi-argument lcm primary template
+ * is a catch-all for invalid and/or presently unimplemented 
+ * unsigned integer types.
+ * 
+ * This form accepts multiple (>= 2) arguments via
+ * initializer list.
+ * 
+ * Example: uint32_t out = lcm<uint32_t>({200u, 15u, 39u, 80u});
+ * 
+ * This form is only valid for input types for which a two-argument lcm
+ * function is defined above.
+ * 
+ * It throws an exception if the result would exceed the range
+ * of the input argument type.
+ */
+template <typename type>
+typename std::enable_if<std::is_unsigned<type>::value, type>::type lcm(const std::initializer_list<type> &i_l) {
+  static_assert(always_false_gcd_lcm<type>(), "type lcm<type>(initializer_list<type> &i_l) is not defined for the specified type.");
+}
+
+/**
+ * Specialization of multiple-input lcm for uint8_t.
+ */
+template <> inline uint8_t lcm<uint8_t>(const std::initializer_list<uint8_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("lcm<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint8_t>::const_iterator itr = i_l.begin();
+  uint8_t running_output = lcm<uint8_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = lcm<uint8_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Specialization of multiple-input lcm for uint16_t.
+ */
+template <> inline uint16_t lcm<uint16_t>(const std::initializer_list<uint16_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("lcm<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint16_t>::const_iterator itr = i_l.begin();
+  uint16_t running_output = lcm<uint16_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = lcm<uint16_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Specialization of multiple-input lcm for uint32_t.
+ */
+template <> inline uint32_t lcm<uint32_t>(const std::initializer_list<uint32_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("lcm<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint32_t>::const_iterator itr = i_l.begin();
+  uint32_t running_output = lcm<uint32_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = lcm<uint32_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Specialization of multiple-input lcm for uint64_t.
+ */
+template <> inline uint64_t lcm<uint64_t>(const std::initializer_list<uint64_t> &i_l) {
+  if (i_l.size() < 2) throw std::invalid_argument("lcm<type>(initializer_list<type> &i_l) requires at least two input values.");
+
+  typename std::initializer_list<uint64_t>::const_iterator itr = i_l.begin();
+  uint64_t running_output = lcm<uint64_t>(*itr, *(itr+1));
+  itr++;
+
+  while (++itr != i_l.end()) running_output = lcm<uint64_t>(running_output, *itr);
+
+  return running_output;
+}
+
+/**
+ * Iterator-based multi-argument lcm function.
+ * 
+ * This form accepts multiple (>= 2) arguments via any container
+ * with at least forward iterators.
+ * 
+ * Example: 
+ * std::vector<uint32_t> v{200, 15, 39, 80};
+ * uint32_t out = lcm(v.cbegin(), v.cend());
+ * 
+ * This form is only valid for input types for which a two-argument lcm
+ * function is defined above.
+ * 
+ * It throws an exception if the result would exceed the range
+ * of the input argument type.
+ */
+template <class Iterator>
+typename std::enable_if<std::is_unsigned<typename std::iterator_traits<Iterator>::value_type>::value, typename std::iterator_traits<Iterator>::value_type>::type 
+lcm(Iterator first, Iterator last) {
+  static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::forward_iterator_tag>::value,
+    "lcm(Iterator first, Iterator last) requires forward iterator (or more capable iterator) arguments.");
   
-  if (a > b) {
-    uint64_t factor = a / gcd_a_b;
-    if (detect_product_overflow_u64(factor, b))
-      throw std::overflow_error("overflow in lcm<uint64_t>()");
+  if ((last - first) < 2) throw std::invalid_argument("lcm(Iterator first, Iterator last) requires at least two input values.");
 
-    return factor * b;
-  } else {
-    uint64_t factor = b / gcd_a_b;
-    if (detect_product_overflow_u64(factor, a))
-      throw std::overflow_error("overflow in lcm<uint64_t>()");
+  Iterator itr = first;
+  typename std::iterator_traits<Iterator>::value_type running_output = lcm<typename std::iterator_traits<Iterator>::value_type>(*itr, *(itr+1));
+  itr++;
 
-    return factor * a;
-  }
+  while (++itr != last) running_output = lcm<typename std::iterator_traits<Iterator>::value_type>(running_output, *itr);
+
+  return running_output;
 }
 
 #endif /* #ifndef GCD_LCM_HPP_ */

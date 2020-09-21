@@ -13,13 +13,13 @@
 
 BASE_OPTIONS = /O2 /Ob2 /Oi /Ot /Oy /Za /Zc:wchar_t- /Zc:inline /Zc:rvalueCast /Zc:forScope /GR- /GF /Gm- /GS- /GT /Gy /EHsc /guard:cf- /fp:strict /fp:except /Qspectre- /Qpar- /GL /permissive- /nologo /Y- /utf-8 /validate-charset /W4 /MT
 LINK_OPTIONS = /link /INCREMENTAL:NO /OPT:REF /OPT:ICF /DYNAMICBASE:NO /NXCOMPAT:NO /LTCG /MACHINE:X64
-OBJ_FILES = Test_RCSn.obj
-EXE_FILES = Test_RCSn.exe
+OBJ_FILES = Test_GCD_LCM.obj detect_product_overflow.obj
+EXE_FILES = Test_GCD_LCM.exe
 
 all: $(EXE_FILES)
 
-Test_RCSn.exe:Test_RCSn.cpp RCSn.hpp
-	cl $(BASE_OPTIONS) Test_RCSn.cpp $(LINK_OPTIONS) /OUT:$(@F)
+Test_GCD_LCM.exe:Test_GCD_LCM.cpp gcd_lcm.hpp detect_product_overflow.c detect_product_overflow.h
+	cl $(BASE_OPTIONS) detect_product_overflow.c Test_GCD_LCM.cpp $(LINK_OPTIONS) /OUT:$(@F)
 
 clean:
 	del $(EXE_FILES) $(OBJ_FILES)
