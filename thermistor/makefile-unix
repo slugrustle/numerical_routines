@@ -13,12 +13,12 @@
 C_OPTIONS = -Wall -O3 -static -static-libgcc -std=c99 -flto -march=athlon64
 BASE_OPTIONS = -Wall -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlon64 
 THREAD_OPTIONS = -pthread -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
-OBJ_FILES = parsers.o multshiftround_shiftround_masks.o heapSort.o NTCcalculations.o QRleast_squares.o
+OBJ_FILES = parsers.o multshiftround_shiftround_masks.o heapSort.o NTCcalculations.o QRleast_squares.o steffen_interpolate.o
 EXE_FILES = thermistor_interpolator thermistor_tolerance
 
 all: $(EXE_FILES)
 
-parsers.o:parsers.cpp parsers.h
+parsers.o:parsers.cpp parsers.h constants.h types.h 
 	g++ $(BASE_OPTIONS) -c -o $@ parsers.cpp
 
 thermistor_tolerance:thermistor_tolerance.cpp parsers.o
@@ -30,14 +30,17 @@ multshiftround_shiftround_masks.o:multshiftround_shiftround_masks.c multshiftrou
 heapSort.o:heapSort.cpp heapSort.h types.h
 	g++ $(BASE_OPTIONS) -c -o $@ heapSort.cpp
 
-NTCcalculations.o:NTCcalculations.cpp NTCcalculations.h globals.h
+NTCcalculations.o:NTCcalculations.cpp NTCcalculations.h constants.h types.h
 	g++ $(BASE_OPTIONS) -c -o $@ NTCcalculations.cpp
 
 QRleast_squares.o:QRleast_squares.cpp QRleast_squares.h types.h heapSort.h
 	g++ $(BASE_OPTIONS) -c -o $@ QRleast_squares.cpp
 
-thermistor_interpolator:thermistor_interpolator.cpp parsers.o multshiftround_shiftround_masks.o heapSort.o NTCcalculations.o QRleast_squares.o run_masks_type.h globals.h types.h
-	g++ $(BASE_OPTIONS) -o $@ parsers.o heapSort.o multshiftround_shiftround_masks.o NTCcalculations.o QRleast_squares.o thermistor_interpolator.cpp
+steffen_interpolate.o:steffen_interpolate.cpp steffen_interpolate.h constants.h types.h
+	g++ $(BASE_OPTIONS) -c -o $@ steffen_interpolate.cpp
+
+thermistor_interpolator:thermistor_interpolator.cpp parsers.o multshiftround_shiftround_masks.o heapSort.o NTCcalculations.o QRleast_squares.o steffen_interpolate.o run_masks_type.h constants.h types.h
+	g++ $(BASE_OPTIONS) -o $@ parsers.o heapSort.o multshiftround_shiftround_masks.o NTCcalculations.o QRleast_squares.o steffen_interpolate.o thermistor_interpolator.cpp
 
 clean:
 	rm -f $(EXE_FILES) $(OBJ_FILES)

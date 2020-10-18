@@ -1,12 +1,12 @@
 /**
- * types.h
+ * constants.h
  *
- * Declarations of struct types used to generate or define the
- * thermistor interpolation table.
+ * Declarations of global constants used byt thermistor_interpolator.cpp,
+ * NTCcalculations.cpp, and parsers.cpp
  *
  * Written in 2019 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
- *
+ * 
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
  * worldwide. This software is distributed without any warranty.
@@ -14,94 +14,40 @@
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef CONSTANTS_H_
+#define CONSTANTS_H_
 
-#include <cinttypes>
-
-/**
- * Defines one row in a table that gives NTC thermistor resistance in Ohms
- * for various temperatures in degrees Celsius.
- */
-typedef struct
-{
-  double temp_C;
-  double res_Ohms;
-} NTC_temp_res_row_t;
+#include "types.h"
 
 /**
- * Defines a cubic function used to interpolate one segment of the 
- * NTC thermistor resistance / temperature data supplied by the user.
- * 
- * Each segment lies between two points in the NTC thermistor
- * resistance / temperature data and reuses both temp_C and res_Ohms
- * from the lower index bounding the segment.
- * 
- * Resistance(eval_temp_C) = a * (eval_temp_C - temp_C)^3 + 
- *   b * (eval_temp_C - temp_C)^2 + c * (eval_temp_C - temp_C) +
- *   res_Ohms;
+ * Global Constants
  */
-typedef struct
-{
-  double a;
-  double b;
-  double c;
-} cubic_interp_seg_t;
+const double inv_128 = 1.0 / 128.0;
+const double kelvin_offset = 273.15;
+const double alumina_melting_point_C = 2054.0;
+const double min_Rntc_nom_Ohms = 1.0;
+const double max_Rntc_nom_Ohms = 100.0e6;
+const double min_beta_K = 100.0;
+const double max_beta_K = 100000.0;
+const double min_Rpullup_nom_Ohms = 1.0;
+const double max_Rpullup_nom_Ohms = 100.0e6;
+const double min_Riso_nom_Ohms = 0.0;
+const double max_Riso_nom_Ohms = 100.0e6;
+const int64_t min_ADC_counts = 8ll;
+const int64_t max_ADC_counts = 1ll << 15;
+const double min_max_interp_error_C = 1.0/256.0;
+const double min_Rntc_Ohms = 1.0e-3;
+const double min_fixedpointable_temp_C = -256.0;
+const double max_fixedpointable_temp_C = 255.9921875;
+const int num_arguments_mode1 = 9;
+const int num_arguments_mode2 = 7;
+const uint32_t min_csv_rows = 4u;
+const uint32_t max_csv_rows = 327680u;
+const uint8_t Undefined_mode = 0u;
+const uint8_t NTC_parameter_mode = 1u;
+const uint8_t NTC_table_mode = 2u;
 
-/**
- * columns[] holds one row of A in a least-squares problem
- * of the form
- *   A * parameters = rhs
- * where A is an Nx2 matrix, parameters is a 2x1 vector,
- * and rhs is an Nx1 vector.
- */
-typedef struct 
-{
-  double columns[2];
-  double rhs;
-} least_squares_row_t;
-
-/**
- * interp_segment_t defines a single linear interpolation
- *                  segment.
- *
- * start_count: the ADC count value corresponding to 
- *              start_temp
- *
- * start_temp: the temperature corresponding to start_count
- *             in 1/128ths of a degree Celsius.
- *             This is signed Q9.7 format fixed point.
- *
- * slope_multiplier: these two define the slope of the
- * slope_shift:      line segment as the rational number
- *                   (slope_multiplier / 2^slope_shift).
- *                   Units are 1/128ths of a degree Celsius
- *                   per ADC count.
- *
- * Each segment ends one count before the start of the
- * next segment. end_count in interp_table_t gives the last
- * valid ADC count for the final segment.
- */
-typedef struct
-{
-  uint16_t start_count;
-  int16_t start_temp;
-  int32_t slope_multiplier;
-  uint8_t slope_shift;
-} interp_segment_t;
-
-/**
- * Holds fit statistics for a single interpolation segment.
- * Only used for informational purposes.
- */
-typedef struct
-{
-  uint16_t num_points;
-  double mean_error;
-  double max_error;
-} segment_stats_t;
-
-#endif /* #ifndef TYPES_H_ */
+#endif /* #ifndef CONSTANTS_H_ */
 
 /*
 Creative Commons Legal Code

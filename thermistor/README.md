@@ -50,15 +50,23 @@ PowerShell> .\thermistor_interpolator.exe -30 90 33k 25 3950 22.1k 1.3k 4096 0.1
 
 Near-optimal thermistor curve interpolation table generator.
 Generates a table of line segments interpolating the temperature
-vs. ADC counts curve for an NTC thermistor with specified parameters
-such that the table error is below some bound.
+vs. ADC counts curve for an NTC thermistor such that the maximum
+interpolation error is below some bound.
 Effort is made to minimize the number of interpolating segments
 required to acheive this.
 
 If special characters (°, Ω, ±, etc.) do not display,
 set your console to unicode (PowerShell> chcp 65001).
 
-[Input Arguments]
+There are two operating modes:
+  Mode 1: NTC Thermistor is specified by nominal resistance and
+          β coefficient.
+  Mode 2: NTC Thermistor is specified by a .csv file containing
+          a table of °C temperatures (column 1) and NTC
+          resistances (in Ω, column 2). The .csv file must not
+          contain other data or header rows.
+
+[Mode 1 Input Arguments]
 1. Lowest table temperature (°C)
 2. Highest table temperature (°C)
 3. NTC nominal resistance (Ω)
@@ -73,8 +81,26 @@ set your console to unicode (PowerShell> chcp 65001).
 8. ADC number of counts (1024 for 10-bit, 4096 for 12-bit, etc.)
 9. Maximum error due to interpolation (°C)
 
-[Example Command]
+[Mode 1 Example Command]
 .\thermistor_interpolator.exe -30 90 33k 25 3950 22.1k 1.3k 4096 0.1
+
+
+[Mode 2 Input Arguments]
+1. Lowest table temperature (°C), within .csv data bounds.
+2. Highest table temperature (°C), within .csv data bounds.
+3. Filename of .csv file with NTC temperatures (°C) in column 1
+   and NTC resistances (Ω) in column 2 and no header rows.
+4. Pullup resistor nominal resistance (Ω)
+   - The pullup resistor connects between the NTC
+     and the positive voltage supply.
+5. Isolation resistor nominal resistance (Ω)
+   - The isolation resistor connects between the NTC
+     and GND.
+6. ADC number of counts (1024 for 10-bit, 4096 for 12-bit, etc.)
+7. Maximum error due to interpolation (°C)
+
+[Mode 2 Example Command]
+.\thermistor_interpolator.exe -30 90 NTC_data.csv 22.1k 1.3k 4096 0.1
 
 
 [Inputs]
@@ -97,13 +123,13 @@ segment   6:  start ADC count =  1559,  offset =    6263 =    48.929688 °C,  sl
 segment   7:  start ADC count =  1869,  offset =    5151 =    40.242188 °C,  slope =   -407 / 2^(  7) =    -3.179688 (1/128)°C / ADC count.
 segment   8:  start ADC count =  2347,  offset =    3646 =    28.484375 °C,  slope =  -3187 / 2^( 10) =    -3.112305 (1/128)°C / ADC count.
 segment   9:  start ADC count =  2924,  offset =    1848 =    14.437500 °C,  slope =   -445 / 2^(  7) =    -3.476563 (1/128)°C / ADC count.
-segment  10:  start ADC count =  3224,  offset =     804 =     6.281250 °C,  slope =  -1033 / 2^(  8) =    -4.035156 (1/128)°C / ADC count.
-segment  11:  start ADC count =  3436,  offset =     -53 =    -0.414063 °C,  slope =  -1231 / 2^(  8) =    -4.808594 (1/128)°C / ADC count.
-segment  12:  start ADC count =  3599,  offset =    -839 =    -6.554688 °C,  slope =   -749 / 2^(  7) =    -5.851563 (1/128)°C / ADC count.
-segment  13:  start ADC count =  3721,  offset =   -1555 =   -12.148438 °C,  slope =   -927 / 2^(  7) =    -7.242188 (1/128)°C / ADC count.
-segment  14:  start ADC count =  3815,  offset =   -2238 =   -17.484375 °C,  slope =   -579 / 2^(  6) =    -9.046875 (1/128)°C / ADC count.
-segment  15:  start ADC count =  3884,  offset =   -2865 =   -22.382813 °C,  slope =   -731 / 2^(  6) =   -11.421875 (1/128)°C / ADC count.
-segment  16:  start ADC count =  3938,  offset =   -3492 =   -27.281250 °C,  slope =   -223 / 2^(  4) =   -13.937500 (1/128)°C / ADC count.
+segment  10:  start ADC count =  3224,  offset =     804 =     6.281250 °C,  slope =  -1035 / 2^(  8) =    -4.042969 (1/128)°C / ADC count.
+segment  11:  start ADC count =  3441,  offset =     -75 =    -0.585938 °C,  slope =   -619 / 2^(  7) =    -4.835938 (1/128)°C / ADC count.
+segment  12:  start ADC count =  3603,  offset =    -860 =    -6.718750 °C,  slope =   -377 / 2^(  6) =    -5.890625 (1/128)°C / ADC count.
+segment  13:  start ADC count =  3725,  offset =   -1581 =   -12.351563 °C,  slope =   -467 / 2^(  6) =    -7.296875 (1/128)°C / ADC count.
+segment  14:  start ADC count =  3817,  offset =   -2254 =   -17.609375 °C,  slope =   -585 / 2^(  6) =    -9.140625 (1/128)°C / ADC count.
+segment  15:  start ADC count =  3888,  offset =   -2906 =   -22.703125 °C,  slope =   -743 / 2^(  6) =   -11.609375 (1/128)°C / ADC count.
+segment  16:  start ADC count =  3941,  offset =   -3532 =   -27.593750 °C,  slope =   -225 / 2^(  4) =   -14.062500 (1/128)°C / ADC count.
 
 segment   0 stats:  # points =   83,  mean error =  0.037608 °C,  max error =  0.092408 °C
 segment   1 stats:  # points =  101,  mean error =  0.038288 °C,  max error =  0.093776 °C
@@ -115,13 +141,13 @@ segment   6 stats:  # points =  310,  mean error =  0.037859 °C,  max error =  
 segment   7 stats:  # points =  478,  mean error =  0.035881 °C,  max error =  0.099936 °C
 segment   8 stats:  # points =  577,  mean error =  0.029464 °C,  max error =  0.095171 °C
 segment   9 stats:  # points =  300,  mean error =  0.035447 °C,  max error =  0.094679 °C
-segment  10 stats:  # points =  212,  mean error =  0.034675 °C,  max error =  0.098227 °C
-segment  11 stats:  # points =  163,  mean error =  0.037516 °C,  max error =  0.097058 °C
-segment  12 stats:  # points =  122,  mean error =  0.036848 °C,  max error =  0.097529 °C
-segment  13 stats:  # points =   94,  mean error =  0.038535 °C,  max error =  0.091880 °C
-segment  14 stats:  # points =   69,  mean error =  0.034339 °C,  max error =  0.099054 °C
-segment  15 stats:  # points =   54,  mean error =  0.037454 °C,  max error =  0.097913 °C
-segment  16 stats:  # points =   26,  mean error =  0.013662 °C,  max error =  0.034604 °C
+segment  10 stats:  # points =  217,  mean error =  0.036934 °C,  max error =  0.098718 °C
+segment  11 stats:  # points =  162,  mean error =  0.037752 °C,  max error =  0.091767 °C
+segment  12 stats:  # points =  122,  mean error =  0.037304 °C,  max error =  0.098876 °C
+segment  13 stats:  # points =   92,  mean error =  0.037071 °C,  max error =  0.094221 °C
+segment  14 stats:  # points =   71,  mean error =  0.038190 °C,  max error =  0.098978 °C
+segment  15 stats:  # points =   53,  mean error =  0.037728 °C,  max error =  0.090968 °C
+segment  16 stats:  # points =   23,  mean error =  0.012097 °C,  max error =  0.026791 °C
 
 /**
  * interp_segment_t defines a single linear interpolation
@@ -166,7 +192,7 @@ typedef struct
  *   - The isolation resistor connects between the NTC and GND.
  * Full ADC count range: 0-4095
  * Max interpolation error: 0.10000000 deg. C
- * Table range: -30.03460354 to 90.03772046 deg. C
+ * Table range: -30.00781250 to 89.94531250 deg. C
  * ADCcount inputs >= 3963 result in the minimum table temperature.
  * ADCcount inputs <= 677 result in the maximum table temperature.
  */
@@ -184,13 +210,13 @@ int16_t read_thermistor(const uint16_t ADCcount)
     { 1869,   5151,   -407,  7},
     { 2347,   3646,  -3187, 10},
     { 2924,   1848,   -445,  7},
-    { 3224,    804,  -1033,  8},
-    { 3436,    -53,  -1231,  8},
-    { 3599,   -839,   -749,  7},
-    { 3721,  -1555,   -927,  7},
-    { 3815,  -2238,   -579,  6},
-    { 3884,  -2865,   -731,  6},
-    { 3938,  -3492,   -223,  4}
+    { 3224,    804,  -1035,  8},
+    { 3441,    -75,   -619,  7},
+    { 3603,   -860,   -377,  6},
+    { 3725,  -1581,   -467,  6},
+    { 3817,  -2254,   -585,  6},
+    { 3888,  -2906,   -743,  6},
+    { 3941,  -3532,   -225,  4}
   };
   static const uint16_t last_segment_end_count = 3963;
 

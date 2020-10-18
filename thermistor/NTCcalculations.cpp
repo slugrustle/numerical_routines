@@ -7,8 +7,7 @@
  * resistor and optional isolation resistor monitored by an Analog to Digital
  * Converter (ADC).
  * 
- * These functions use global variables declared in globals.h whose values
- * are expected to be set by the main() routine in thermistor_interpolator.cpp.
+ * These functions use some of the constants defined in constants.h.
  *
  * Written in 2019 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
@@ -21,7 +20,7 @@
  */
 
 #include "NTCcalculations.h"
-#include "globals.h"
+#include "constants.h"
 #include <cassert>
 #include <cmath>
 #include <limits>
@@ -29,28 +28,89 @@
 /**
  * Calculates nominal NTC resistance in Ohms
  * given an ADC reading on the range [0, ADC_counts - 1].
+ * 
+ * ADC_counts: Total number of counts in ADC (1024 for 10-bit, 4096 for 12-bit, etc.)
+ * Rpullup_nom_Ohms: Nominal resistance (Ω) of pullup resistor in NTC measurement circuit.
+ * Riso_nom_Ohms: Nominal resistance (Ω) of resistor between NTC and GND.
  */
-double Rntc_from_ADCread(const uint16_t ADCread)
+double Rntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, const double Riso_nom_Ohms)
 {
   assert(ADCread < ADC_counts);
   
-  double ADCratio;
-  if (ADCread == 0u) ADCratio = 0.5 * inv_ADC_counts_minus_one;
-  else if (ADCread == ADC_counts - 1u) ADCratio = (static_cast<double>(ADC_counts) - 1.5) * inv_ADC_counts_minus_one;
-  else ADCratio = static_cast<double>(ADCread) * inv_ADC_counts_minus_one;
+  double ADCratio = 0.0;
+  
+  if (ADCread == 0u) ADCratio = 0.5 / static_cast<double>(ADC_counts - (uint16_t)1u);
+  else if (ADCread == ADC_counts - 1u) ADCratio = (static_cast<double>(ADC_counts) - 1.5) / static_cast<double>(ADC_counts - (uint16_t)1u);
+  else ADCratio = static_cast<double>(ADCread) / static_cast<double>(ADC_counts - (uint16_t)1u);
+  
   return (Rpullup_nom_Ohms * ADCratio - Riso_nom_Ohms * (1.0 - ADCratio)) / (1.0 - ADCratio);
 }
 
 /**
  * Calculates nominal NTC resistance in Ohms for a given
- * NTC temperature in degrees Celsius
+ * NTC temperature in degrees Celsius.
+ * 
+ * NTC_temp_C: NTC actual temperature (°C)
+ * Rntc_nom_Ohms: NTC nominal resistance (Ω) at NTC_nom_temp_C (°C)
+ * beta_K: NTC nominal ß coefficient (K)
  */
-double Rntc_from_Tntc(double Tntc)
+double Rntc_from_Tntc(const double NTC_temp_C, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C)
 {
-  assert(Tntc >= -kelvin_offset);
-  assert(std::isfinite(Tntc));
+  assert(std::isfinite(NTC_temp_C));
+  assert(NTC_temp_C >= -kelvin_offset);
 
-  return Rntc_nom_Ohms * std::exp(beta_K * (1.0 / (Tntc + kelvin_offset) - inv_NTC_nom_temp_K));
+  return Rntc_nom_Ohms * std::exp(beta_K * (1.0 / (NTC_temp_C + kelvin_offset) - 1.0 / (NTC_nom_temp_C + kelvin_offset)));
+}
+
+/**
+ * Looks up NTC resistance in Ohms for a given NTC temperature
+ * in degrees Celsius using the interpolated NTC thermistor
+ * temperature / resistance data supplied by the user.
+ * 
+ * data: points to the parsed NTC thermistor temperature / resistance
+ *       data that came from the user's .csv file
+ * num_points: is the number of valid temperature / resistance data points
+ * segments: stores the parameters for the piecewise cubic segments interpolating
+ *           the points in data
+ */
+double Rntc_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *data, const uint32_t num_points, const cubic_interp_seg_t *segments)
+{
+  /**
+   * Check input NTC_temp_C against table min & max temperatures.
+   */
+  if (NTC_temp_C <= data[0].temp_C) return data[0].res_Ohms;
+  if (NTC_temp_C >= data[num_points - 1u].temp_C) return data[num_points - 1u].res_Ohms;
+
+  /**
+   * Find the interpolation segment that contains NTC_temp_C
+   * via binary search.
+   */
+  uint32_t lower_bound = 0u;
+  uint32_t upper_bound = num_points - 2u;
+  uint32_t seg_index = (lower_bound + upper_bound) >> 1;
+
+  while (true)
+  {
+    if (NTC_temp_C < data[seg_index].temp_C)
+    {
+      upper_bound = seg_index - 1u;
+      seg_index = (lower_bound + upper_bound) >> 1;
+    }
+    else if (seg_index + 1u < num_points - 1u &&
+             NTC_temp_C >= data[seg_index + 1u].temp_C)
+    {
+      lower_bound = seg_index + 1u;
+      seg_index = (lower_bound + upper_bound) >> 1;
+    }
+    else
+    {
+      NTC_temp_res_row_t seg_row = data[seg_index];
+      double x = NTC_temp_C - seg_row.temp_C;
+      double x_2 = x * x;
+      cubic_interp_seg_t seg_coeffs = segments[seg_index];
+      return seg_coeffs.a * x * x_2 + seg_coeffs.b * x_2 + seg_coeffs.c * x + seg_row.res_Ohms;
+    }
+  }
 }
 
 /**
@@ -58,40 +118,166 @@ double Rntc_from_Tntc(double Tntc)
  * Celsius given an ADC reading on the range
  * [0, ADC_counts - 1].
  * Returns NaN for infeasible ADC readings.
+ * 
+ * ADC_counts: Total number of counts in ADC (1024 for 10-bit, 4096 for 12-bit, etc.)
+ * Rpullup_nom_Ohms: Nominal resistance (Ω) of pullup resistor in NTC measurement circuit.
+ * Riso_nom_Ohms: Nominal resistance (Ω) of resistor between NTC and GND.
+ * data: points to the parsed NTC thermistor temperature / resistance
+ *       data that came from the user's .csv file
+ * num_points: is the number of valid temperature / resistance data points
+ * segments: stores the parameters for the piecewise cubic segments interpolating
+ *           the points in data
  */
-double Tntc_from_ADCread(const uint16_t ADCread)
+double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, 
+                         const double Riso_nom_Ohms, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C)
 {
   assert(ADCread < ADC_counts);
 
-  double Rntc = Rntc_from_ADCread(ADCread);
-  if (Rntc <= 0.0) return std::numeric_limits<double>::quiet_NaN();
-  return 1.0 / (std::log(Rntc * inv_Rntc_nom_Ohms) * inv_beta_K + inv_NTC_nom_temp_K) - kelvin_offset;
+  double Rntc = Rntc_from_ADCread(ADCread, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+  if (Rntc < min_Rntc_Ohms) return std::numeric_limits<double>::quiet_NaN();
+  return 1.0 / (std::log(Rntc / Rntc_nom_Ohms) / beta_K + 1.0 / (NTC_nom_temp_C + kelvin_offset)) - kelvin_offset;
+}
+
+/**
+ * Calculates nominal NTC temperature in degrees
+ * Celsius given an ADC reading on the range
+ * [0, ADC_counts - 1].
+ * Returns NaN for infeasible ADC readings.
+ * 
+ * ADC_counts: Total number of counts in ADC (1024 for 10-bit, 4096 for 12-bit, etc.)
+ * Rpullup_nom_Ohms: Nominal resistance (Ω) of pullup resistor in NTC measurement circuit.
+ * Riso_nom_Ohms: Nominal resistance (Ω) of resistor between NTC and GND.
+ * Rntc_nom_Ohms: NTC nominal resistance (Ω) at NTC_nom_temp_C (°C)
+ * beta_K: NTC nominal ß coefficient (K)
+ */
+double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, 
+                         const double Riso_nom_Ohms, const NTC_temp_res_row_t *data, const uint32_t num_points, const cubic_interp_seg_t *segments)
+{
+  assert(ADCread < ADC_counts);
+
+  double Rntc = Rntc_from_ADCread(ADCread, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+  
+  /**
+   * Check Rntc against table min & max resistances.
+   */
+  if (Rntc >= data[0].res_Ohms) return data[0].temp_C;
+  if (Rntc <= data[num_points - 1u].res_Ohms) return data[num_points - 1u].temp_C;
+
+  /**
+   * Find the interpolation segment that contains Rntc
+   * via binary search.
+   */
+  uint32_t lower_bound = 0u;
+  uint32_t upper_bound = num_points - 2u;
+  uint32_t seg_index = (lower_bound + upper_bound) >> 1;
+
+  while (true)
+  {
+    if (Rntc > data[seg_index].res_Ohms)
+    {
+      upper_bound = seg_index - 1u;
+      seg_index = (lower_bound + upper_bound) >> 1;
+    }
+    else if (seg_index + 1u < num_points - 1u &&
+             Rntc <= data[seg_index + 1u].res_Ohms)
+    {
+      lower_bound = seg_index + 1u;
+      seg_index = (lower_bound + upper_bound) >> 1;
+    }
+    else
+    {
+      /**
+       * Use linear interpolation to get an initial estimate
+       * for Newton's method.
+       */
+      NTC_temp_res_row_t seg_row = data[seg_index];
+      NTC_temp_res_row_t next_row = data[seg_index+1u];
+      double guess_temp_C = seg_row.temp_C + (next_row.temp_C - seg_row.temp_C) * (seg_row.res_Ohms - Rntc) / (seg_row.res_Ohms - next_row.res_Ohms);
+      
+      /**
+       * Solve for the temperature that yields Rntc via Newton's method.
+       */
+      cubic_interp_seg_t seg_coeffs = segments[seg_index];
+      double x = guess_temp_C - seg_row.temp_C;
+      double x_2 = x * x;
+      double this_err = seg_coeffs.a * x * x_2 + seg_coeffs.b * x_2 + seg_coeffs.c * x + seg_row.res_Ohms - Rntc;
+
+      while (std::fabs(this_err) > 1.0e-9)
+      {
+        double next_temp_C = guess_temp_C - this_err / (3.0 * seg_coeffs.a * x_2 + 2.0 * seg_coeffs.b * x + seg_coeffs.c);
+        x = next_temp_C - seg_row.temp_C;
+        x_2 = x * x;
+        double next_err = seg_coeffs.a * x * x_2 + seg_coeffs.b * x_2 + seg_coeffs.c * x + seg_row.res_Ohms - Rntc;
+
+        if (std::fabs(next_err) > std::fabs(this_err)) return std::numeric_limits<double>::quiet_NaN();
+
+        guess_temp_C = next_temp_C;
+        this_err = next_err;
+      }
+
+      return guess_temp_C;
+    }
+  }
 }
 
 /**
  * Calculates nominal ADC reading for a given
  * NTC temperature in degrees Celsius
+ * 
+ * Rntc_nom_Ohms: NTC nominal resistance (Ω) at NTC_nom_temp_C (°C)
+ * beta_K: NTC nominal ß coefficient (K)
+ * ADC_counts: Total number of counts in ADC (1024 for 10-bit, 4096 for 12-bit, etc.)
+ * Rpullup_nom_Ohms: Nominal resistance (Ω) of pullup resistor in NTC measurement circuit.
+ * Riso_nom_Ohms: Nominal resistance (Ω) of resistor between NTC and GND.
  */
-uint16_t ADCread_from_Tntc(double Tntc)
+uint16_t ADCread_from_Tntc(const double NTC_temp_C, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C,
+                           const uint16_t ADC_counts, const double Rpullup_nom_Ohms, const double Riso_nom_Ohms)
 {
-  assert(Tntc >= -kelvin_offset);
-  assert(std::isfinite(Tntc));
+  assert(std::isfinite(NTC_temp_C));
+  assert(NTC_temp_C >= -kelvin_offset);
 
-  double Rntc = Rntc_from_Tntc(Tntc);
-  assert(Rntc >= 0.0);
+  double Rntc = Rntc_from_Tntc(NTC_temp_C, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+  assert(Rntc >= min_Rntc_Ohms);
 
   double ADCratio = (Rntc + Riso_nom_Ohms) / (Rntc + Riso_nom_Ohms + Rpullup_nom_Ohms);
-  return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - 1u)));
+  return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - (uint16_t)1u)));
+}
+
+/**
+ * Calculates nominal ADC reading for a given
+ * NTC temperature in degrees Celsius
+ * 
+ * data: Points to the parsed NTC thermistor temperature / resistance
+ *       data that came from the user's .csv file
+ * num_points: The number of valid temperature / resistance data points
+ * segments: Stores the parameters for the piecewise cubic segments interpolating
+ *           the points in data
+ * ADC_counts: Total number of counts in ADC (1024 for 10-bit, 4096 for 12-bit, etc.)
+ * Rpullup_nom_Ohms: Nominal resistance (Ω) of pullup resistor in NTC measurement circuit.
+ * Riso_nom_Ohms: Nominal resistance (Ω) of resistor between NTC and GND.
+ */
+uint16_t ADCread_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *data, const uint32_t num_points, 
+                           const cubic_interp_seg_t *segments, const uint16_t ADC_counts, const double Rpullup_nom_Ohms,
+                           const double Riso_nom_Ohms)
+{
+  assert(std::isfinite(NTC_temp_C));
+  assert(NTC_temp_C >= -kelvin_offset);
+
+  double Rntc = Rntc_from_Tntc(NTC_temp_C, data, num_points, segments);
+  assert(Rntc >= min_Rntc_Ohms);
+
+  double ADCratio = (Rntc + Riso_nom_Ohms) / (Rntc + Riso_nom_Ohms + Rpullup_nom_Ohms);
+  return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - (uint16_t)1u)));
 }
 
 /**
  * Convert a floating point degrees Celsius temperature
  * into (1/128) degrees Celsius fixed point.
  */
-int16_t fixed_point_C(double temp_C)
+int16_t fixed_point_C(const double temp_C)
 {
-  assert(temp_C >= -256.0);
-  assert(temp_C <= 255.9921875);
+  assert(temp_C >= min_fixedpointable_temp_C);
+  assert(temp_C <= max_fixedpointable_temp_C);
 
   return static_cast<int16_t>(std::round(128.0 * temp_C));
 }

@@ -20,17 +20,28 @@
 #ifndef NTCCALCULATIONS_H_
 #define NTCCALCULATIONS_H_
 
-#include <cinttypes>
+#include "types.h"
 
-double Rntc_from_ADCread(const uint16_t ADCread);
+double Rntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, const double Riso_nom_Ohms);
 
-double Rntc_from_Tntc(double Tntc);
+double Rntc_from_Tntc(const double Tntc, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C);
 
-double Tntc_from_ADCread(const uint16_t ADCread);
+double Rntc_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *data, const uint32_t num_points, const cubic_interp_seg_t *segments);
 
-uint16_t ADCread_from_Tntc(double Tntc);
+double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, 
+                         const double Riso_nom_Ohms, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C);
 
-int16_t fixed_point_C(double temp_C);
+double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, 
+                         const double Riso_nom_Ohms, const NTC_temp_res_row_t *data, const uint32_t num_points, const cubic_interp_seg_t *segments);
+
+uint16_t ADCread_from_Tntc(const double NTC_temp_C, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C,
+                           const uint16_t ADC_counts, const double Rpullup_nom_Ohms, const double Riso_nom_Ohms);
+
+uint16_t ADCread_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *data, const uint32_t num_points, 
+                           const cubic_interp_seg_t *segments, const uint16_t ADC_counts, const double Rpullup_nom_Ohms,
+                           const double Riso_nom_Ohms);
+
+int16_t fixed_point_C(const double temp_C);
 
 #endif /* #ifndef NTCCALCULATIONS_H_ */
 

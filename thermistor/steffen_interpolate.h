@@ -1,12 +1,13 @@
 /**
- * globals.h
+ * steffen_interpolate.h
  *
- * Declarations of global variables shared between thermistor_interpolator.cpp
- * and NTCcalculations.cpp
+ * Declaration of a function that performs shape-preserving piecewise cubic
+ * interpolation via the method of M. Steffen from the paper
+ * "A simple method for monotonic interpolation in one dimension".
  *
- * Written in 2019 by Ben Tesch.
+ * Written in 2020 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
- * 
+ *
  * To the extent possible under law, the author has dedicated all copyright
  * and related and neighboring rights to this software to the public domain
  * worldwide. This software is distributed without any warranty.
@@ -14,37 +15,14 @@
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#ifndef GLOBALS_H_
-#define GLOBALS_H_
+#ifndef STEFFEN_INTERPOLATE_H_
+#define STEFFEN_INTERPOLATE_H_
 
 #include "types.h"
 
-/**
- * Major variables used in calculations.
- * These are also taken as input arguments from
- * the command line.
- */
-extern double Rntc_nom_Ohms;
-extern double beta_K;
-extern double Rpullup_nom_Ohms;
-extern double Riso_nom_Ohms;
-extern uint16_t ADC_counts;
+bool steffen_interpolate(const NTC_temp_res_row_t *data, const uint32_t num_points, cubic_interp_seg_t *storage);
 
-/**
- * Precomputed numerical inverses to reduce the
- * number of division operations.
- */
-extern double inv_Rntc_nom_Ohms;
-extern double inv_NTC_nom_temp_K;
-extern double inv_beta_K;
-extern double inv_ADC_counts_minus_one;
-
-/**
- * Constants
- */
-const double kelvin_offset = 273.15;
-
-#endif /* #ifndef GLOBALS_H_ */
+#endif /* #ifndef STEFFEN_INTERPOLATE_H_ */
 
 /*
 Creative Commons Legal Code

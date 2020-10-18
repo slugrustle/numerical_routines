@@ -1,10 +1,11 @@
 /**
- * types.h
+ * steffen_interpolate.h
  *
- * Declarations of struct types used to generate or define the
- * thermistor interpolation table.
+ * Definition of a function that performs shape-preserving piecewise cubic
+ * interpolation via the method of M. Steffen from the paper
+ * "A simple method for monotonic interpolation in one dimension".
  *
- * Written in 2019 by Ben Tesch.
+ * Written in 2020 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
  *
  * To the extent possible under law, the author has dedicated all copyright
@@ -14,94 +15,114 @@
  * end of this file. If not, see http ://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#ifndef TYPES_H_
-#define TYPES_H_
-
-#include <cinttypes>
-
-/**
- * Defines one row in a table that gives NTC thermistor resistance in Ohms
- * for various temperatures in degrees Celsius.
- */
-typedef struct
-{
-  double temp_C;
-  double res_Ohms;
-} NTC_temp_res_row_t;
+#include "steffen_interpolate.h"
+#include "constants.h"
+#include <cmath>
+#include <algorithm>
 
 /**
- * Defines a cubic function used to interpolate one segment of the 
- * NTC thermistor resistance / temperature data supplied by the user.
+ * Interpolate the NTC thermistor temperature/resistance data in data
+ * using the method described in the paper
  * 
- * Each segment lies between two points in the NTC thermistor
- * resistance / temperature data and reuses both temp_C and res_Ohms
- * from the lower index bounding the segment.
+ * Steffen, M. "A simple method for monotonic interpolation in one dimension." Astronomy and Astrophysics 239 (1990): 443.
  * 
- * Resistance(eval_temp_C) = a * (eval_temp_C - temp_C)^3 + 
- *   b * (eval_temp_C - temp_C)^2 + c * (eval_temp_C - temp_C) +
- *   res_Ohms;
+ * and store the a, b, and c coefficients for all piecewise cubic
+ * segments in storage.
+ * 
+ * Returns true upon success and false upon failure.
+ * Assumes valid input data.
  */
-typedef struct
+bool steffen_interpolate(const NTC_temp_res_row_t *data, const uint32_t num_points, cubic_interp_seg_t *storage)
 {
-  double a;
-  double b;
-  double c;
-} cubic_interp_seg_t;
+  if (num_points < 4u) return false;
+  if (num_points > max_csv_rows) return false;
 
-/**
- * columns[] holds one row of A in a least-squares problem
- * of the form
- *   A * parameters = rhs
- * where A is an Nx2 matrix, parameters is a 2x1 vector,
- * and rhs is an Nx1 vector.
- */
-typedef struct 
-{
-  double columns[2];
-  double rhs;
-} least_squares_row_t;
+  /**
+   * Start with the very first segment, which uses a boundary condition
+   * to get the first derivative.
+   */
+  double this_h = data[1].temp_C - data[0].temp_C;
+  double this_s = (data[1].res_Ohms - data[0].res_Ohms) / this_h;
+  double abs_this_s = std::fabs(this_s);
+  double next_h = data[2].temp_C - data[1].temp_C;
+  double next_s = (data[2].res_Ohms - data[1].res_Ohms) / next_h;
+  double abs_next_s = std::fabs(next_s);
+  double tmp_fac = this_h / (this_h + next_h);
+  double this_p = this_s * (1.0 + tmp_fac) - next_s * tmp_fac;
+  double this_y_prime = this_p;
+  if (this_p * this_s <= 0.0) this_y_prime = 0.0;
+  else if (std::fabs(this_p) > 2.0 * abs_this_s) this_y_prime = 2.0 * this_s;
 
-/**
- * interp_segment_t defines a single linear interpolation
- *                  segment.
- *
- * start_count: the ADC count value corresponding to 
- *              start_temp
- *
- * start_temp: the temperature corresponding to start_count
- *             in 1/128ths of a degree Celsius.
- *             This is signed Q9.7 format fixed point.
- *
- * slope_multiplier: these two define the slope of the
- * slope_shift:      line segment as the rational number
- *                   (slope_multiplier / 2^slope_shift).
- *                   Units are 1/128ths of a degree Celsius
- *                   per ADC count.
- *
- * Each segment ends one count before the start of the
- * next segment. end_count in interp_table_t gives the last
- * valid ADC count for the final segment.
- */
-typedef struct
-{
-  uint16_t start_count;
-  int16_t start_temp;
-  int32_t slope_multiplier;
-  uint8_t slope_shift;
-} interp_segment_t;
+  double next_p = (this_s * next_h + next_s * this_h) / (this_h + next_h);
+  double abs_next_p = std::fabs(next_p);
+  double next_y_prime = next_p;
 
-/**
- * Holds fit statistics for a single interpolation segment.
- * Only used for informational purposes.
- */
-typedef struct
-{
-  uint16_t num_points;
-  double mean_error;
-  double max_error;
-} segment_stats_t;
+  if (this_s * next_s <= 0.0) next_y_prime = 0.0;
+  else if (abs_next_p > 2.0 * abs_this_s || abs_next_p > 2.0 * abs_next_s)
+  {
+    next_y_prime = std::min(abs_this_s, abs_next_s);
+    if (this_s < 0.0) next_y_prime *= -1.0;
+  } 
 
-#endif /* #ifndef TYPES_H_ */
+  double a = (this_y_prime + next_y_prime - 2.0 * this_s) / (this_h * this_h);
+  double b = (3.0 * this_s - 2.0 * this_y_prime - next_y_prime) / this_h;
+  double c = this_y_prime;
+
+  storage[0] = {a, b, c};
+
+  /**
+   * Determine coefficients for all but the last segment in a loop.
+   */
+  for (uint32_t jSegment = 1u; jSegment < num_points-2u; jSegment++)
+  {
+    this_h = next_h;
+    this_s = next_s;
+    abs_this_s = abs_next_s;
+    this_y_prime = next_y_prime;
+
+    next_h = data[jSegment + 2u].temp_C - data[jSegment + 1u].temp_C;
+    next_s = (data[jSegment + 2u].res_Ohms - data[jSegment + 1u].res_Ohms) / next_h;
+    abs_next_s = std::fabs(next_s);
+    next_p = (this_s * next_h + next_s * this_h) / (this_h + next_h);
+    abs_next_p = std::fabs(next_p);
+
+    next_y_prime = next_p;
+    if (this_s * next_s <= 0.0) next_y_prime = 0.0;
+    else if (abs_next_p > 2.0 * abs_this_s || abs_next_p > 2.0 * abs_next_s)
+    {
+      next_y_prime = std::min(abs_this_s, abs_next_s);
+      if (this_s < 0.0) next_y_prime *= -1.0;
+    }
+
+    a = (this_y_prime + next_y_prime - 2.0 * this_s) / (this_h * this_h);
+    b = (3.0 * this_s - 2.0 * this_y_prime - next_y_prime) / this_h;
+    c = this_y_prime;
+    storage[jSegment] = {a, b, c};
+  }
+
+  /**
+   * Handle the last segment, which uses a boundary condition.
+   */
+  this_h = next_h;
+  this_s = next_s;
+  this_y_prime = next_y_prime;
+
+  next_h = data[num_points - 1u].temp_C - data[num_points - 2u].temp_C;
+  next_s = (data[num_points - 1u].res_Ohms - data[num_points - 2u].res_Ohms) / next_h;
+  tmp_fac = next_h / (next_h + this_h);
+  next_p = next_s * (1.0 + tmp_fac) - this_s * tmp_fac;
+  next_y_prime = next_p;
+
+  if (next_p * next_s <= 0.0) next_y_prime = 0.0;
+  else if (std::fabs(next_p) > 2.0 * std::fabs(next_s)) next_y_prime = 2.0 * next_s;
+
+  a = (this_y_prime + next_y_prime - 2.0 * this_s) / (this_h * this_h);
+  b = (3.0 * this_s - 2.0 * this_y_prime - next_y_prime) / this_h;
+  c = this_y_prime;
+  storage[num_points - 2u] = {a, b, c};
+
+  return true;
+}
 
 /*
 Creative Commons Legal Code

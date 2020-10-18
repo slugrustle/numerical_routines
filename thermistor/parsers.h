@@ -17,14 +17,20 @@
 #ifndef PARSERS_H_
 #define PARSERS_H_
 
-#include <cinttypes>
+#include "types.h"
 #include <string>
+#include <vector>
+#include <set>
 
 int64_t parse_int64(const std::string &in_str, bool &success);
 
 double parse_double(const std::string &in_str);
 
 double parse_resistance(std::string &res_string);
+
+std::vector<std::string> tokenize(const std::string &input, const std::set<std::string::value_type> &delimeters);
+
+bool parse_NTC_csv_file(const std::string &filename, NTC_temp_res_row_t *storage, uint32_t &stored_rows);
 
 #endif /* #define PARSERS_H_ */
 

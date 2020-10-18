@@ -15,10 +15,13 @@
  */
 
 #include "parsers.h"
+#include "types.h"
+#include "constants.h"
 #include <exception>
 #include <stdexcept>
 #include <limits>
 #include <cmath>
+#include <fstream>
 
 /**
  * Parses a string to an int64_t. Sets success true/false based on
@@ -118,6 +121,142 @@ double parse_resistance(std::string &res_string)
   if ('k' == suffix) return 1000.0 * res_val;
   if ('M' == suffix) return 1.0e6 * res_val;
   return res_val;
+}
+
+/**
+ * A basic string tokenizer.
+ *
+ * Contiguous runs of characters in the input string that are not in the set delimeters
+ * will be returned as separate strings (tokens) in the output vector.
+ */
+std::vector<std::string> tokenize(const std::string &input, const std::set<std::string::value_type> &delimeters)
+{
+  std::vector<std::string> output;
+  std::string this_token;
+  bool last_char_nondelimeter = false;
+
+  for (std::size_t jChar = 0u; jChar < input.size(); jChar++)
+  {
+    std::string::value_type this_char = input.at(jChar);
+    bool this_char_nondelimeter = (delimeters.end() == delimeters.find(this_char));
+
+
+    if (this_char_nondelimeter)
+    {
+      this_token.push_back(this_char);
+    }
+    else if (last_char_nondelimeter)
+    {
+      output.push_back(this_token);
+      this_token.clear();
+    }
+
+    last_char_nondelimeter = this_char_nondelimeter;
+  }
+
+  if (!this_token.empty())
+  {
+    output.push_back(this_token);
+  }
+
+  return output;
+}
+
+/**
+ * Parses a csv file with degrees Celsius temperatures in column 1
+ * and corresponding NTC resistances in column 2 and stores this
+ * data in the pointed-to array.
+ * 
+ * The number of valid rows commited to the storage array is saved
+ * in stored_rows.
+ */
+bool parse_NTC_csv_file(const std::string &filename, NTC_temp_res_row_t *storage, uint32_t &stored_rows)
+{
+  static const std::set<std::string::value_type> delimeters = {',', ' ', '\n', '\r', '\t', '\f', '\v'};
+
+  stored_rows = 0u;
+
+  std::ifstream csv_file(filename);
+  if (!csv_file.is_open())
+  {
+    std::printf("Input Error: could not open input .csv file\n");
+    std::printf("             %s for reading.\n\n", filename.c_str());
+    return false;
+  }
+
+  uint32_t jLine = 0u;
+  std::string line;
+  while (std::getline(csv_file, line) && stored_rows < max_csv_rows)
+  {
+    /* Erase a UTF-8 byte order mark if it is present. */
+    if (jLine == 0 && line.size() >= 3 &&
+        line.at(0) == '\xEF' && line.at(1) == '\xBB' && line.at(2) == '\xBF')
+    {
+        line = line.substr(3);
+    }
+  
+    std::vector<std::string> tokens = tokenize(line, delimeters);
+
+    /* Ignore lines with fewer than two "rows". */
+    if (tokens.size() >= 2)
+    {
+      double row_temp_C = parse_double(tokens.at(0));
+      if (std::isnan(row_temp_C))
+      {
+        std::printf(u8"Input Error: could not parse the temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"             of %s.\n\n", filename.c_str());
+        return false;
+      }
+      else if (row_temp_C < -kelvin_offset)
+      {
+        std::printf(u8"Input Error: the temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"             of %s\n", filename.c_str());
+        std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
+        return false;
+      }
+      else if (row_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
+      {
+        std::printf(u8"Input Error: the temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"             of %s\n", filename.c_str());
+        std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
+        std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
+        std::printf(u8"             temperature representable in an int16_t.\n\n");
+        return false;
+      }
+      else if (row_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
+      {
+        std::printf(u8"Input Error: temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"             of %s\n", filename.c_str());
+        std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
+        std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
+        std::printf(u8"             temperature representable in an int16_t.\n\n");
+        return false;
+      }
+
+      double row_res_Ohms = parse_resistance(tokens.at(1));
+      if (std::isnan(row_res_Ohms))
+      {
+        std::printf(u8"Input Error: could not parse the resistance in column 2 on line %u\n", jLine);
+        std::printf(u8"             of %s.\n\n", filename.c_str());
+        return false;
+      }
+      else if (row_res_Ohms < min_Rntc_Ohms)
+      {
+        std::printf(u8"Input Error: the resistance in column 2 on line %u\n", jLine);
+        std::printf(u8"             of %s\n", filename.c_str());
+        std::printf(u8"             should not be < %.3e \u03A9.\n", min_Rntc_Ohms);
+        return false;
+      }
+
+      storage[stored_rows] = {row_temp_C, row_res_Ohms};
+      stored_rows++;
+    }
+
+    jLine++;
+  }
+
+  csv_file.close();
+  return true;
 }
 
 /*

@@ -25,41 +25,41 @@
 #include <string>
 #include <algorithm>
 #include "multshiftround_run.hpp"
-#include "globals.h"
+#include "constants.h"
 #include "types.h"
 #include "parsers.h"
 #include "NTCcalculations.h"
 #include "QRleast_squares.h"
+#include "steffen_interpolate.h"
+#include <fstream>
 
 /**
- * Defining variables declared in globals.h
- * These are also shared with NTCcalculations.cpp
+ * In-memory storage for a user-supplied table that gives
+ * NTC thermistor resistance in Ohms at various temperatures
+ * in degrees Celsius.
  */
-double Rntc_nom_Ohms;
-double beta_K;
-double Rpullup_nom_Ohms;
-double Riso_nom_Ohms;
-uint16_t ADC_counts;
-double inv_Rntc_nom_Ohms;
-double inv_NTC_nom_temp_K;
-double inv_beta_K;
-double inv_ADC_counts_minus_one;
+static NTC_temp_res_row_t NTC_temp_res_data[max_csv_rows];
 
 /**
- * Input or calculation variables used in main.
+ * Function to enable sorting NTC_temp_res_data by temperature
+ * ascending.
  */
-static double NTC_nom_temp_C;
-static double min_table_temp_C;
-static double max_table_temp_C;
-static double max_interp_error_C;
-static const double inv_128 = 1.0 / 128.0;
+static bool NTC_temp_res_data_sort(const NTC_temp_res_row_t &a, const NTC_temp_res_row_t &b)
+{
+  return a.temp_C < b.temp_C;
+}
+
+/**
+ * Table of cubic interpolants of NTC_temp_res_data.
+ */
+static cubic_interp_seg_t cubic_interp_segs[max_csv_rows - 1u];
 
 /**
  * The ADC_counts input is limited to 2^15 = 32768.
  * Max size the storage for the least squares problem
  * and use subsets of this array during computation.
  */
-static least_squares_row_t least_squares_data[32768];
+static least_squares_row_t least_squares_data[max_ADC_counts];
 
 /**
  * Instead of calling Tntc_from_ADCread() on the same input
@@ -69,15 +69,15 @@ static least_squares_row_t least_squares_data[32768];
  * 
  * Not all indices will be used.
  */
-static double Tntc_array[32768];
+static double Tntc_array[max_ADC_counts];
 
 /**
  * storage for the table's linear interpolation segments
  * and for statistics data about those segments.
  */
-static interp_segment_t interp_segments[32768];
+static interp_segment_t interp_segments[max_ADC_counts];
 static uint16_t n_stored_segments;
-static segment_stats_t segment_stats[32768];
+static segment_stats_t segment_stats[max_ADC_counts];
 
 /**
  * Main routine of thermistor_interpolator.
@@ -94,15 +94,23 @@ int main (int argc, char **argv)
    */
   std::printf(u8"\nNear-optimal thermistor curve interpolation table generator.\n");
   std::printf(u8"Generates a table of line segments interpolating the temperature\n");
-  std::printf(u8"vs. ADC counts curve for an NTC thermistor with specified parameters\n");
-  std::printf(u8"such that the table error is below some bound.\n");
+  std::printf(u8"vs. ADC counts curve for an NTC thermistor such that the maximum\n");
+  std::printf(u8"interpolation error is below some bound.\n");
   std::printf(u8"Effort is made to minimize the number of interpolating segments\n");
   std::printf(u8"required to acheive this.\n\n");
 
   std::printf(u8"If special characters (\u00B0, \u03A9, \u00B1, etc.) do not display,\n");
   std::printf(u8"set your console to unicode (PowerShell> chcp 65001).\n\n");
 
-  std::printf(u8"[Input Arguments]\n");
+  std::printf("There are two operating modes:\n");
+  std::printf("  Mode 1: NTC Thermistor is specified by nominal resistance and\n");
+  std::printf("          \u03B2 coefficient.\n");
+  std::printf("  Mode 2: NTC Thermistor is specified by a .csv file containing\n");
+  std::printf("          a table of \u00B0C temperatures (column 1) and NTC\n");
+  std::printf("          resistances (in \u03A9, column 2). The .csv file must not\n");
+  std::printf("          contain other data or header rows.\n\n");
+
+  std::printf(u8"[Mode 1 Input Arguments]\n");
   std::printf(u8"1. Lowest table temperature (\u00B0C)\n");
   std::printf(u8"2. Highest table temperature (\u00B0C)\n");
   std::printf(u8"3. NTC nominal resistance (\u03A9)\n");
@@ -117,34 +125,68 @@ int main (int argc, char **argv)
   std::printf(u8"8. ADC number of counts (1024 for 10-bit, 4096 for 12-bit, etc.)\n");
   std::printf(u8"9. Maximum error due to interpolation (\u00B0C)\n\n");
 
-  std::printf(u8"[Example Command]\n");
+  std::printf(u8"[Mode 1 Example Command]\n");
   std::printf(u8".\\thermistor_interpolator.exe -30 90 33k 25 3950 22.1k 1.3k 4096 0.1\n\n\n");
 
-  if (argc != 10)
+  std::printf(u8"[Mode 2 Input Arguments]\n");
+  std::printf(u8"1. Lowest table temperature (\u00B0C), within .csv data bounds.\n");
+  std::printf(u8"2. Highest table temperature (\u00B0C), within .csv data bounds.\n");
+  std::printf(u8"3. Filename of .csv file with NTC temperatures (\u00B0C) in column 1\n");
+  std::printf(u8"   and NTC resistances (\u03A9) in column 2 and no header rows.\n");
+  std::printf(u8"4. Pullup resistor nominal resistance (\u03A9)\n");
+  std::printf(u8"   - The pullup resistor connects between the NTC\n");
+  std::printf(u8"     and the positive voltage supply.\n");
+  std::printf(u8"5. Isolation resistor nominal resistance (\u03A9)\n");
+  std::printf(u8"   - The isolation resistor connects between the NTC\n");
+  std::printf(u8"     and GND.\n");
+  std::printf(u8"6. ADC number of counts (1024 for 10-bit, 4096 for 12-bit, etc.)\n");
+  std::printf(u8"7. Maximum error due to interpolation (\u00B0C)\n\n");
+
+  std::printf(u8"[Mode 2 Example Command]\n");
+  std::printf(u8".\\thermistor_interpolator.exe -30 90 NTC_data.csv 22.1k 1.3k 4096 0.1\n\n\n");
+
+  uint8_t operating_mode = Undefined_mode;
+  if (argc == (num_arguments_mode1 + 1)) operating_mode = NTC_parameter_mode;
+  else if (argc == (num_arguments_mode2 + 1)) operating_mode = NTC_table_mode;
+  else
   {
-    std::printf(u8"Input Error: requires exactly 9 arguments.\n");
+    std::printf(u8"Input Error: requires either %i or %i arguments.\n", num_arguments_mode1, num_arguments_mode2);
     std::printf(u8"             Please read the tedious help text above.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
+
+  const uint8_t min_table_temp_argv_indx = 1u;
+  const uint8_t max_table_temp_argv_indx = 2u;
+  
+  const uint8_t Rntc_nom_argv_indx = 3u;
+  const uint8_t NTC_nom_temp_argv_indx = 4u;
+  const uint8_t beta_argv_indx = 5u;
+
+  const uint8_t csv_filename_argv_indx = 3u;
+
+  const uint8_t Rpullup_nom_argv_indx = operating_mode == NTC_parameter_mode ? 6u : 4u;
+  const uint8_t Riso_nom_argv_indx = operating_mode == NTC_parameter_mode ? 7u : 5u;
+  const uint8_t ADC_counts_argv_indx = operating_mode == NTC_parameter_mode ? 8u : 6u;
+  const uint8_t max_interp_error_argv_indx = operating_mode == NTC_parameter_mode ? 9u : 7u;
 
   /**
    * Parse the lowest table temperature input
    */
-  std::string this_input = std::string(argv[1]);
-  min_table_temp_C = parse_double(this_input);
+  std::string this_input = std::string(argv[min_table_temp_argv_indx]);
+  double min_table_temp_C = parse_double(this_input);
 
   if (std::isnan(min_table_temp_C))
   {
     std::printf(u8"Input Error: could not parse the lowest table temperature\n");
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (min_table_temp_C < -kelvin_offset)
   {
     std::printf(u8"Input Error: the lowest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
     std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (min_table_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
   {
@@ -153,7 +195,7 @@ int main (int argc, char **argv)
     std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
     std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (min_table_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
   {
@@ -162,27 +204,27 @@ int main (int argc, char **argv)
     std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
     std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
   /**
    * Parse the highest table temperature input
    */
-  this_input = std::string(argv[2]);
-  max_table_temp_C = parse_double(this_input);
+  this_input = std::string(argv[max_table_temp_argv_indx]);
+  double max_table_temp_C = parse_double(this_input);
 
   if (std::isnan(max_table_temp_C))
   {
     std::printf(u8"Input Error: could not parse the highest table temperature\n");
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (max_table_temp_C < -kelvin_offset)
   {
     std::printf(u8"Input Error: the highest table temperature value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
     std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (max_table_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
   {
@@ -191,7 +233,7 @@ int main (int argc, char **argv)
     std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
     std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (max_table_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
   {
@@ -200,7 +242,7 @@ int main (int argc, char **argv)
     std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
     std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
   if (max_table_temp_C < min_table_temp_C)
@@ -208,155 +250,247 @@ int main (int argc, char **argv)
     std::printf(u8"Input Error: the highest table temperature value\n");
     std::printf(u8"             must be greater than the lowest table\n");
     std::printf(u8"             temperature value.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
-  /**
-   * Parse NTC thermistor nominal resistance input
-   */
-  this_input = std::string(argv[3]);
-  Rntc_nom_Ohms = parse_resistance(this_input);
+  double Rntc_nom_Ohms = std::numeric_limits<double>::quiet_NaN();
+  std::string csv_filename;
+  uint32_t csv_stored_rows = 0u;
 
-  if (std::isnan(Rntc_nom_Ohms))
+  if (operating_mode == NTC_parameter_mode)
   {
-    std::printf(u8"Input Error: could not parse the NTC nominal resistance\n");
-    std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    /**
+     * Parse NTC thermistor nominal resistance input
+     */
+    this_input = std::string(argv[Rntc_nom_argv_indx]);
+    Rntc_nom_Ohms = parse_resistance(this_input);
+
+    if (std::isnan(Rntc_nom_Ohms))
+    {
+      std::printf(u8"Input Error: could not parse the NTC nominal resistance\n");
+      std::printf(u8"             \"%s\".\n\n", this_input.c_str());
+      return EXIT_FAILURE;
+    }
+    else if (Rntc_nom_Ohms < min_Rntc_nom_Ohms)
+    {
+      std::printf(u8"Input Error: the NTC nominal resistance value\n");
+      std::printf(u8"             \"%s\"\n", this_input.c_str());
+      std::printf(u8"             should not be <%.0f\u03A9.\n\n", min_Rntc_nom_Ohms);
+      return EXIT_FAILURE;
+    }
+    else if (Rntc_nom_Ohms > max_Rntc_nom_Ohms)
+    {
+      std::printf(u8"Input Error: the NTC nominal resistance value\n");
+      std::printf(u8"             \"%s\"\n", this_input.c_str());
+      std::printf(u8"             should not be >%.0fM\u03A9.\n\n", 1.0e-6 * max_Rntc_nom_Ohms);
+      return EXIT_FAILURE;
+    }
   }
-  else if (Rntc_nom_Ohms < 1.0)
+  else if (operating_mode == NTC_table_mode)
   {
-    std::printf(u8"Input Error: the NTC nominal resistance value\n");
-    std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <1\u03A9.\n\n");
-    return 0;
-  }
-  else if (Rntc_nom_Ohms > 100.0e6)
-  {
-    std::printf(u8"Input Error: the NTC nominal resistance value\n");
-    std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >100M\u03A9.\n\n");
-    return 0;
+    csv_filename = std::string(argv[csv_filename_argv_indx]);
+    if (!parse_NTC_csv_file(csv_filename, NTC_temp_res_data, csv_stored_rows))
+    {
+      return EXIT_FAILURE;
+    }
+
+    if (csv_stored_rows < min_csv_rows)
+    {
+      std::printf("Input Error: found <%u valid rows in the input .csv file\n", min_csv_rows);
+      std::printf("             %s.\n\n", csv_filename.c_str());
+      return EXIT_FAILURE;
+    }
+
+    /* Sort the NTC temperature/resistance data by temperature ascending. */
+    std::sort(NTC_temp_res_data, NTC_temp_res_data + csv_stored_rows, NTC_temp_res_data_sort);
+
+    /**
+     * Check the NTC temperature/resistance data.
+     * Temperature should be strictly increasing and
+     * resistance should be strictly decreasing.
+     */
+    NTC_temp_res_row_t prev_row = NTC_temp_res_data[0];
+    for (uint32_t jRow = 1u; jRow < csv_stored_rows; jRow++)
+    {
+      NTC_temp_res_row_t this_row = NTC_temp_res_data[jRow];
+      if (this_row.temp_C <= prev_row.temp_C)
+      {
+        std::printf("Input Error: Temperature is not strictly increasing in the\n");
+        std::printf("             input .csv file %s\n", csv_filename.c_str());
+        std::printf("             even after sorting by temperature ascending.\n\n");
+        return EXIT_FAILURE;
+      }
+
+      if (this_row.res_Ohms >= prev_row.res_Ohms)
+      {
+        std::printf("Input Error: Resistance is not strictly decreasing in the\n");
+        std::printf("             input .csv file %s\n", csv_filename.c_str());
+        std::printf("             even after sorting by temperature ascending.\n\n");
+        return EXIT_FAILURE;
+      }
+
+      prev_row = this_row;
+    }
+
+    if (min_table_temp_C < NTC_temp_res_data[0].temp_C)
+    {
+      std::printf(u8"Input Error: the lowest table temperature value\n");
+      std::printf(u8"             must be greater than or equal to the minimum\n");
+      std::printf(u8"             temperature in the .csv file.\n\n");
+      return EXIT_FAILURE;
+    }
+
+    if (max_table_temp_C > NTC_temp_res_data[csv_stored_rows-1u].temp_C)
+    {
+      std::printf(u8"Input Error: the highest table temperature value\n");
+      std::printf(u8"             must be less than or equal to the maximum\n");
+      std::printf(u8"             temperature in the .csv file.\n\n");
+      return EXIT_FAILURE;
+    }
+
+    /**
+     * Interpolate the NTC temperature/resistance data via Steffen's
+     * method and save the interpolant for use in the main algorithm.
+     */
+    if (!steffen_interpolate(NTC_temp_res_data, csv_stored_rows, cubic_interp_segs))
+    {
+      std::printf("Error: Something went very wrong while attempting to\n");
+      std::printf("       interpolate the NTC thermistor temperature / resistance\n");
+      std::printf("       data found in %s.\n\n", csv_filename.c_str());
+      return EXIT_FAILURE;
+    }
+
+    std::ofstream debug_csv("debug.csv");
+    for (double temp_C = NTC_temp_res_data[0].temp_C; temp_C <= NTC_temp_res_data[csv_stored_rows-1u].temp_C; temp_C += 0.1)
+    {
+      debug_csv << temp_C << "," << 0.001 * Rntc_from_Tntc(temp_C, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs) << "\n";
+    }
+    debug_csv.close();
   }
 
-  inv_Rntc_nom_Ohms = 1.0 / Rntc_nom_Ohms;
+  double NTC_nom_temp_C = std::numeric_limits<double>::quiet_NaN();
 
-  /**
-   * Parse the temperature of NTC nominal resistance input.
-   */
-  this_input = std::string(argv[4]);
-  NTC_nom_temp_C = parse_double(this_input);
+  if (operating_mode == NTC_parameter_mode)
+  {
+    /**
+     * Parse the temperature of NTC nominal resistance input.
+     */
+    this_input = std::string(argv[NTC_nom_temp_argv_indx]);
+    NTC_nom_temp_C = parse_double(this_input);
 
-  if (std::isnan(NTC_nom_temp_C))
-  {
-    std::printf(u8"Input Error: could not parse the temperature for the NTC\n");
-    std::printf(u8"             nominal resistance, \"%s\".\n\n", this_input.c_str());    
-    return 0;
-  }
-  else if (NTC_nom_temp_C < -kelvin_offset)
-  {
-    std::printf(u8"Input Error: the temperature for the NTC nominal resistance\n");
-    std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
-    return 0;
-  }
-  else if (NTC_nom_temp_C >= 2054.0)
-  {
-    std::printf(u8"Input Error: the temperature for the NTC nominal resistance\n");
-    std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be \u22652054\u00B0C. The common\n");
-    std::printf(u8"             resistor substrate Alumina melts @ 2054\u00B0C.\n\n");
-    return 0;
-  }
-
-  inv_NTC_nom_temp_K = 1.0 / (NTC_nom_temp_C + kelvin_offset);
-
-  /**
-   * Parse NTC nominal Beta coefficient input.
-   */
-  this_input = std::string(argv[5]);
-  beta_K = parse_double(this_input);
-
-  if (std::isnan(beta_K))
-  {
-    std::printf(u8"Input Error: could not parse the NTC nominal \u03B2 coefficient\n");
-    std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
-  }
-  else if (beta_K < 100.0)
-  {
-    std::printf(u8"Input Error: the NTC nominal \u03B2 coefficient value\n");
-    std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <100K.\n\n");
-    return 0;
-  }
-  else if (beta_K > 100000.0)
-  {
-    std::printf(u8"Input Error: the NTC nominal \u03B2 coefficient value\n");
-    std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >100,000K.\n\n");
-    return 0;
+    if (std::isnan(NTC_nom_temp_C))
+    {
+      std::printf(u8"Input Error: could not parse the temperature for the NTC\n");
+      std::printf(u8"             nominal resistance, \"%s\".\n\n", this_input.c_str());    
+      return EXIT_FAILURE;
+    }
+    else if (NTC_nom_temp_C < -kelvin_offset)
+    {
+      std::printf(u8"Input Error: the temperature for the NTC nominal resistance\n");
+      std::printf(u8"             \"%s\"\n", this_input.c_str());
+      std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
+      return EXIT_FAILURE;
+    }
+    else if (NTC_nom_temp_C >= alumina_melting_point_C)
+    {
+      std::printf(u8"Input Error: the temperature for the NTC nominal resistance\n");
+      std::printf(u8"             \"%s\"\n", this_input.c_str());
+      std::printf(u8"             should not be \u22652054\u00B0C. The common\n");
+      std::printf(u8"             resistor substrate Alumina melts @ %.0f\u00B0C.\n\n", alumina_melting_point_C);
+      return EXIT_FAILURE;
+    }
   }
 
-  inv_beta_K = 1.0 / beta_K;
+  double beta_K = std::numeric_limits<double>::quiet_NaN();
+
+  if (operating_mode == NTC_parameter_mode)
+  {
+    /**
+     * Parse NTC nominal Beta coefficient input.
+     */
+    this_input = std::string(argv[beta_argv_indx]);
+    beta_K = parse_double(this_input);
+
+    if (std::isnan(beta_K))
+    {
+      std::printf(u8"Input Error: could not parse the NTC nominal \u03B2 coefficient\n");
+      std::printf(u8"             \"%s\".\n\n", this_input.c_str());
+      return EXIT_FAILURE;
+    }
+    else if (beta_K < min_beta_K)
+    {
+      std::printf(u8"Input Error: the NTC nominal \u03B2 coefficient value\n");
+      std::printf(u8"             \"%s\"\n", this_input.c_str());
+      std::printf(u8"             should not be <%.0fK.\n\n", min_beta_K);
+      return EXIT_FAILURE;
+    }
+    else if (beta_K > max_beta_K)
+    {
+      std::printf(u8"Input Error: the NTC nominal \u03B2 coefficient value\n");
+      std::printf(u8"             \"%s\"\n", this_input.c_str());
+      std::printf(u8"             should not be >%.0fK.\n\n", max_beta_K);
+      return EXIT_FAILURE;
+    }
+  }
 
   /**
    * Parse the pullup resistance input.
    */
-  this_input = std::string(argv[6]);
-  Rpullup_nom_Ohms = parse_resistance(this_input);
+  this_input = std::string(argv[Rpullup_nom_argv_indx]);
+  double Rpullup_nom_Ohms = parse_resistance(this_input);
 
   if (std::isnan(Rpullup_nom_Ohms))
   {
     std::printf(u8"Input Error: could not parse the pullup resistor nominal resistance\n");
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    return EXIT_FAILURE;
   }
-  else if (Rpullup_nom_Ohms < 1.0)
+  else if (Rpullup_nom_Ohms < min_Rpullup_nom_Ohms)
   {
     std::printf(u8"Input Error: the pullup resistor nominal resistance value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <1\u03A9.\n\n");
-    return 0;
+    std::printf(u8"             should not be <%.0f\u03A9.\n\n", min_Rpullup_nom_Ohms);
+    return EXIT_FAILURE;
   }
-  else if (Rpullup_nom_Ohms > 100.0e6)
+  else if (Rpullup_nom_Ohms > max_Rpullup_nom_Ohms)
   {
     std::printf(u8"Input Error: the pullup resistor nominal resistance value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >100M\u03A9.\n\n");
-    return 0;
+    std::printf(u8"             should not be >%.0fM\u03A9.\n\n", 1.0e-6 * max_Rpullup_nom_Ohms);
+    return EXIT_FAILURE;
   }
 
   /**
    * Parse the isolation resistance input.
    */
-  this_input = std::string(argv[7]);
-  Riso_nom_Ohms = parse_resistance(this_input);
+  this_input = std::string(argv[Riso_nom_argv_indx]);
+  double Riso_nom_Ohms = parse_resistance(this_input);
 
   if (std::isnan(Riso_nom_Ohms))
   {
     std::printf(u8"Input Error: could not parse the isolation resistor nominal resistance\n");
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    return EXIT_FAILURE;
   }
-  else if (Riso_nom_Ohms < 0.0)
+  else if (Riso_nom_Ohms < min_Riso_nom_Ohms)
   {
     std::printf(u8"Input Error: the isolation resistor nominal resistance value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <0\u03A9.\n\n");
-    return 0;
+    std::printf(u8"             should not be <%.0f\u03A9.\n\n", min_Riso_nom_Ohms);
+    return EXIT_FAILURE;
   }
-  else if (Riso_nom_Ohms > 100.0e6)
+  else if (Riso_nom_Ohms > max_Riso_nom_Ohms)
   {
     std::printf(u8"Input Error: the isolation resistor nominal resistance value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >100M\u03A9.\n\n");
-    return 0;
+    std::printf(u8"             should not be >%.0fM\u03A9.\n\n", 1.0e-6 * max_Riso_nom_Ohms);
+    return EXIT_FAILURE;
   }
 
   /**
    * Parse the number of ADC counts input.
    */
-  this_input = std::string(argv[8]);
+  this_input = std::string(argv[ADC_counts_argv_indx]);
   bool parse_ok = false;
   int64_t tmp_ADC_counts = parse_int64(this_input, parse_ok);
 
@@ -364,46 +498,45 @@ int main (int argc, char **argv)
   {
     std::printf(u8"Input Error: could not parse the ADC number of counts\n");
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    return EXIT_FAILURE;
   }
-  else if (tmp_ADC_counts < 8ll)
+  else if (tmp_ADC_counts < min_ADC_counts)
   {
     std::printf(u8"Input Error: the ADC number of counts\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <8.\n\n");
-    return 0;
+    std::printf(u8"             should not be <%" PRIi64 ".\n\n", min_ADC_counts);
+    return EXIT_FAILURE;
   }
-  else if (tmp_ADC_counts > (1ll << 15))
+  else if (tmp_ADC_counts > max_ADC_counts)
   {
     std::printf(u8"Input Error: the ADC number of counts\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be >%u.\n\n", 1u << 15);
-    return 0;
+    std::printf(u8"             should not be >%" PRIi64 ".\n\n", max_ADC_counts);
+    return EXIT_FAILURE;
   }
 
-  ADC_counts = static_cast<uint16_t>(tmp_ADC_counts);
-  inv_ADC_counts_minus_one = 1.0 / static_cast<double>(ADC_counts - 1u);
+  uint16_t ADC_counts = static_cast<uint16_t>(tmp_ADC_counts);
 
   /**
    * Parse the maximum interpolation error input.
    */
-  this_input = std::string(argv[9]);
-  max_interp_error_C = parse_double(this_input);
+  this_input = std::string(argv[max_interp_error_argv_indx]);
+  double max_interp_error_C = parse_double(this_input);
 
   if (std::isnan(max_interp_error_C))
   {
     std::printf(u8"Input Error: could not parse the maximum interpolation error\n");
     std::printf(u8"             \"%s\".\n\n", this_input.c_str());
-    return 0;
+    return EXIT_FAILURE;
   }
-  else if (max_interp_error_C < 1.0/256.0)
+  else if (max_interp_error_C < min_max_interp_error_C)
   {
     std::printf(u8"Input Error: the maximum interpolation error value\n");
     std::printf(u8"             \"%s\"\n", this_input.c_str());
-    std::printf(u8"             should not be <%.10f, which is half\n", 1.0/256.0);
+    std::printf(u8"             should not be <%.10f, which is half\n", min_max_interp_error_C);
     std::printf(u8"             the value of one least significant bit in the\n");
     std::printf(u8"             underlying fixed point representation\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
   else if (max_interp_error_C >= std::max(std::fabs(min_table_temp_C), std::fabs(max_table_temp_C)))
   {
@@ -411,45 +544,59 @@ int main (int argc, char **argv)
     std::printf(u8"             \"%s\"\n", this_input.c_str());
     std::printf(u8"             should not be larger than the absolute value\n");
     std::printf(u8"             of the minimum or maximum table temperature.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
   /**
    * Do a little more validation of lowest and highest table temperatures.
    */
-  double min_Rntc = Rntc_from_Tntc(max_table_temp_C);
-  if (min_Rntc <= 0.0)
+  double lowest_Rntc = std::numeric_limits<double>::quiet_NaN();
+  if (operating_mode == NTC_parameter_mode) lowest_Rntc = Rntc_from_Tntc(max_table_temp_C, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+  else if (operating_mode == NTC_table_mode) lowest_Rntc = Rntc_from_Tntc(max_table_temp_C, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
+
+  if (lowest_Rntc < min_Rntc_Ohms)
   {
     std::printf(u8"Input Error: the highest table temperature value\n");
     std::printf(u8"             and the NTC parameters result in an\n");
-    std::printf(u8"             NTC resistance that is \u22640\u03A9.\n");
-    return 0;
+    std::printf(u8"             NTC resistance that is < %.3e \u03A9.\n", min_Rntc_Ohms);
+    return EXIT_FAILURE;
   }
-  uint16_t table_start_count = ADCread_from_Tntc(max_table_temp_C);
-  double real_max_table_temp = Tntc_from_ADCread(table_start_count);
-  if (real_max_table_temp < max_table_temp_C)
+  uint16_t table_start_count = 0u;
+  if (operating_mode == NTC_parameter_mode) table_start_count = ADCread_from_Tntc(max_table_temp_C, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+  else if (operating_mode == NTC_table_mode) table_start_count = ADCread_from_Tntc(max_table_temp_C, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+
+  double real_max_table_temp_C = std::numeric_limits<double>::quiet_NaN();
+  if (operating_mode == NTC_parameter_mode) real_max_table_temp_C = Tntc_from_ADCread(table_start_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+  else if (operating_mode == NTC_table_mode) real_max_table_temp_C = Tntc_from_ADCread(table_start_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
+
+  if (real_max_table_temp_C < max_table_temp_C)
   {
     table_start_count--;
-    min_Rntc = Rntc_from_ADCread(table_start_count);
-    if (min_Rntc <= 0.0)
+    lowest_Rntc = Rntc_from_ADCread(table_start_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+    if (lowest_Rntc < min_Rntc_Ohms)
     {
       std::printf(u8"Input Error: the highest table temperature value\n");
       std::printf(u8"             and the NTC parameters result in an\n");
-      std::printf(u8"             NTC resistance that is \u22640\u03A9.\n");
-      return 0;
+      std::printf(u8"             NTC resistance that is < %.3e \u03A9.\n", min_Rntc_Ohms);
+      return EXIT_FAILURE;
     }
-    real_max_table_temp = Tntc_from_ADCread(table_start_count);
-    min_Rntc = Rntc_from_Tntc(real_max_table_temp);
-    if (min_Rntc <= 0.0)
+
+    if (operating_mode == NTC_parameter_mode) real_max_table_temp_C = Tntc_from_ADCread(table_start_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+    else if (operating_mode == NTC_table_mode) real_max_table_temp_C = Tntc_from_ADCread(table_start_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
+
+    if (operating_mode == NTC_parameter_mode) lowest_Rntc = Rntc_from_Tntc(real_max_table_temp_C, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+    else if (operating_mode == NTC_table_mode) lowest_Rntc = Rntc_from_Tntc(real_max_table_temp_C, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
+
+    if (lowest_Rntc < min_Rntc_Ohms)
     {
       std::printf(u8"Input Error: the highest table temperature value\n");
       std::printf(u8"             and the NTC parameters result in an\n");
-      std::printf(u8"             NTC resistance that is \u22640\u03A9.\n");
-      return 0;
+      std::printf(u8"             NTC resistance that is < %.3e \u03A9.\n", min_Rntc_Ohms);
+      return EXIT_FAILURE;
     }
   }
 
-  if (real_max_table_temp > std::numeric_limits<int16_t>::max() * inv_128)
+  if (real_max_table_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
   {
     std::printf(u8"Input Error: the nearest ADC count that encompasses\n");
     std::printf(u8"             the highest table temperature value results\n");
@@ -457,18 +604,25 @@ int main (int argc, char **argv)
     std::printf(u8"             exceeds %.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
     std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
-  uint16_t table_end_count = ADCread_from_Tntc(min_table_temp_C);
-  double real_min_table_temp = Tntc_from_ADCread(table_end_count);
-  if (table_end_count < ADC_counts - 1u && real_min_table_temp > min_table_temp_C)
+  uint16_t table_end_count = 0u;
+  if (operating_mode == NTC_parameter_mode) table_end_count = ADCread_from_Tntc(min_table_temp_C, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+  else if (operating_mode == NTC_table_mode) table_end_count = ADCread_from_Tntc(min_table_temp_C, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+
+  double real_min_table_temp_C = std::numeric_limits<double>::quiet_NaN();
+  if (operating_mode == NTC_parameter_mode) real_min_table_temp_C = Tntc_from_ADCread(table_end_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+  else if (operating_mode == NTC_table_mode) real_min_table_temp_C = Tntc_from_ADCread(table_end_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
+
+  if (table_end_count < ADC_counts - 1u && real_min_table_temp_C > min_table_temp_C)
   {
     table_end_count++;
-    real_min_table_temp = Tntc_from_ADCread(table_end_count);
+    if (operating_mode == NTC_parameter_mode) real_min_table_temp_C = Tntc_from_ADCread(table_end_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+    else if (operating_mode == NTC_table_mode) real_min_table_temp_C = Tntc_from_ADCread(table_end_count, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
   }
 
-  if (real_min_table_temp < std::numeric_limits<int16_t>::lowest() * inv_128)
+  if (real_min_table_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
   {
     std::printf(u8"Input Error: the nearest ADC count that encompasses\n");
     std::printf(u8"             the lowest table temperature value results\n");
@@ -476,13 +630,13 @@ int main (int argc, char **argv)
     std::printf(u8"             than %.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
     std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
     std::printf(u8"             temperature representable in an int16_t.\n\n");
-    return 0;
+    return EXIT_FAILURE;
   }
 
-  if (real_min_table_temp - min_table_temp_C > inv_128)
+  if (real_min_table_temp_C - min_table_temp_C > inv_128)
   {
     std::printf(u8"WARNING: The interpolation table actual minimum temperature\n");
-    std::printf(u8"         is %.10f\u00B0C, which is less than\n", real_min_table_temp);
+    std::printf(u8"         is %.10f\u00B0C, which is greater than\n", real_min_table_temp_C);
     std::printf(u8"         the requested %.10f\u00B0C because\n", min_table_temp_C);
     std::printf(u8"         the thermistor circuit output voltage has reached\n");
     std::printf(u8"         the limit of the ADC.\n\n");
@@ -492,11 +646,18 @@ int main (int argc, char **argv)
    * Redisplay input arguments back to user.
    */
   std::printf(u8"[Inputs]\n");
-  std::printf(u8"NTC: %.1f\u03A9 @ %.1f\u00B0C, \u03B2 = %.0fK\n", Rntc_nom_Ohms, NTC_nom_temp_C, beta_K);
+  if (operating_mode == NTC_parameter_mode)
+  {
+    std::printf(u8"NTC: %.1f\u03A9 @ %.1f\u00B0C, \u03B2 = %.0fK\n", Rntc_nom_Ohms, NTC_nom_temp_C, beta_K);
+  }
+  else if (operating_mode == NTC_table_mode)
+  {
+    std::printf(u8"NTC: Specified by %s.\n", csv_filename.c_str());
+  }
   std::printf(u8"Pullup Resistor: %.1f\u03A9\n", Rpullup_nom_Ohms);
   std::printf(u8"Isolation Resistor:  %.1f\u03A9\n", Riso_nom_Ohms);
   std::printf(u8"ADC: %u counts\n", ADC_counts);
-  std::printf(u8"Table temperatures: lowest = %.8f\u00B0C, highest = %.8f\u00B0C\n", real_min_table_temp, real_max_table_temp);
+  std::printf(u8"Table temperatures: lowest = %.8f\u00B0C, highest = %.8f\u00B0C\n", real_min_table_temp_C, real_max_table_temp_C);
   std::printf(u8"Max interpolation error: %.6f\u00B0C\n\n", max_interp_error_C);
 
   std::printf("table start: ADC count %5u\n", table_start_count);
@@ -506,9 +667,19 @@ int main (int argc, char **argv)
    * Fill in table of NTC temperature readings indexed by ADC count
    * for the whole table range.
    */
-  for (uint16_t ADC_read = table_start_count; ADC_read <= table_end_count; ADC_read++)
+  if (operating_mode == NTC_parameter_mode)
   {
-    Tntc_array[ADC_read] = Tntc_from_ADCread(ADC_read);
+    for (uint16_t ADC_read = table_start_count; ADC_read <= table_end_count; ADC_read++)
+    {
+      Tntc_array[ADC_read] = Tntc_from_ADCread(ADC_read, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
+    }
+  }
+  else if (operating_mode == NTC_table_mode)
+  {
+    for (uint16_t ADC_read = table_start_count; ADC_read <= table_end_count; ADC_read++)
+    {
+      Tntc_array[ADC_read] = Tntc_from_ADCread(ADC_read, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms, NTC_temp_res_data, csv_stored_rows, cubic_interp_segs);
+    }
   }
 
   /**
@@ -640,7 +811,7 @@ int main (int argc, char **argv)
       if (!found_rational)
       {
         std::printf("Error: could not find int32_t base-2 rational approximation to %f\n", frac_slope);
-        return 0;
+        return EXIT_FAILURE;
       }
 
       /**
@@ -990,8 +1161,16 @@ int main (int argc, char **argv)
   std::printf(" * into a temperature in 1/128ths of a degree Celsius.\n");
   std::printf(" *\n");
   std::printf(" * This code was autogenerated with the following parameters:\n");
-  std::printf(" * NTC Thermistor: %.1f Ohms nominal @ %.1f deg. C.\n", Rntc_nom_Ohms, NTC_nom_temp_C);
-  std::printf(" *                 Beta = %.0f K\n", beta_K);
+  if (operating_mode == NTC_parameter_mode)
+  {
+    std::printf(" * NTC Thermistor: %.1f Ohms nominal @ %.1f deg. C.\n", Rntc_nom_Ohms, NTC_nom_temp_C);
+    std::printf(" *                 Beta = %.0f K\n", beta_K);
+  }
+  else if (operating_mode == NTC_table_mode)
+  {
+    std::printf(" * NTC Thermistor: Defined by Temperature / Resistance data\n");
+    std::printf(" *                 provided in %s.\n", csv_filename.c_str());
+  }
   std::printf(" * Pullup resistor: %.1f Ohms nominal.\n", Rpullup_nom_Ohms);
   std::printf(" *   - The pullup resistor connects between the NTC and the\n");
   std::printf(" *     positive voltage supply.\n");
@@ -999,7 +1178,11 @@ int main (int argc, char **argv)
   std::printf(" *   - The isolation resistor connects between the NTC and GND.\n");
   std::printf(" * Full ADC count range: 0-%u\n", ADC_counts - 1u);
   std::printf(" * Max interpolation error: %.8f deg. C\n", max_interp_error_C);
-  std::printf(" * Table range: %.8f to %.8f deg. C\n", real_min_table_temp, real_max_table_temp);
+  double true_min_table_temp_C = static_cast<double>(interp_segments[n_stored_segments - 1u].start_temp + 
+    multshiftround<int32_t>(table_end_count - interp_segments[n_stored_segments - 1u].start_count, 
+                            interp_segments[n_stored_segments - 1u].slope_multiplier, 
+                            interp_segments[n_stored_segments - 1u].slope_shift)) * inv_128;
+  std::printf(" * Table range: %.8f to %.8f deg. C\n", true_min_table_temp_C, interp_segments[0].start_temp * inv_128);
   std::printf(" * ADCcount inputs >= %u result in the minimum table temperature.\n", table_end_count);
   std::printf(" * ADCcount inputs <= %u result in the maximum table temperature.\n", interp_segments[0].start_count);
   std::printf(" *" "/\n");
@@ -1072,7 +1255,7 @@ int main (int argc, char **argv)
   std::printf("  }\n");
   std::printf("}\n\n");
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 /*
