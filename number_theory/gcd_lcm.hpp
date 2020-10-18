@@ -226,7 +226,7 @@ template <> inline uint64_t gcd<uint64_t>(const std::initializer_list<uint64_t> 
  */
 template <class Iterator>
 typename std::enable_if<std::is_unsigned<typename std::iterator_traits<Iterator>::value_type>::value, typename std::iterator_traits<Iterator>::value_type>::type 
-gcd(Iterator first, Iterator last) {
+gcd(const Iterator &first, const Iterator &last) {
   static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::forward_iterator_tag>::value,
     "gcd(Iterator first, Iterator last) requires forward iterator (or more capable iterator) arguments.");
   
@@ -423,7 +423,7 @@ template <> inline uint64_t lcm<uint64_t>(const std::initializer_list<uint64_t> 
  */
 template <class Iterator>
 typename std::enable_if<std::is_unsigned<typename std::iterator_traits<Iterator>::value_type>::value, typename std::iterator_traits<Iterator>::value_type>::type 
-lcm(Iterator first, Iterator last) {
+lcm(const Iterator &first, const Iterator &last) {
   static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::forward_iterator_tag>::value,
     "lcm(Iterator first, Iterator last) requires forward iterator (or more capable iterator) arguments.");
   
