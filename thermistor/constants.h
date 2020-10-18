@@ -1,8 +1,8 @@
 /**
  * constants.h
  *
- * Declarations of global constants used byt thermistor_interpolator.cpp,
- * NTCcalculations.cpp, and parsers.cpp
+ * Declarations of global constants used by various files related to
+ * thermistor_interpolator.
  *
  * Written in 2019 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
@@ -18,34 +18,38 @@
 #define CONSTANTS_H_
 
 #include "types.h"
+#include <limits>
 
 /**
  * Global Constants
  */
-const double inv_128 = 1.0 / 128.0;
-const double kelvin_offset = 273.15;
-const double alumina_melting_point_C = 2054.0;
-const double min_Rntc_nom_Ohms = 1.0;
-const double max_Rntc_nom_Ohms = 100.0e6;
-const double min_beta_K = 100.0;
-const double max_beta_K = 100000.0;
-const double min_Rpullup_nom_Ohms = 1.0;
-const double max_Rpullup_nom_Ohms = 100.0e6;
-const double min_Riso_nom_Ohms = 0.0;
-const double max_Riso_nom_Ohms = 100.0e6;
-const int64_t min_ADC_counts = 8ll;
-const int64_t max_ADC_counts = 1ll << 15;
-const double min_max_interp_error_C = 1.0/256.0;
-const double min_Rntc_Ohms = 1.0e-3;
-const double min_fixedpointable_temp_C = -256.0;
-const double max_fixedpointable_temp_C = 255.9921875;
-const int num_arguments_mode1 = 9;
-const int num_arguments_mode2 = 7;
-const uint32_t min_csv_rows = 4u;
-const uint32_t max_csv_rows = 327680u;
-const uint8_t Undefined_mode = 0u;
-const uint8_t NTC_parameter_mode = 1u;
-const uint8_t NTC_table_mode = 2u;
+const double INV_128 = 1.0 / 128.0;
+const double KELVIN_OFFSET = 273.15;
+const double MIN_RNTC_NOM_OHMS = 1.0;
+const double MAX_RNTC_NOM_OHMS = 100.0e6;
+const double MIN_BETA_K = 100.0;
+const double MAX_BETA_K = 100000.0;
+const double MIN_NTC_NOM_TEMP_C = -KELVIN_OFFSET;
+const double MAX_NTC_NOM_TEMP_C = 2054.0; // The melting point of Alumina
+const double MIN_RPULLUP_NOM_OHMS = 1.0;
+const double MAX_RPULLUP_NOM_OHMS = 100.0e6;
+const double MIN_RISO_NOM_OHMS = 0.0;
+const double MAX_RISO_NOM_OHMS = 100.0e6;
+const int64_t MIN_ADC_COUNTS = 8ll;
+const int64_t MAX_ADC_COUNTS = 1ll << 15;
+const double MIN_MAX_INTERP_ERROR_C = 1.0/256.0;
+const double MIN_RNTC_OHMS = 1.0e-3;
+const double MIN_FIXEDPOINTABLE_TEMP_C = static_cast<double>(std::numeric_limits<int16_t>::lowest()) * INV_128;
+const double MAX_FIXEDPOINTABLE_TEMP_C = static_cast<double>(std::numeric_limits<int16_t>::max()) * INV_128;
+const int NUM_ARGUMENTS_PARAMETER_MODE = 9;
+const int NUM_ARGUMENTS_TABLE_MODE = 7;
+const uint32_t MIN_CSV_ROWS = 4u;
+const uint32_t MAX_CSV_ROWS = 327680u;
+const uint8_t UNDEFINED_MODE = 0u;
+const uint8_t NTC_PARAMETER_MODE = 1u;
+const uint8_t NTC_TABLE_MODE = 2u;
+const uint8_t NEWTON_MAX_ITERATIONS = 100u;
+const double NEWTON_STOP_ERR_THRESHOLD = 1.0e-9;
 
 #endif /* #ifndef CONSTANTS_H_ */
 

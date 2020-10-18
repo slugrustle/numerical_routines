@@ -34,8 +34,8 @@
  */
 bool steffen_interpolate(const NTC_temp_res_row_t *data, const uint32_t num_points, cubic_interp_seg_t *storage)
 {
-  if (num_points < 4u) return false;
-  if (num_points > max_csv_rows) return false;
+  if (num_points < MIN_CSV_ROWS) return false;
+  if (num_points > MAX_CSV_ROWS) return false;
 
   /**
    * Start with the very first segment, which uses a boundary condition
@@ -68,6 +68,8 @@ bool steffen_interpolate(const NTC_temp_res_row_t *data, const uint32_t num_poin
   double b = (3.0 * this_s - 2.0 * this_y_prime - next_y_prime) / this_h;
   double c = this_y_prime;
 
+  if (!std::isfinite(a) || !std::isfinite(b) || !std::isfinite(c)) return false;
+
   storage[0] = {a, b, c};
 
   /**
@@ -97,6 +99,9 @@ bool steffen_interpolate(const NTC_temp_res_row_t *data, const uint32_t num_poin
     a = (this_y_prime + next_y_prime - 2.0 * this_s) / (this_h * this_h);
     b = (3.0 * this_s - 2.0 * this_y_prime - next_y_prime) / this_h;
     c = this_y_prime;
+
+    if (!std::isfinite(a) || !std::isfinite(b) || !std::isfinite(c)) return false;
+
     storage[jSegment] = {a, b, c};
   }
 
@@ -119,6 +124,9 @@ bool steffen_interpolate(const NTC_temp_res_row_t *data, const uint32_t num_poin
   a = (this_y_prime + next_y_prime - 2.0 * this_s) / (this_h * this_h);
   b = (3.0 * this_s - 2.0 * this_y_prime - next_y_prime) / this_h;
   c = this_y_prime;
+
+  if (!std::isfinite(a) || !std::isfinite(b) || !std::isfinite(c)) return false;
+
   storage[num_points - 2u] = {a, b, c};
 
   return true;

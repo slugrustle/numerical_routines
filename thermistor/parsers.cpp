@@ -169,24 +169,27 @@ std::vector<std::string> tokenize(const std::string &input, const std::set<std::
  * 
  * The number of valid rows commited to the storage array is saved
  * in stored_rows.
+ * 
+ * Returns true upon success and false upon failure / error.
  */
 bool parse_NTC_csv_file(const std::string &filename, NTC_temp_res_row_t *storage, uint32_t &stored_rows)
 {
-  static const std::set<std::string::value_type> delimeters = {',', ' ', '\n', '\r', '\t', '\f', '\v'};
+  static const std::set<std::string::value_type> DELIMITERS = {',', ' ', '\n', '\r', '\t', '\f', '\v'};
 
   stored_rows = 0u;
 
   std::ifstream csv_file(filename);
   if (!csv_file.is_open())
   {
-    std::printf("Input Error: could not open input .csv file\n");
+    std::printf("Input Error: could not open input file\n");
     std::printf("             %s for reading.\n\n", filename.c_str());
     return false;
   }
 
   uint32_t jLine = 0u;
   std::string line;
-  while (std::getline(csv_file, line) && stored_rows < max_csv_rows)
+  bool valid_data_previous_line = false;
+  while (std::getline(csv_file, line))
   {
     /* Erase a UTF-8 byte order mark if it is present. */
     if (jLine == 0 && line.size() >= 3 &&
@@ -195,7 +198,7 @@ bool parse_NTC_csv_file(const std::string &filename, NTC_temp_res_row_t *storage
         line = line.substr(3);
     }
   
-    std::vector<std::string> tokens = tokenize(line, delimeters);
+    std::vector<std::string> tokens = tokenize(line, DELIMITERS);
 
     /* Ignore lines with fewer than two "rows". */
     if (tokens.size() >= 2)
@@ -203,53 +206,82 @@ bool parse_NTC_csv_file(const std::string &filename, NTC_temp_res_row_t *storage
       double row_temp_C = parse_double(tokens.at(0));
       if (std::isnan(row_temp_C))
       {
-        std::printf(u8"Input Error: could not parse the temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"Input Error: could not parse the temperature in column 1 on line %u\n", jLine+1u);
         std::printf(u8"             of %s.\n\n", filename.c_str());
+        csv_file.close();
         return false;
       }
-      else if (row_temp_C < -kelvin_offset)
+      else if (row_temp_C < -KELVIN_OFFSET)
       {
-        std::printf(u8"Input Error: the temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"Input Error: the temperature in column 1 on line %u\n", jLine+1u);
         std::printf(u8"             of %s\n", filename.c_str());
         std::printf(u8"             should not be <-273.15\u00B0C (think about it).\n\n");
+        csv_file.close();
         return false;
       }
-      else if (row_temp_C < std::numeric_limits<int16_t>::lowest() * inv_128)
+      else if (row_temp_C < MIN_FIXEDPOINTABLE_TEMP_C)
       {
-        std::printf(u8"Input Error: the temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"Input Error: the temperature in column 1 on line %u\n", jLine+1u);
         std::printf(u8"             of %s\n", filename.c_str());
-        std::printf(u8"             should not be <%.8f\u00B0C.\n", std::numeric_limits<int16_t>::lowest() * inv_128);
+        std::printf(u8"             should not be <%.8f\u00B0C.\n", MIN_FIXEDPOINTABLE_TEMP_C);
         std::printf(u8"             This is the lowest 1/128th of a degree Celsius\n");
         std::printf(u8"             temperature representable in an int16_t.\n\n");
+        csv_file.close();
         return false;
       }
-      else if (row_temp_C > std::numeric_limits<int16_t>::max() * inv_128)
+      else if (row_temp_C > MAX_FIXEDPOINTABLE_TEMP_C)
       {
-        std::printf(u8"Input Error: temperature in column 1 on line %u\n", jLine);
+        std::printf(u8"Input Error: temperature in column 1 on line %u\n", jLine+1u);
         std::printf(u8"             of %s\n", filename.c_str());
-        std::printf(u8"             should not be >%.8f\u00B0C.\n", std::numeric_limits<int16_t>::max() * inv_128);
+        std::printf(u8"             should not be >%.8f\u00B0C.\n", MAX_FIXEDPOINTABLE_TEMP_C);
         std::printf(u8"             This is the highest 1/128th of a degree Celsius\n");
         std::printf(u8"             temperature representable in an int16_t.\n\n");
+        csv_file.close();
         return false;
       }
 
       double row_res_Ohms = parse_resistance(tokens.at(1));
       if (std::isnan(row_res_Ohms))
       {
-        std::printf(u8"Input Error: could not parse the resistance in column 2 on line %u\n", jLine);
+        std::printf(u8"Input Error: could not parse the resistance in column 2 on line %u\n", jLine+1u);
         std::printf(u8"             of %s.\n\n", filename.c_str());
+        csv_file.close();
         return false;
       }
-      else if (row_res_Ohms < min_Rntc_Ohms)
+      else if (row_res_Ohms < MIN_RNTC_OHMS)
       {
-        std::printf(u8"Input Error: the resistance in column 2 on line %u\n", jLine);
+        std::printf(u8"Input Error: the resistance in column 2 on line %u\n", jLine+1u);
         std::printf(u8"             of %s\n", filename.c_str());
-        std::printf(u8"             should not be < %.3e \u03A9.\n", min_Rntc_Ohms);
+        std::printf(u8"             should not be < %.3e \u03A9.\n", MIN_RNTC_OHMS);
+        csv_file.close();
+        return false;
+      }
+
+      if (stored_rows > MAX_CSV_ROWS-1u)
+      {
+        std::printf(u8"Input Error: the input file %s\n", filename.c_str());
+        std::printf(u8"             has more than %u valid data rows, which is the\n", MAX_CSV_ROWS);
+        std::printf(u8"             largest number of rows that this program supports.\n\n");
+        csv_file.close();
+        return false;
+      }
+
+      if (!valid_data_previous_line && jLine > 0u)
+      {
+        std::printf(u8"Input Error: found fewer than two columns of data on line %u\n", jLine);
+        std::printf(u8"             of %s\n", filename.c_str());
+        std::printf(u8"             Each row of this file must have two columns of data.\n\n");
+        csv_file.close();
         return false;
       }
 
       storage[stored_rows] = {row_temp_C, row_res_Ohms};
       stored_rows++;
+      valid_data_previous_line = true;
+    }
+    else
+    {
+      valid_data_previous_line = false;
     }
 
     jLine++;

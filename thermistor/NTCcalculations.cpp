@@ -35,7 +35,16 @@
  */
 double Rntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, const double Riso_nom_Ohms)
 {
+  assert(ADC_counts >= MIN_ADC_COUNTS);
+  assert(ADC_counts <= MAX_ADC_COUNTS);
+  
   assert(ADCread < ADC_counts);
+  
+  assert(Rpullup_nom_Ohms >= MIN_RPULLUP_NOM_OHMS);
+  assert(Rpullup_nom_Ohms <= MAX_RPULLUP_NOM_OHMS);
+
+  assert(Riso_nom_Ohms >= MIN_RISO_NOM_OHMS);
+  assert(Riso_nom_Ohms <= MAX_RISO_NOM_OHMS);
   
   double ADCratio = 0.0;
   
@@ -57,9 +66,18 @@ double Rntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, cons
 double Rntc_from_Tntc(const double NTC_temp_C, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C)
 {
   assert(std::isfinite(NTC_temp_C));
-  assert(NTC_temp_C >= -kelvin_offset);
+  assert(NTC_temp_C >= -KELVIN_OFFSET);
 
-  return Rntc_nom_Ohms * std::exp(beta_K * (1.0 / (NTC_temp_C + kelvin_offset) - 1.0 / (NTC_nom_temp_C + kelvin_offset)));
+  assert(Rntc_nom_Ohms >= MIN_RNTC_NOM_OHMS);
+  assert(Rntc_nom_Ohms <= MAX_RNTC_NOM_OHMS);
+
+  assert(beta_K >= MIN_BETA_K);
+  assert(beta_K <= MAX_BETA_K);
+
+  assert(NTC_nom_temp_C >= MIN_NTC_NOM_TEMP_C);
+  assert(NTC_nom_temp_C <= MAX_NTC_NOM_TEMP_C);
+
+  return Rntc_nom_Ohms * std::exp(beta_K * (1.0 / (NTC_temp_C + KELVIN_OFFSET) - 1.0 / (NTC_nom_temp_C + KELVIN_OFFSET)));
 }
 
 /**
@@ -75,6 +93,12 @@ double Rntc_from_Tntc(const double NTC_temp_C, const double Rntc_nom_Ohms, const
  */
 double Rntc_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *data, const uint32_t num_points, const cubic_interp_seg_t *segments)
 {
+  assert(std::isfinite(NTC_temp_C));
+  assert(NTC_temp_C >= -KELVIN_OFFSET);
+
+  assert(num_points >= MIN_CSV_ROWS);
+  assert(num_points <= MAX_CSV_ROWS);
+
   /**
    * Check input NTC_temp_C against table min & max temperatures.
    */
@@ -131,11 +155,31 @@ double Rntc_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *data, c
 double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, 
                          const double Riso_nom_Ohms, const double Rntc_nom_Ohms, const double beta_K, const double NTC_nom_temp_C)
 {
+  assert(ADC_counts >= MIN_ADC_COUNTS);
+  assert(ADC_counts <= MAX_ADC_COUNTS);
+  
   assert(ADCread < ADC_counts);
+  
+  assert(Rpullup_nom_Ohms >= MIN_RPULLUP_NOM_OHMS);
+  assert(Rpullup_nom_Ohms <= MAX_RPULLUP_NOM_OHMS);
+
+  assert(Riso_nom_Ohms >= MIN_RISO_NOM_OHMS);
+  assert(Riso_nom_Ohms <= MAX_RISO_NOM_OHMS);
+
+  assert(Rntc_nom_Ohms >= MIN_RNTC_NOM_OHMS);
+  assert(Rntc_nom_Ohms <= MAX_RNTC_NOM_OHMS);
+
+  assert(beta_K >= MIN_BETA_K);
+  assert(beta_K <= MAX_BETA_K);
+
+  assert(NTC_nom_temp_C >= MIN_NTC_NOM_TEMP_C);
+  assert(NTC_nom_temp_C <= MAX_NTC_NOM_TEMP_C);
 
   double Rntc = Rntc_from_ADCread(ADCread, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
-  if (Rntc < min_Rntc_Ohms) return std::numeric_limits<double>::quiet_NaN();
-  return 1.0 / (std::log(Rntc / Rntc_nom_Ohms) / beta_K + 1.0 / (NTC_nom_temp_C + kelvin_offset)) - kelvin_offset;
+  assert(std::isfinite(Rntc));
+  assert(Rntc >= MIN_RNTC_OHMS);
+
+  return 1.0 / (std::log(Rntc / Rntc_nom_Ohms) / beta_K + 1.0 / (NTC_nom_temp_C + KELVIN_OFFSET)) - KELVIN_OFFSET;
 }
 
 /**
@@ -153,9 +197,23 @@ double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, cons
 double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, const double Rpullup_nom_Ohms, 
                          const double Riso_nom_Ohms, const NTC_temp_res_row_t *data, const uint32_t num_points, const cubic_interp_seg_t *segments)
 {
+  assert(ADC_counts >= MIN_ADC_COUNTS);
+  assert(ADC_counts <= MAX_ADC_COUNTS);
+
   assert(ADCread < ADC_counts);
+  
+  assert(Rpullup_nom_Ohms >= MIN_RPULLUP_NOM_OHMS);
+  assert(Rpullup_nom_Ohms <= MAX_RPULLUP_NOM_OHMS);
+
+  assert(Riso_nom_Ohms >= MIN_RISO_NOM_OHMS);
+  assert(Riso_nom_Ohms <= MAX_RISO_NOM_OHMS);
+
+  assert(num_points >= MIN_CSV_ROWS);
+  assert(num_points <= MAX_CSV_ROWS);
 
   double Rntc = Rntc_from_ADCread(ADCread, ADC_counts, Rpullup_nom_Ohms, Riso_nom_Ohms);
+  assert(std::isfinite(Rntc));
+  assert(Rntc >= MIN_RNTC_OHMS);
   
   /**
    * Check Rntc against table min & max resistances.
@@ -197,22 +255,48 @@ double Tntc_from_ADCread(const uint16_t ADCread, const uint16_t ADC_counts, cons
       /**
        * Solve for the temperature that yields Rntc via Newton's method.
        */
+      uint8_t jIteration = 0u;
       cubic_interp_seg_t seg_coeffs = segments[seg_index];
       double x = guess_temp_C - seg_row.temp_C;
       double x_2 = x * x;
       double this_err = seg_coeffs.a * x * x_2 + seg_coeffs.b * x_2 + seg_coeffs.c * x + seg_row.res_Ohms - Rntc;
 
-      while (std::fabs(this_err) > 1.0e-9)
+      while (std::fabs(this_err) > NEWTON_STOP_ERR_THRESHOLD)
       {
         double next_temp_C = guess_temp_C - this_err / (3.0 * seg_coeffs.a * x_2 + 2.0 * seg_coeffs.b * x + seg_coeffs.c);
         x = next_temp_C - seg_row.temp_C;
         x_2 = x * x;
         double next_err = seg_coeffs.a * x * x_2 + seg_coeffs.b * x_2 + seg_coeffs.c * x + seg_row.res_Ohms - Rntc;
 
-        if (std::fabs(next_err) > std::fabs(this_err)) return std::numeric_limits<double>::quiet_NaN();
+        if (std::fabs(next_err) > std::fabs(this_err))
+        {
+          std::printf(u8"Error: Newton's method misstepped while back-calculating\n");
+          std::printf(u8"       NTC temperature from resistance. Please check your\n");
+          std::printf(u8"       input parameters / data. If everything looks ok,\n");
+          std::printf(u8"       please file a bug report.\n\n");
+          return std::numeric_limits<double>::quiet_NaN();
+        }
 
         guess_temp_C = next_temp_C;
         this_err = next_err;
+        jIteration++;
+
+        if (jIteration > NEWTON_MAX_ITERATIONS)
+        {
+          std::printf(u8"Error: Newton's method failed to converge while\n");
+          std::printf(u8"       back-calculating NTC temperature from resistance.\n");
+          std::printf(u8"       Please check your input parameters / data.\n");
+          std::printf(u8"       If everything looks ok, please file a bug report.\n\n");
+          return std::numeric_limits<double>::quiet_NaN();
+        }
+      }
+      
+      if (!std::isfinite(guess_temp_C))
+      {
+        std::printf(u8"Error: Back-calculation of NTC temperature from resistance\n");
+        std::printf(u8"       failed for an unknown reason. Please check your input\n");
+        std::printf(u8"       parameters / data. If everything looks ok, please\n");
+        std::printf(u8"       file a bug report.\n\n");
       }
 
       return guess_temp_C;
@@ -234,10 +318,29 @@ uint16_t ADCread_from_Tntc(const double NTC_temp_C, const double Rntc_nom_Ohms, 
                            const uint16_t ADC_counts, const double Rpullup_nom_Ohms, const double Riso_nom_Ohms)
 {
   assert(std::isfinite(NTC_temp_C));
-  assert(NTC_temp_C >= -kelvin_offset);
+  assert(NTC_temp_C >= -KELVIN_OFFSET);
+
+  assert(Rntc_nom_Ohms >= MIN_RNTC_NOM_OHMS);
+  assert(Rntc_nom_Ohms <= MAX_RNTC_NOM_OHMS);
+
+  assert(beta_K >= MIN_BETA_K);
+  assert(beta_K <= MAX_BETA_K);
+
+  assert(NTC_nom_temp_C >= MIN_NTC_NOM_TEMP_C);
+  assert(NTC_nom_temp_C <= MAX_NTC_NOM_TEMP_C);
+
+  assert(ADC_counts >= MIN_ADC_COUNTS);
+  assert(ADC_counts <= MAX_ADC_COUNTS);
+
+  assert(Rpullup_nom_Ohms >= MIN_RPULLUP_NOM_OHMS);
+  assert(Rpullup_nom_Ohms <= MAX_RPULLUP_NOM_OHMS);
+
+  assert(Riso_nom_Ohms >= MIN_RISO_NOM_OHMS);
+  assert(Riso_nom_Ohms <= MAX_RISO_NOM_OHMS);
 
   double Rntc = Rntc_from_Tntc(NTC_temp_C, Rntc_nom_Ohms, beta_K, NTC_nom_temp_C);
-  assert(Rntc >= min_Rntc_Ohms);
+  assert(std::isfinite(Rntc));
+  assert(Rntc >= MIN_RNTC_OHMS);
 
   double ADCratio = (Rntc + Riso_nom_Ohms) / (Rntc + Riso_nom_Ohms + Rpullup_nom_Ohms);
   return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - (uint16_t)1u)));
@@ -261,10 +364,23 @@ uint16_t ADCread_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *da
                            const double Riso_nom_Ohms)
 {
   assert(std::isfinite(NTC_temp_C));
-  assert(NTC_temp_C >= -kelvin_offset);
+  assert(NTC_temp_C >= -KELVIN_OFFSET);
+
+  assert(num_points >= MIN_CSV_ROWS);
+  assert(num_points <= MAX_CSV_ROWS);
+
+  assert(ADC_counts >= MIN_ADC_COUNTS);
+  assert(ADC_counts <= MAX_ADC_COUNTS);
+
+  assert(Rpullup_nom_Ohms >= MIN_RPULLUP_NOM_OHMS);
+  assert(Rpullup_nom_Ohms <= MAX_RPULLUP_NOM_OHMS);
+
+  assert(Riso_nom_Ohms >= MIN_RISO_NOM_OHMS);
+  assert(Riso_nom_Ohms <= MAX_RISO_NOM_OHMS);
 
   double Rntc = Rntc_from_Tntc(NTC_temp_C, data, num_points, segments);
-  assert(Rntc >= min_Rntc_Ohms);
+  assert(std::isfinite(Rntc));
+  assert(Rntc >= MIN_RNTC_OHMS);
 
   double ADCratio = (Rntc + Riso_nom_Ohms) / (Rntc + Riso_nom_Ohms + Rpullup_nom_Ohms);
   return static_cast<uint16_t>(std::round(ADCratio * static_cast<double>(ADC_counts - (uint16_t)1u)));
@@ -276,8 +392,8 @@ uint16_t ADCread_from_Tntc(const double NTC_temp_C, const NTC_temp_res_row_t *da
  */
 int16_t fixed_point_C(const double temp_C)
 {
-  assert(temp_C >= min_fixedpointable_temp_C);
-  assert(temp_C <= max_fixedpointable_temp_C);
+  assert(temp_C >= MIN_FIXEDPOINTABLE_TEMP_C);
+  assert(temp_C <= MAX_FIXEDPOINTABLE_TEMP_C);
 
   return static_cast<int16_t>(std::round(128.0 * temp_C));
 }
