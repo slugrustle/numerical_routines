@@ -25,6 +25,7 @@
 #include <iterator>
 #include <vector>
 #include <algorithm>
+#include <type_traits>
 
 /**
  * RCSn() implements the O(n log n) version of Sn.
@@ -36,42 +37,45 @@
 template <class Iterator>
 typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, const Iterator &last)
 {
+  using itr_value_type = typename std::iterator_traits<Iterator>::value_type;
+  using itr_diff_type = typename std::iterator_traits<Iterator>::difference_type;
+
   static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::random_access_iterator_tag>::value, "RCSn() requires random access iterator arguments.");
-  static_assert(std::is_floating_point<typename std::iterator_traits<Iterator>::value_type>::value, "RCSn() only operates on floating point data.");
-  
-  typename std::iterator_traits<Iterator>::difference_type n = last - first;
+  static_assert(std::is_floating_point<itr_value_type>::value, "RCSn() only operates on floating point data.");
+
+  itr_diff_type n = last - first;
 
   if (n <= 1)
   {
     return 0.0;
   }
 
-  std::vector<typename std::iterator_traits<Iterator>::value_type> a2(n, 0.0);
+  std::vector<itr_value_type> a2(n, 0.0);
 
   /* Initialize y with a copy of the input data and sort it. */
-  std::vector<typename std::iterator_traits<Iterator>::value_type> y(first, last);
+  std::vector<itr_value_type> y(first, last);
   std::sort(y.begin(), y.end());
-  a2.at(0) = static_cast<typename std::iterator_traits<Iterator>::value_type>(y.at(n >> 1) - y.at(0));
+  a2.at(0) = static_cast<itr_value_type>(y.at(n >> 1) - y.at(0));
   
-  for (typename std::iterator_traits<Iterator>::difference_type i = 2; i <= ((n+1) >> 1); i++)
+  for (itr_diff_type i = 2; i <= ((n+1) >> 1); i++)
   {
-    typename std::iterator_traits<Iterator>::difference_type nA = i - 1;
-    typename std::iterator_traits<Iterator>::difference_type nB = n - i;
-    typename std::iterator_traits<Iterator>::difference_type diff = nB - nA;
-    typename std::iterator_traits<Iterator>::difference_type leftA = 1;
-    typename std::iterator_traits<Iterator>::difference_type leftB = 1;
-    typename std::iterator_traits<Iterator>::difference_type rightA = nB;
-    typename std::iterator_traits<Iterator>::difference_type rightB = nB;
-    typename std::iterator_traits<Iterator>::difference_type Amin = 1 + (diff >> 1);
-    typename std::iterator_traits<Iterator>::difference_type Amax = nA + (diff >> 1);
+    itr_diff_type nA = i - 1;
+    itr_diff_type nB = n - i;
+    itr_diff_type diff = nB - nA;
+    itr_diff_type leftA = 1;
+    itr_diff_type leftB = 1;
+    itr_diff_type rightA = nB;
+    itr_diff_type rightB = nB;
+    itr_diff_type Amin = 1 + (diff >> 1);
+    itr_diff_type Amax = nA + (diff >> 1);
 
     while (leftA < rightA)
     {
-      typename std::iterator_traits<Iterator>::difference_type length = rightA - leftA + 1;
-      typename std::iterator_traits<Iterator>::difference_type even = 1 - (length & (typename std::iterator_traits<Iterator>::difference_type)1);
-      typename std::iterator_traits<Iterator>::difference_type half = (length - 1) >> 1;
-      typename std::iterator_traits<Iterator>::difference_type tryA = leftA + half;
-      typename std::iterator_traits<Iterator>::difference_type tryB = leftB + half;
+      itr_diff_type length = rightA - leftA + 1;
+      itr_diff_type even = 1 - (length & (itr_diff_type)1);
+      itr_diff_type half = (length - 1) >> 1;
+      itr_diff_type tryA = leftA + half;
+      itr_diff_type tryB = leftB + half;
 
       if (tryA < Amin)
       {
@@ -87,8 +91,8 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
         }
         else
         {
-          typename std::iterator_traits<Iterator>::value_type medA = y.at(i-1) - y.at(i - tryA + Amin - 2);
-          typename std::iterator_traits<Iterator>::value_type medB = y.at(tryB + i - 1) - y.at(i - 1);
+          itr_value_type medA = y.at(i-1) - y.at(i - tryA + Amin - 2);
+          itr_value_type medB = y.at(tryB + i - 1) - y.at(i - 1);
 
           if (medA >= medB)
           {
@@ -110,31 +114,31 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
     }
     else
     {
-      typename std::iterator_traits<Iterator>::value_type medA = y.at(i - 1) - y.at(i - leftA + Amin - 2);
-      typename std::iterator_traits<Iterator>::value_type medB = y.at(leftB + i - 1) - y.at(i - 1);
+      itr_value_type medA = y.at(i - 1) - y.at(i - leftA + Amin - 2);
+      itr_value_type medB = y.at(leftB + i - 1) - y.at(i - 1);
       a2.at(i - 1) = std::min(medA, medB);
     }
   }
 
-  for (typename std::iterator_traits<Iterator>::difference_type i = 1 + ((n + 1) >> 1); i <= n - 1; i++)
+  for (itr_diff_type i = 1 + ((n + 1) >> 1); i <= n - 1; i++)
   {
-    typename std::iterator_traits<Iterator>::difference_type nA = n - i;
-    typename std::iterator_traits<Iterator>::difference_type nB = i - 1;
-    typename std::iterator_traits<Iterator>::difference_type diff = nB - nA;
-    typename std::iterator_traits<Iterator>::difference_type leftA = 1;
-    typename std::iterator_traits<Iterator>::difference_type leftB = 1;
-    typename std::iterator_traits<Iterator>::difference_type rightA = nB;
-    typename std::iterator_traits<Iterator>::difference_type rightB = nB;
-    typename std::iterator_traits<Iterator>::difference_type Amin = 1 + (diff >> 1);
-    typename std::iterator_traits<Iterator>::difference_type Amax = nA + (diff >> 1);
+    itr_diff_type nA = n - i;
+    itr_diff_type nB = i - 1;
+    itr_diff_type diff = nB - nA;
+    itr_diff_type leftA = 1;
+    itr_diff_type leftB = 1;
+    itr_diff_type rightA = nB;
+    itr_diff_type rightB = nB;
+    itr_diff_type Amin = 1 + (diff >> 1);
+    itr_diff_type Amax = nA + (diff >> 1);
 
     while (leftA < rightA)
     {
-      typename std::iterator_traits<Iterator>::difference_type length = rightA - leftA + 1;
-      typename std::iterator_traits<Iterator>::difference_type even = 1 - (length & (typename std::iterator_traits<Iterator>::difference_type)1);
-      typename std::iterator_traits<Iterator>::difference_type half = (length - 1) >> 1;
-      typename std::iterator_traits<Iterator>::difference_type tryA = leftA + half;
-      typename std::iterator_traits<Iterator>::difference_type tryB = leftB + half;
+      itr_diff_type length = rightA - leftA + 1;
+      itr_diff_type even = 1 - (length & (itr_diff_type)1);
+      itr_diff_type half = (length - 1) >> 1;
+      itr_diff_type tryA = leftA + half;
+      itr_diff_type tryB = leftB + half;
 
       if (tryA < Amin)
       {
@@ -150,8 +154,8 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
         }
         else
         {
-          typename std::iterator_traits<Iterator>::value_type medA = y.at(i + tryA - Amin) - y.at(i - 1);
-          typename std::iterator_traits<Iterator>::value_type medB = y.at(i - 1) - y.at(i - tryB - 1);
+          itr_value_type medA = y.at(i + tryA - Amin) - y.at(i - 1);
+          itr_value_type medB = y.at(i - 1) - y.at(i - tryB - 1);
 
           if (medA >= medB)
           {
@@ -173,35 +177,35 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
     }
     else
     {
-      typename std::iterator_traits<Iterator>::value_type medA = y.at(i + leftA - Amin) - y.at(i - 1);
-      typename std::iterator_traits<Iterator>::value_type medB = y.at(i - 1) - y.at(i - leftB - 1);
+      itr_value_type medA = y.at(i + leftA - Amin) - y.at(i - 1);
+      itr_value_type medB = y.at(i - 1) - y.at(i - leftB - 1);
       a2.at(i - 1) = std::min(medA, medB);
     }
   }
 
   a2.at(n - 1) = y.at(n - 1) - y.at(((n + 1) >> 1) - 1);
-  typename std::iterator_traits<Iterator>::value_type cn = 1.0;
+  itr_value_type cn = 1.0;
 
   if (n <= 9)
   {
-    const typename std::iterator_traits<Iterator>::value_type cn_array[11] = { 0.0, 0.0, 0.743, 1.851, 0.954, 1.351, 0.993, 1.198, 1.005, 1.131 };
+    static const itr_value_type cn_array[11] = { 0.0, 0.0, 0.743, 1.851, 0.954, 1.351, 0.993, 1.198, 1.005, 1.131 };
     cn = cn_array[n];
   }
-  else if ((n & (typename std::iterator_traits<Iterator>::difference_type)1) == 1)
+  else if ((n & (itr_diff_type)1) == 1)
   {
-    typename std::iterator_traits<Iterator>::value_type n_fp = static_cast<typename std::iterator_traits<Iterator>::value_type>(n);
-    cn = n_fp / (n_fp - 0.9);
+    itr_value_type n_fp = static_cast<itr_value_type>(n);
+    cn = n_fp / (n_fp - static_cast<itr_value_type>(0.9));
   }
   
   /**
    * Put the the (n+1)/2 th order statistic of a2 at index
    * (n + 1)/2 - 1 in a2.
    */
-  typename std::iterator_traits<Iterator>::difference_type order_stat_index = ((n + 1) >> 1) - 1;
+  itr_diff_type order_stat_index = ((n + 1) >> 1) - 1;
   std::nth_element(a2.begin(), a2.begin() + order_stat_index, a2.end());
 
   /* Return Sn. */
-  return (1.1926 * cn * a2.at(order_stat_index));
+  return static_cast<itr_value_type>(1.1926) * cn * a2.at(order_stat_index);
 }
 
 /**
@@ -214,41 +218,44 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
 template <class Iterator>
 typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator &first, const Iterator &last)
 {
+  using itr_value_type = typename std::iterator_traits<Iterator>::value_type;
+  using itr_diff_type = typename std::iterator_traits<Iterator>::difference_type;
+
   static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::random_access_iterator_tag>::value, "RCSn() requires random access iterator arguments.");
-  static_assert(std::is_floating_point<typename std::iterator_traits<Iterator>::value_type>::value, "RCSn() only operates on floating point data.");
+  static_assert(std::is_floating_point<itr_value_type>::value, "RCSn() only operates on floating point data.");
   
-  typename std::iterator_traits<Iterator>::difference_type n = last - first;
+  itr_diff_type n = last - first;
 
   if (n <= 1)
   {
     return 0.0;
   }
 
-  std::vector<typename std::iterator_traits<Iterator>::value_type> a2(n, 0.0);
+  std::vector<itr_value_type> a2(n, 0.0);
 
   /* Sort the input data. */
   std::sort(first, last);
-  a2.at(0) = static_cast<typename std::iterator_traits<Iterator>::value_type>(*(first + (n >> 1)) - *first);
+  a2.at(0) = static_cast<itr_value_type>(*(first + (n >> 1)) - *first);
   
-  for (typename std::iterator_traits<Iterator>::difference_type i = 2; i <= ((n+1) >> 1); i++)
+  for (itr_diff_type i = 2; i <= ((n+1) >> 1); i++)
   {
-    typename std::iterator_traits<Iterator>::difference_type nA = i - 1;
-    typename std::iterator_traits<Iterator>::difference_type nB = n - i;
-    typename std::iterator_traits<Iterator>::difference_type diff = nB - nA;
-    typename std::iterator_traits<Iterator>::difference_type leftA = 1;
-    typename std::iterator_traits<Iterator>::difference_type leftB = 1;
-    typename std::iterator_traits<Iterator>::difference_type rightA = nB;
-    typename std::iterator_traits<Iterator>::difference_type rightB = nB;
-    typename std::iterator_traits<Iterator>::difference_type Amin = 1 + (diff >> 1);
-    typename std::iterator_traits<Iterator>::difference_type Amax = nA + (diff >> 1);
+    itr_diff_type nA = i - 1;
+    itr_diff_type nB = n - i;
+    itr_diff_type diff = nB - nA;
+    itr_diff_type leftA = 1;
+    itr_diff_type leftB = 1;
+    itr_diff_type rightA = nB;
+    itr_diff_type rightB = nB;
+    itr_diff_type Amin = 1 + (diff >> 1);
+    itr_diff_type Amax = nA + (diff >> 1);
 
     while (leftA < rightA)
     {
-      typename std::iterator_traits<Iterator>::difference_type length = rightA - leftA + 1;
-      typename std::iterator_traits<Iterator>::difference_type even = 1 - (length & (typename std::iterator_traits<Iterator>::difference_type)1);
-      typename std::iterator_traits<Iterator>::difference_type half = (length - 1) >> 1;
-      typename std::iterator_traits<Iterator>::difference_type tryA = leftA + half;
-      typename std::iterator_traits<Iterator>::difference_type tryB = leftB + half;
+      itr_diff_type length = rightA - leftA + 1;
+      itr_diff_type even = 1 - (length & (itr_diff_type)1);
+      itr_diff_type half = (length - 1) >> 1;
+      itr_diff_type tryA = leftA + half;
+      itr_diff_type tryB = leftB + half;
 
       if (tryA < Amin)
       {
@@ -264,8 +271,8 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
         }
         else
         {
-          typename std::iterator_traits<Iterator>::value_type medA = *(first + i - 1) - *(first + i - tryA + Amin - 2);
-          typename std::iterator_traits<Iterator>::value_type medB = *(first + tryB + i - 1) - *(first + i - 1);
+          itr_value_type medA = *(first + i - 1) - *(first + i - tryA + Amin - 2);
+          itr_value_type medB = *(first + tryB + i - 1) - *(first + i - 1);
 
           if (medA >= medB)
           {
@@ -287,31 +294,31 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
     }
     else
     {
-      typename std::iterator_traits<Iterator>::value_type medA = *(first + i - 1) - *(first + i - leftA + Amin - 2);
-      typename std::iterator_traits<Iterator>::value_type medB = *(first + leftB + i - 1) - *(first + i - 1);
+      itr_value_type medA = *(first + i - 1) - *(first + i - leftA + Amin - 2);
+      itr_value_type medB = *(first + leftB + i - 1) - *(first + i - 1);
       a2.at(i - 1) = std::min(medA, medB);
     }
   }
 
-  for (typename std::iterator_traits<Iterator>::difference_type i = 1 + ((n + 1) >> 1); i <= n - 1; i++)
+  for (itr_diff_type i = 1 + ((n + 1) >> 1); i <= n - 1; i++)
   {
-    typename std::iterator_traits<Iterator>::difference_type nA = n - i;
-    typename std::iterator_traits<Iterator>::difference_type nB = i - 1;
-    typename std::iterator_traits<Iterator>::difference_type diff = nB - nA;
-    typename std::iterator_traits<Iterator>::difference_type leftA = 1;
-    typename std::iterator_traits<Iterator>::difference_type leftB = 1;
-    typename std::iterator_traits<Iterator>::difference_type rightA = nB;
-    typename std::iterator_traits<Iterator>::difference_type rightB = nB;
-    typename std::iterator_traits<Iterator>::difference_type Amin = 1 + (diff >> 1);
-    typename std::iterator_traits<Iterator>::difference_type Amax = nA + (diff >> 1);
+    itr_diff_type nA = n - i;
+    itr_diff_type nB = i - 1;
+    itr_diff_type diff = nB - nA;
+    itr_diff_type leftA = 1;
+    itr_diff_type leftB = 1;
+    itr_diff_type rightA = nB;
+    itr_diff_type rightB = nB;
+    itr_diff_type Amin = 1 + (diff >> 1);
+    itr_diff_type Amax = nA + (diff >> 1);
 
     while (leftA < rightA)
     {
-      typename std::iterator_traits<Iterator>::difference_type length = rightA - leftA + 1;
-      typename std::iterator_traits<Iterator>::difference_type even = 1 - (length & (typename std::iterator_traits<Iterator>::difference_type)1);
-      typename std::iterator_traits<Iterator>::difference_type half = (length - 1) >> 1;
-      typename std::iterator_traits<Iterator>::difference_type tryA = leftA + half;
-      typename std::iterator_traits<Iterator>::difference_type tryB = leftB + half;
+      itr_diff_type length = rightA - leftA + 1;
+      itr_diff_type even = 1 - (length & (itr_diff_type)1);
+      itr_diff_type half = (length - 1) >> 1;
+      itr_diff_type tryA = leftA + half;
+      itr_diff_type tryB = leftB + half;
 
       if (tryA < Amin)
       {
@@ -327,8 +334,8 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
         }
         else
         {
-          typename std::iterator_traits<Iterator>::value_type medA = *(first + i + tryA - Amin) - *(first + i - 1);
-          typename std::iterator_traits<Iterator>::value_type medB = *(first + i - 1) - *(first + i - tryB - 1);
+          itr_value_type medA = *(first + i + tryA - Amin) - *(first + i - 1);
+          itr_value_type medB = *(first + i - 1) - *(first + i - tryB - 1);
 
           if (medA >= medB)
           {
@@ -350,35 +357,35 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
     }
     else
     {
-      typename std::iterator_traits<Iterator>::value_type medA = *(first + i + leftA - Amin) - *(first + i - 1);
-      typename std::iterator_traits<Iterator>::value_type medB = *(first + i - 1) - *(first + i - leftB - 1);
+      itr_value_type medA = *(first + i + leftA - Amin) - *(first + i - 1);
+      itr_value_type medB = *(first + i - 1) - *(first + i - leftB - 1);
       a2.at(i - 1) = std::min(medA, medB);
     }
   }
 
   a2.at(n - 1) = *(first + n - 1) - *(first + ((n + 1) >> 1) - 1);
-  typename std::iterator_traits<Iterator>::value_type cn = 1.0;
+  itr_value_type cn = 1.0;
 
   if (n <= 9)
   {
-    const typename std::iterator_traits<Iterator>::value_type cn_array[11] = { 0.0, 0.0, 0.743, 1.851, 0.954, 1.351, 0.993, 1.198, 1.005, 1.131 };
+    static const itr_value_type cn_array[11] = { 0.0, 0.0, 0.743, 1.851, 0.954, 1.351, 0.993, 1.198, 1.005, 1.131 };
     cn = cn_array[n];
   }
-  else if ((n & (typename std::iterator_traits<Iterator>::difference_type)1) == 1)
+  else if ((n & (itr_diff_type)1) == 1)
   {
-    typename std::iterator_traits<Iterator>::value_type n_fp = static_cast<typename std::iterator_traits<Iterator>::value_type>(n);
-    cn = n_fp / (n_fp - 0.9);
+    itr_value_type n_fp = static_cast<itr_value_type>(n);
+    cn = n_fp / (n_fp - static_cast<itr_value_type>(0.9));
   }
   
   /**
    * Put the the (n+1)/2 th order statistic of a2 at index
    * (n + 1)/2 - 1 in a2.
    */
-  typename std::iterator_traits<Iterator>::difference_type order_stat_index = ((n + 1) >> 1) - 1;
+  itr_diff_type order_stat_index = ((n + 1) >> 1) - 1;
   std::nth_element(a2.begin(), a2.begin() + order_stat_index, a2.end());
 
   /* Return Sn. */
-  return (1.1926 * cn * a2.at(order_stat_index));
+  return static_cast<itr_value_type>(1.1926) * cn * a2.at(order_stat_index);
 }
 
 /**
@@ -393,22 +400,25 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
 template <class Iterator>
 typename std::iterator_traits<Iterator>::value_type RCSn_naive(const Iterator &first, const Iterator &last)
 {
+  using itr_value_type = typename std::iterator_traits<Iterator>::value_type;
+  using itr_diff_type = typename std::iterator_traits<Iterator>::difference_type;
+
   static_assert(std::is_convertible<typename std::iterator_traits<Iterator>::iterator_category, std::random_access_iterator_tag>::value, "RCSn_naive() requires random access iterator arguments.");
-  static_assert(std::is_floating_point<typename std::iterator_traits<Iterator>::value_type>::value, "RCSn_naive() only operates on floating point data.");
+  static_assert(std::is_floating_point<itr_value_type>::value, "RCSn_naive() only operates on floating point data.");
   
-  typename std::iterator_traits<Iterator>::difference_type n = last - first;
+  itr_diff_type n = last - first;
 
   if (n <= 1)
   {
     return 0.0;
   }
 
-  std::vector<typename std::iterator_traits<Iterator>::value_type> vInner(n, 0.0);
-  std::vector<typename std::iterator_traits<Iterator>::value_type> vOuter(n, 0.0);
+  std::vector<itr_value_type> vInner(n, 0.0);
+  std::vector<itr_value_type> vOuter(n, 0.0);
 
   for (Iterator i_itr = first; i_itr != last; i_itr++)
   {
-    typename std::iterator_traits<Iterator>::value_type i_val = *i_itr;
+    itr_value_type i_val = *i_itr;
 
     for (Iterator j_itr = first; j_itr != last; j_itr++)
     {
@@ -419,34 +429,34 @@ typename std::iterator_traits<Iterator>::value_type RCSn_naive(const Iterator &f
      * Place the high median ( (n / 2) + 1 th order statistic ) of vInner
      * at index n / 2 in vInner.
      */
-    typename std::iterator_traits<Iterator>::difference_type order_stat_index = n / 2;
+    itr_diff_type order_stat_index = n / 2;
     std::nth_element(vInner.begin(), vInner.begin() + order_stat_index, vInner.end());
 
     vOuter.at(i_itr - first) = vInner.at(order_stat_index);
   }
 
-  typename std::iterator_traits<Iterator>::value_type cn = 1.0;
+  itr_value_type cn = 1.0;
 
   if (n <= 9)
   {
-    const typename std::iterator_traits<Iterator>::value_type cn_array[11] = { 0.0, 0.0, 0.743, 1.851, 0.954, 1.351, 0.993, 1.198, 1.005, 1.131 };
+    static const itr_value_type cn_array[11] = { 0.0, 0.0, 0.743, 1.851, 0.954, 1.351, 0.993, 1.198, 1.005, 1.131 };
     cn = cn_array[n];
   }
-  else if ((n % 2) == 1)
+  else if ((n & (itr_diff_type)1) == 1)
   {
-    typename std::iterator_traits<Iterator>::value_type n_fp = static_cast<typename std::iterator_traits<Iterator>::value_type>(n);
-    cn = n_fp / (n_fp - 0.9);
+    itr_value_type n_fp = static_cast<itr_value_type>(n);
+    cn = n_fp / (n_fp - static_cast<itr_value_type>(0.9));
   }
 
   /**
   * Place the low median ( (n + 1) / 2 th order statistic ) of vOuter
   * at index (n + 1) / 2 - 1 in vOuter.
   */
-  typename std::iterator_traits<Iterator>::difference_type order_stat_index = (n + 1) / 2 - 1;
+  itr_diff_type order_stat_index = (n + 1) / 2 - 1;
   std::nth_element(vOuter.begin(), vOuter.begin() + order_stat_index, vOuter.end());
 
   /* Return Sn. */
-  return (1.1926 * cn * vOuter.at(order_stat_index));
+  return static_cast<itr_value_type>(1.1926) * cn * vOuter.at(order_stat_index);
 }
 
 /*
