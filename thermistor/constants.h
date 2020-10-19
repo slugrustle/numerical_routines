@@ -4,7 +4,7 @@
  * Declarations of global constants used by various files related to
  * thermistor_interpolator.
  *
- * Written in 2019 by Ben Tesch.
+ * Written in 2020 by Ben Tesch.
  * Originally distributed at https://github.com/slugrustle/numerical_routines
  * 
  * To the extent possible under law, the author has dedicated all copyright
@@ -23,31 +23,91 @@
 /**
  * Global Constants
  */
+/**
+ * INV_128 is precomputed because divide operations are slow.
+ * The underlying fixed point representation of temperature
+ * in the output interpolation table has 1/128 degrees Celsius
+ * per least significant bit.
+ */
 const double INV_128 = 1.0 / 128.0;
 const double KELVIN_OFFSET = 273.15;
+/**
+ * Many of the following constants are used to check for
+ * basic validity of user-supplied parameters.
+ */
 const double MIN_RNTC_NOM_OHMS = 1.0;
 const double MAX_RNTC_NOM_OHMS = 100.0e6;
 const double MIN_BETA_K = 100.0;
-const double MAX_BETA_K = 100000.0;
+const double MAX_BETA_K = 100.0e3;
+/* What's cooler than being cool? */
 const double MIN_NTC_NOM_TEMP_C = -KELVIN_OFFSET;
-const double MAX_NTC_NOM_TEMP_C = 2054.0; // The melting point of Alumina
+/**
+ * Alumina (Al2O3) is a common resistor substrate
+ * that melts at 2054°C.
+ */
+const double MAX_NTC_NOM_TEMP_C = 2054.0;
 const double MIN_RPULLUP_NOM_OHMS = 1.0;
 const double MAX_RPULLUP_NOM_OHMS = 100.0e6;
 const double MIN_RISO_NOM_OHMS = 0.0;
 const double MAX_RISO_NOM_OHMS = 100.0e6;
-const int64_t MIN_ADC_COUNTS = 8ll;
+const int64_t MIN_ADC_COUNTS = 1ll << 3;
 const int64_t MAX_ADC_COUNTS = 1ll << 15;
-const double MIN_MAX_INTERP_ERROR_C = 1.0/256.0;
 const double MIN_RNTC_OHMS = 1.0e-3;
+/**
+ * The smallest allowed setting for maximum output interpolation
+ * table error is set to the degrees Celsius value of one half
+ * of one least significant bit in the underlying fixed point
+ * representation of temperature.
+ */
+const double MIN_MAX_INTERP_ERROR_C = 1.0/256.0;
+/**
+ * Minimum and maximum degrees Celsius temperature values
+ * representable in signed Q9.7 format fixed point.
+ */
 const double MIN_FIXEDPOINTABLE_TEMP_C = static_cast<double>(std::numeric_limits<int16_t>::lowest()) * INV_128;
 const double MAX_FIXEDPOINTABLE_TEMP_C = static_cast<double>(std::numeric_limits<int16_t>::max()) * INV_128;
+/**
+ * thermistor_interpolator has two operating modes:
+ * Parameter mode and Table mode.
+ * 
+ * Parameter mode is when the NTC thermistor's nominal
+ * characteristics are defined by:
+ * 1. Its nominal resistance at
+ * 2. Some nominal temperature
+ * and
+ * 3. Its ß coefficient.
+ * 
+ * Table mode is when the NTC thermistor's nominal
+ * characteristics are defined by at least 4
+ * resistance / temperature data points supplied
+ * in a CSV file.
+ */
 const int NUM_ARGUMENTS_PARAMETER_MODE = 9;
 const int NUM_ARGUMENTS_TABLE_MODE = 7;
-const uint32_t MIN_CSV_ROWS = 4u;
-const uint32_t MAX_CSV_ROWS = 327680u;
 const uint8_t UNDEFINED_MODE = 0u;
 const uint8_t NTC_PARAMETER_MODE = 1u;
 const uint8_t NTC_TABLE_MODE = 2u;
+/**
+ * Table mode requires thermistor_interpolator to parse
+ * a user-supplied CSV file which must have at least
+ * 4 valid rows of temperature/resistance data points.
+ */
+const uint32_t MIN_CSV_ROWS = 4u;
+const uint32_t MAX_CSV_ROWS = 10u * static_cast<uint32_t>(MAX_ADC_COUNTS);
+/**
+ * These two constants are used to check that the
+ * temperature/resistance data points in theuser-supplied
+ * CSV file in Table mode have strictly increasing
+ * temperature and strictly decreasing resistance when
+ * sorted by increasing temperature.
+ */
+const double MIN_CSV_TEMP_INCREMENT_C = 1.0e-6;
+const double MIN_CSV_RES_DECREMENT_OHMS = 1.0e-6;
+/**
+ * These two constants are used to define when the
+ * implementation of Newton's method inside the
+ * Tntc_from_ADCread() function stops iterating.
+ */
 const uint8_t NEWTON_MAX_ITERATIONS = 100u;
 const double NEWTON_STOP_ERR_THRESHOLD = 1.0e-9;
 

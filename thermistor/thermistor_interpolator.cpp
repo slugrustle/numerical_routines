@@ -54,7 +54,7 @@ static bool NTC_temp_res_data_sort(const NTC_temp_res_row_t &a, const NTC_temp_r
 static cubic_interp_seg_t cubic_interp_segs[MAX_CSV_ROWS - 1u];
 
 /**
- * The ADC_counts input is limited to 2^15 = 32768.
+ * The ADC_counts input is limited.
  * Max size the storage for the least squares problem
  * and use subsets of this array during computation.
  */
@@ -75,7 +75,6 @@ static double Tntc_array[MAX_ADC_COUNTS];
  * and for statistics data about those segments.
  */
 static interp_segment_t interp_segments[MAX_ADC_COUNTS];
-static uint16_t n_stored_segments;
 static segment_stats_t segment_stats[MAX_ADC_COUNTS];
 
 /**
@@ -321,7 +320,7 @@ int main (int argc, char **argv)
     for (uint32_t jRow = 1u; jRow < csv_stored_rows; jRow++)
     {
       NTC_temp_res_row_t this_row = NTC_temp_res_data[jRow];
-      if (this_row.temp_C <= prev_row.temp_C)
+      if (this_row.temp_C - prev_row.temp_C < MIN_CSV_TEMP_INCREMENT_C)
       {
         std::printf(u8"Input Error: Temperature is not strictly increasing in the\n");
         std::printf(u8"             input .csv file %s\n", csv_filename.c_str());
@@ -329,7 +328,7 @@ int main (int argc, char **argv)
         return EXIT_FAILURE;
       }
 
-      if (this_row.res_Ohms >= prev_row.res_Ohms)
+      if (prev_row.res_Ohms - this_row.res_Ohms < MIN_CSV_RES_DECREMENT_OHMS)
       {
         std::printf(u8"Input Error: Resistance is not strictly decreasing in the\n");
         std::printf(u8"             input .csv file %s\n", csv_filename.c_str());
@@ -940,7 +939,7 @@ int main (int argc, char **argv)
    * does not exceed the maximum interpolation error.
    */
   uint16_t next_start_count = table_start_count;
-  n_stored_segments = 0u;
+  uint16_t n_stored_segments = 0u;
 
   while (true)
   {
