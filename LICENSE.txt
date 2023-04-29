@@ -52,6 +52,10 @@ All files produced by the author of this repository, including
   README.md
   Test_GCD_LCM.cpp
 
+[solvers/ directory]
+  ITP_solve.m
+  README.md
+
 [statistics/ directory]
   makefile-nmake
   makefile-unix

@@ -6,6 +6,8 @@ The integer/ directory holds efficient routines for performing value saturation,
 
 The number\_theory/ directory has code implementing Greatest Common Divisor (GCD) and Least Common Multiple (LCM) on the most common unsigned integer types.
 
+The solvers/ directory contains an implementation of the ITP method, a univariate root finder.
+
 The statistics/ directory contains an implementation of Sn, a robust estimator of scale.
 
 The thermistor/ directory contains two programs related to Negative Temperature Coefficient (NTC) thermistors: (1) a simulator of the worst&#x2011;case measurement errors encountered when monitoring an NTC thermistor with an ADC and (2) a near&#x2011;optimal linear interpolation table generator for NTC thermistors.

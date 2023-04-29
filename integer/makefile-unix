@@ -10,8 +10,8 @@
 # make -f makefile-unix cleanobj
 # to delete all .o files created during the build.
 
-C_OPTIONS = -Wall -O3 -static -static-libgcc -std=c99 -flto -march=athlon64
-BASE_OPTIONS = -Wall -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlon64 
+C_OPTIONS = -Wall -s -O3 -static -static-libgcc -std=c99 -flto -march=athlon64
+BASE_OPTIONS = -Wall -s -O3 -static -static-libstdc++ -std=c++14 -flto -march=athlon64 
 BOOST_OPTIONS = -I.
 THREAD_OPTIONS = -pthread -Wl,--whole-archive -lpthread -Wl,--no-whole-archive
 OBJ_FILES = saturate_value.o divround.o multshiftround_comp.o multshiftround_run_array.o multshiftround_run_computed.o shiftround_comp.o shiftround_run_array.o shiftround_run_computed.o multshiftround_shiftround_masks.o detect_product_overflow.o divround_non_debug.o multshiftround_run_non_debug.o shiftround_run_non_debug.o

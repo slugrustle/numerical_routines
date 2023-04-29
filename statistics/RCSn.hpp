@@ -65,7 +65,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
     itr_diff_type leftA = 1;
     itr_diff_type leftB = 1;
     itr_diff_type rightA = nB;
-    itr_diff_type rightB = nB;
     itr_diff_type Amin = 1 + (diff >> 1);
     itr_diff_type Amax = nA + (diff >> 1);
 
@@ -79,7 +78,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
 
       if (tryA < Amin)
       {
-        rightB = tryB;
         leftA = tryA + even;
       }
       else
@@ -101,7 +99,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
           }
           else
           {
-            rightB = tryB;
             leftA = tryA + even;
           }
         }
@@ -128,7 +125,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
     itr_diff_type leftA = 1;
     itr_diff_type leftB = 1;
     itr_diff_type rightA = nB;
-    itr_diff_type rightB = nB;
     itr_diff_type Amin = 1 + (diff >> 1);
     itr_diff_type Amax = nA + (diff >> 1);
 
@@ -142,7 +138,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
 
       if (tryA < Amin)
       {
-        rightB = tryB;
         leftA = tryA + even;
       }
       else
@@ -164,7 +159,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn(const Iterator &first, 
           }
           else
           {
-            rightB = tryB;
             leftA = tryA + even;
           }
         }
@@ -245,7 +239,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
     itr_diff_type leftA = 1;
     itr_diff_type leftB = 1;
     itr_diff_type rightA = nB;
-    itr_diff_type rightB = nB;
     itr_diff_type Amin = 1 + (diff >> 1);
     itr_diff_type Amax = nA + (diff >> 1);
 
@@ -259,7 +252,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
 
       if (tryA < Amin)
       {
-        rightB = tryB;
         leftA = tryA + even;
       }
       else
@@ -281,7 +273,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
           }
           else
           {
-            rightB = tryB;
             leftA = tryA + even;
           }
         }
@@ -308,7 +299,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
     itr_diff_type leftA = 1;
     itr_diff_type leftB = 1;
     itr_diff_type rightA = nB;
-    itr_diff_type rightB = nB;
     itr_diff_type Amin = 1 + (diff >> 1);
     itr_diff_type Amax = nA + (diff >> 1);
 
@@ -322,7 +312,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
 
       if (tryA < Amin)
       {
-        rightB = tryB;
         leftA = tryA + even;
       }
       else
@@ -344,7 +333,6 @@ typename std::iterator_traits<Iterator>::value_type RCSn_InPlace(const Iterator 
           }
           else
           {
-            rightB = tryB;
             leftA = tryA + even;
           }
         }

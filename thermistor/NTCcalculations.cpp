@@ -24,6 +24,7 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <cstdio>
 
 /**
  * Calculates nominal NTC resistance in Ohms
