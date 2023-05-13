@@ -1,5 +1,4 @@
-% [x, fval, nIter, converged] = ITP_solve(fhandle, a, b)
-% [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol)
+% [x, converged] = ITP_solve(fhandle, a, b)
 %
 % Solves a univariate function for approximate equality to zero using the
 % ITP Method described in the paper
@@ -8,32 +7,28 @@
 % Softw. 47, 1, Article 5 (December 2020), 24 pages.
 % https://doi.org/10.1145/3423597
 %
+% ---INPUTS---
 % fhandle is a function handle for the univariate function to be solved.
 %         This function must take one input argument. Wrapping with an
 %         anonymous function may be used:
 %         x2 = constant;
 %         fh = @(x1) func(x1, x2);
-%         [x, fval, converged] = ITP_solve(fh, a, b, tol);
+%         [x, converged] = ITP_solve(fh, a, b);
 %
 % a and b are arguments to fhandle such that a ~= b and either
 %         fhandle(a) < 0 and fhandle(b) > 0 or
 %         fhandle(a) > 0 and fhandle(b) < 0.
 %
-% tol is the tolerance on the solution such that if fhandle(x0) == 0,
-%         abs(x-x0) <= tol. tol must be >= eps. tol defaults to 1024*eps.
-%
-% x is the solver output. It is the argument to fhandle such that if
-%         fhandle(x0) == 0, abs(x-x0) <= tol. This only holds if converged is
-%         true.
-%
-% fval is the value of fhandle(x).
-%
-% nIter is the number of algorithm iterations.
+% ---OUTPUTS---
+% x is the solver output. It is the argument to fhandle such that
+%         fhandle(x0) approximately equals 0, abs(x-x0) <= tol.
+%         This only holds if converged is true.
+%         tol is defined as 2*max(eps(a), eps(b)).
 %
 % converged is true if the solver converged to a solution. converged is false if
 %         the solver failed to converge.
 %
-function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(double(1.0)))
+function [x, converged] = ITP_solve(fhandle, a, b)
   %
   % Written in 2023 by Ben Tesch.
   % Originally distributed at https://github.com/slugrustle/numerical_routines
@@ -47,14 +42,12 @@ function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(dou
 
   % Input checks.
   assert(is_function_handle(fhandle), 'fhandle must be a function handle');
-  assert(isnumeric(a) && isreal(a) && isscalar(a), 'a must be a real scalar value.');
-  assert(isnumeric(b) && isreal(b) && isscalar(b), 'b must be a real scalar value.');
-  assert(isnumeric(tol) && isreal(tol) && isscalar(tol), 'tol must be a real scalar value.');
-  assert(a~=b, 'a and b must not be equal.');
-  assert(tol >= eps(double(1.0)), 'tol must be >= eps.');
+  assert(isa(a, 'double') && isreal(a) && isfinite(a) && isscalar(a), 'a must be a real, finite, scalar, double precision floating point value.');
+  assert(isa(b, 'double') && isreal(b) && isfinite(b) && isscalar(b), 'b must be a real, finite, scalar, double precision floating point value.');
 
   % Initialization.
-  nIter = 0;
+  tol = 2*max(eps(a), eps(b));
+  nonzero = 2*eps(double(1));
   converged = true;
 
   % Ensure a < b.
@@ -76,7 +69,8 @@ function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(dou
   % Initial ya & yb values and checks on the same.
   ya = fhandle(a);
   yb = fhandle(b);
-  assert(isnumeric(ya) && isreal(ya) && isscalar(ya), 'fhandle must return a real scalar result.');
+  assert(isa(ya, 'double') && isreal(ya) && isfinite(ya) && isscalar(ya), 'fhandle must return a real, finite, scalar, double precision floating point result.');
+  assert(isa(yb, 'double') && isreal(yb) && isfinite(yb) && isscalar(yb), 'fhandle must return a real, finite, scalar, double precision floating point result.');
 
   if ya == 0,
     x = a;
@@ -90,15 +84,17 @@ function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(dou
     return;
   end
 
-  assert((ya < 0 && yb > 0) || (ya > 0 && yb < 0), 'fhandle must have opposite signs at a and b.');
+  assert(a~=b, 'a and b must not be equal.');
+  assert((ya < 0 && yb > 0) || (ya > 0 && yb < 0), 'fhandle(a) and fhandle(b) must have opposite signs.');
 
   % Main algorithm iteration loop.
+  nIter = 0;
   while b-a > 2*tol,
     % x estimate by interpolation.
-    x_interp = a + max(b-a, eps) * abs(ya) / max(abs(ya-yb), eps);
+    x_interp = a + max(b-a, nonzero) * abs(ya) / max(abs(ya-yb), nonzero);
 
     % x estimate via bisection.
-    x_bisec = min(max(0.5*(a+b), a+eps), b-eps);
+    x_bisec = min(max(0.5*(a+b), a), b);
 
     % x estimate by truncation.
     diff_bisec_interp = x_bisec - x_interp;
@@ -107,7 +103,7 @@ function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(dou
 
     delta = 0.2*(b-a);
     if b-a <= 2,
-      delta = k1 * max(b-a, eps)^k2;
+      delta = k1 * max(b-a, nonzero)^k2;
     end
 
     x_trunc = x_bisec;
@@ -116,7 +112,7 @@ function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(dou
     end
 
     % Radius of minmax interval.
-    r = max(0, min(tol*2^(n_max_ITP-nIter)-0.5*b+0.5*a-eps));
+    r = max(0, tol*2^(n_max_ITP-nIter)-0.5*b+0.5*a-nonzero);
 
     % x estimate for this iteration.
     x_estimate = x_bisec - sign_diff_bisec_interp*r;
@@ -166,9 +162,8 @@ function [x, fval, nIter, converged] = ITP_solve(fhandle, a, b, tol=1024*eps(dou
     end
   end
 
-  % Compute output values prior to returning.
+  % Compute output value prior to returning.
   x = 0.5 * (a+b);
-  fval = fhandle(x);
 end
 %
 % Creative Commons Legal Code
